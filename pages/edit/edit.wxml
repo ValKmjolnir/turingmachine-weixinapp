@@ -1,0 +1,4 @@
+<!--pages/edit.wxml-->
+
+<canvas type="2d" id="editor"></canvas>
+

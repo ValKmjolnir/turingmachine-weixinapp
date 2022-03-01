@@ -1,7 +1,8 @@
 {
     "pages": [
         "pages/index/index",
-        "pages/logs/index"
+        "pages/logs/index",
+        "pages/edit/edit"
     ],
     "window": {
         "navigationBarTitleText": "TuringMachine"
@@ -12,21 +13,25 @@
         "selectedColor": "#11cd6e",
         "borderStyle": "black",
         "position": "bottom",
-        "list": [{
-            "pagePath": "pages/index/index",
-            "iconPath": "image/icon_component.png",
-            "selectedIconPath": "image/icon_component_HL.png",
-            "text": "首页"
-            },{
-            "pagePath": "pages/logs/index",
-            "iconPath": "image/icon_API.png",
-            "selectedIconPath": "image/icon_API_HL.png",
-            "text": "日志"
-        }]
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "iconPath": "image/icon_component.png",
+                "selectedIconPath": "image/icon_component_HL.png",
+                "text": "首页"
+            },
+            {
+                "pagePath": "pages/logs/index",
+                "iconPath": "image/icon_API.png",
+                "selectedIconPath": "image/icon_API_HL.png",
+                "text": "日志"
+            }
+        ]
     },
     "networkTimeout": {
         "request": 10000,
         "downloadFile": 10000
     },
-    "debug": true
+    "debug": true,
+    "sitemapLocation": "sitemap.json"
 }
