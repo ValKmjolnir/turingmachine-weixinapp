@@ -1,0 +1,9 @@
+<!--pages/index/index.wxml-->
+
+<view class="page-body">
+    <view class="button-container" style="font-weight: 700; margin-top: 50rpx;">
+        <button style="color: #5a6877;">单带图灵机</button>
+        <button style="color: #5a6877;">多带图灵机</button>
+        <button style="color: #5a6877;">带子程序的图灵机</button>
+    </view>
+</view>
