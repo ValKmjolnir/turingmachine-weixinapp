@@ -1,4 +1,6 @@
 <!--pages/edit.wxml-->
 
-<canvas type="2d" id="editor"></canvas>
+<view class="page-body">
+    <canvas type="2d" id="editor"></canvas>
+</view>
 
