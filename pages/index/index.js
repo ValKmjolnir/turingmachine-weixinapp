@@ -26,7 +26,16 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow: function () {
-
+        let fs=wx.getFileSystemManager();
+        fs.access({
+            path: `${wx.env.USER_DATA_PATH}/turingmachinesimulator`,
+            fail(res){
+                fs.mkdir({
+                    dirPath: `${wx.env.USER_DATA_PATH}/turingmachinesimulator`,
+                    recursive: false
+                });
+            }
+        });
     },
 
     /**
@@ -65,8 +74,15 @@ Page({
     },
 
     gotoEdit: function(param) {
-        wx.navigateTo({
-          url: "/pages/edit/edit",
-        });
+        let arg=param.currentTarget.dataset.param;
+        if(arg=="exist-file"){
+            wx.navigateTo({
+              url: '/pages/files/files',
+            });
+        }else{
+            wx.navigateTo({
+                url: "/pages/edit/edit?type="+arg,
+            });
+        }
     }
 });

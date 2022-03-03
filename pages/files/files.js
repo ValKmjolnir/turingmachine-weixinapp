@@ -1,18 +1,19 @@
 // pages/files/files.js
+
 Page({
 
     /**
      * 页面的初始数据
      */
     data: {
-        fileList:[]
+        files:['a','b','c']
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
-
+        this.fs=wx.getFileSystemManager();
     },
 
     /**
@@ -26,18 +27,9 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow: function () {
-        let fs=wx.getFileSystemManager();
-        fs.access({
-            path: `${wx.env.USER_DATA_PATH}/turingmachinesimulator`,
-            success(res){},
-            fail(res){
-                fs.mkdir({
-                    dirPath: `${wx.env.USER_DATA_PATH}/turingmachinesimulator`,
-                    recursive: false,
-                    success(res){},
-                    fail(err){}
-                });
-            }
+        let fs=this.fs;
+        this.setData({
+            files:fs.readdirSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator`)
         });
     },
 
@@ -76,11 +68,29 @@ Page({
 
     },
 
-    readfile: function() {
-        let tmp=`${wx.env.USER_DATA_PATH}/turingmachinesimulator`;
+    upload: function () {
+        wx.chooseImage({
+          count: 1,
+          success(res){
+              const tmp=res.tempFilePaths;
+              wx.saveFile({
+                tempFilePath: tmp[0],
+                success(res){
+                    const savedFilePath=res.savedFilePath;
+                    console.log(savedFilePath);
+                }
+              })
+          }
+        });
     },
 
-    writefile: function() {
-        let tmp=`${wx.env.USER_DATA_PATH}/turingmachinesimulator`;
+    readfile: function() {
+        wx.getSavedFileList({
+            success: (res) => {
+                res.fileList.forEach(element => {
+                    console.log(element.filePath);
+                });
+            }
+        })
     }
 })

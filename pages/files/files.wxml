@@ -1,22 +1,11 @@
 <!--pages/files/files.wxml-->
-<wxs module="test">
-    var readDir=function(){
-        // let fs=wx.getFileSystemManager();
-        // // return fs.readdir({
-        // //     dirPath:wx.env.USER_DATA_PATH+"/turingmachinesimulator",
-        // //     success(res) {
-        // //         return res.files;
-        // //     },
-        // //     fail(err) {}
-        // // });
-        return ["fuck","off"];
-    }
-    module.exports.readDir=readDir;
-</wxs>
+
 <view class="page-body">
     <view class="button-container" style="font-weight: 700; margin-top: 20rpx;">
+        <button bindtap="upload" style="color: #5a6877;" >上传文件</button>
         <button bindtap="readfile" style="color: #5a6877;">加载文件</button>
-        <button bindtap="writefile" style="color: #5a6877;">保存文件</button>
-        <view wx:for="{{test.readDir()}}" style="text-align: center;">{{item}}</view>
+    </view>
+    <view class="container" style="text-align: center;margin-top: 20rpx;font-weight: 700;">
+        <view wx:for="{{files}}" style="color: #5a6877; margin-top: 10rpx;">{{item}}</view>
     </view>
 </view>

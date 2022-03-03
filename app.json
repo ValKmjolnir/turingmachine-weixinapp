@@ -22,12 +22,6 @@
                 "text": "首页"
             },
             {
-                "pagePath": "pages/files/files",
-                "iconPath": "image/icon_API.png",
-                "selectedIconPath": "image/icon_API_HL.png",
-                "text": "文件"
-            },
-            {
                 "pagePath": "pages/logs/index",
                 "iconPath": "image/icon_API.png",
                 "selectedIconPath": "image/icon_API_HL.png",
