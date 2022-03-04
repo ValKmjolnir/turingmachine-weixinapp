@@ -5,20 +5,21 @@ Page({
      * 页面的初始数据
      */
     data: {
-
+        type:null,
+        filename:"untitled.json"
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
-        // let canvasBox=null;
-        // wx.createSelectorQuery()
-        //     .select("editor")
-        //     .context(function(res){
-        //         canvasBox=res.context;
-        //     })
-        //     .exec();
+        this.setData({
+            type:options.type
+        });
+        if("filename" in options)
+            this.setData({
+                filename:options.filename
+            })
     },
 
     /**

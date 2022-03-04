@@ -8,6 +8,10 @@ button {
     background-color: #8feeb6;
 }
 
+.button-hover {
+    background-color: cadetblue;
+}
+
 .button-container {
     display: flex;
     flex-direction: column;

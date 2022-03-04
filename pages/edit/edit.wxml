@@ -1,6 +1,7 @@
 <!--pages/edit.wxml-->
 
 <view class="page-body">
+    <view>{{type}}</view>
+    <view>{{filename}}</view>
     <canvas type="2d" id="editor"></canvas>
 </view>
-

@@ -73,16 +73,16 @@ Page({
 
     },
 
-    gotoEdit: function(param) {
+    gotoedit: function(param) {
         let arg=param.currentTarget.dataset.param;
-        if(arg=="exist-file"){
-            wx.navigateTo({
-              url: '/pages/files/files',
-            });
-        }else{
-            wx.navigateTo({
-                url: "/pages/edit/edit?type="+arg,
-            });
-        }
+        wx.navigateTo({
+            url: "/pages/edit/edit?type="+arg,
+        });
+    },
+
+    gotofiles: function (param) {
+        wx.navigateTo({
+          url: '/pages/files/files',
+        });
     }
 });

@@ -6,7 +6,8 @@ Page({
      * 页面的初始数据
      */
     data: {
-        files:['a','b','c']
+        files:[],
+        empty_file_list:true
     },
 
     /**
@@ -31,6 +32,10 @@ Page({
         this.setData({
             files:fs.readdirSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator`)
         });
+        if(this.data.files.length>0)
+            this.setData({
+                empty_file_list:false
+            });
     },
 
     /**
@@ -68,29 +73,10 @@ Page({
 
     },
 
-    upload: function () {
-        wx.chooseImage({
-          count: 1,
-          success(res){
-              const tmp=res.tempFilePaths;
-              wx.saveFile({
-                tempFilePath: tmp[0],
-                success(res){
-                    const savedFilePath=res.savedFilePath;
-                    console.log(savedFilePath);
-                }
-              })
-          }
+    gotoedit: function(param) {
+        let arg=param.currentTarget.dataset.param;
+        wx.navigateTo({
+            url: "/pages/edit/edit?type=exist_file&filename="+arg,
         });
     },
-
-    readfile: function() {
-        wx.getSavedFileList({
-            success: (res) => {
-                res.fileList.forEach(element => {
-                    console.log(element.filePath);
-                });
-            }
-        })
-    }
 })

@@ -2,10 +2,15 @@
 button {
     font-size: 30rpx;
     margin-top: 10rpx;
-    margin-bottom: 10rpx;
-    margin-left: 30rpx;
-    margin-right: 30rpx;
+    margin-bottom: 5rpx;
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+    height: 100rpx;
     background-color: #8feeb6;
+}
+
+.button-hover {
+    background-color: cadetblue;
 }
 
 .button-container {
