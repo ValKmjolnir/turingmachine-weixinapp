@@ -6,7 +6,7 @@ button {
     margin-left: 20rpx;
     margin-right: 20rpx;
     height: 100rpx;
-    background-color: #8feeb6;
+    background-color: #b9f7d3;
 }
 
 .button-hover {

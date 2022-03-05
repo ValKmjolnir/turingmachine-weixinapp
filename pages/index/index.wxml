@@ -6,8 +6,8 @@
     </view>
     <view class="button-container" style="font-weight: 700; margin-top: 20rpx;">
         <button bindtap="gotoedit" data-param="normal" style="color: #5a6877;" >单带图灵机</button>
-        <button bindtap="gotoedit" data-param="multiple" style="color: #5a6877;" app-parameter="multi">多带图灵机</button>
-        <button bindtap="gotoedit" data-param="subprogram" style="color: #5a6877;" app-parameter="subprog">带子程序的图灵机</button>
+        <button bindtap="gotoedit" data-param="multiple" style="color: #5a6877;">多带图灵机</button>
+        <button bindtap="gotoedit" data-param="subprogram" style="color: #5a6877;">带子程序的图灵机</button>
     </view>
     <view style="text-align: center;margin-top: 20rpx;font-weight: 700;">
         <text style="color: #5a6877;">加载已保存的图灵机</text>

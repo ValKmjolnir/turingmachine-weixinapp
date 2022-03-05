@@ -1,7 +1,12 @@
 <!--pages/edit.wxml-->
 
 <view class="page-body">
-    <view>{{type}}</view>
-    <view>{{filename}}</view>
-    <canvas type="2d" id="editor"></canvas>
+    <view>{{type}}-{{filename}}</view>
+    <canvas
+        type="2d"
+        id="canvas"
+        style="position: fixed;width: 750rpx;height: 1050rpx;"
+        bindtap="drawCircle"
+    ></canvas>
 </view>
+<view style="color: #ffe985;"></view>
