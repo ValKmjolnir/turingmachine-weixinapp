@@ -4,67 +4,67 @@
     <view class="button-container">
         <view wx:if="{{operand_type=='select'}}">
             <button bindtap="tapButton" data-param="select" style="background-color: cadetblue;">
-                <image src="/image/arrow.png" mode="scaleToFill"></image>
+                <image src="/image/arrow.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='select'}}">
             <button bindtap="tapButton" data-param="select" style="background-color: #ddfcea;">
-                <image src="/image/arrow.png" mode="scaleToFill"></image>
+                <image src="/image/arrow.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='state'}}">
             <button bindtap="tapButton" data-param="state" style="background-color: cadetblue;">
-                <image src="/image/state.png" mode="scaleToFill"></image>
+                <image src="/image/state.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='state'}}">
             <button bindtap="tapButton" data-param="state" style="background-color: #ddfcea;">
-                <image src="/image/state.png" mode="scaleToFill"></image>
+                <image src="/image/state.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='func'}}">
             <button bindtap="tapButton" data-param="func" style="background-color: cadetblue;">
-                <image src="/image/func.png" mode="scaleToFill"></image>
+                <image src="/image/func.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='func'}}">
             <button bindtap="tapButton" data-param="func" style="background-color: #ddfcea;">
-                <image src="/image/func.png" mode="scaleToFill"></image>
+                <image src="/image/func.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='delete'}}">
             <button bindtap="tapButton" data-param="delete" style="background-color: cadetblue;">
-                <image src="/image/delete.png" mode="scaleToFill"></image>
+                <image src="/image/delete.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='delete'}}">
             <button bindtap="tapButton" data-param="delete" style="background-color: #ddfcea;">
-                <image src="/image/delete.png" mode="scaleToFill"></image>
+                <image src="/image/delete.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='undo'}}">
             <button bindtap="tapButton" data-param="undo" style="background-color: cadetblue;">
-                <image src="/image/undo.png" mode="scaleToFill"></image>
+                <image src="/image/undo.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='undo'}}">
             <button bindtap="tapButton" data-param="undo" style="background-color: #ddfcea;">
-                <image src="/image/undo.png" mode="scaleToFill"></image>
+                <image src="/image/undo.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='rollback'}}">
             <button bindtap="tapButton" data-param="rollback" style="background-color: cadetblue;">
-                <image src="/image/rollback.png" mode="scaleToFill"></image>
+                <image src="/image/rollback.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='rollback'}}">
             <button bindtap="tapButton" data-param="rollback" style="background-color: #ddfcea;">
-                <image src="/image/rollback.png" mode="scaleToFill"></image>
+                <image src="/image/rollback.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
             <button bindtap="saveFile">
-                <image src="/image/save.png" mode="scaleToFill"></image>
+                <image src="/image/save.png" mode="aspectFit"></image>
             </button>
         </view>
     </view>

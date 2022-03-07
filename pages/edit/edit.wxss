@@ -1,18 +1,21 @@
 /* pages/edit.wxss */
 
 button {
-    width: 90rpx;
-    height: 50rpx;
-    margin-top: 12rpx;
-    margin-bottom: 12rpx;
+    width: 70rpx;
+    height: 70rpx;
+    margin-top: 10rpx;
+    margin-bottom: 10rpx;
     margin-left: 5rpx;
     background-color: #ddfcea;
+    padding: 15rpx;
 }
 
 image {
-    width: 45rpx;
-    height: 45rpx;
+    width: 40rpx;
+    height: 40rpx;
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .button-hover {
