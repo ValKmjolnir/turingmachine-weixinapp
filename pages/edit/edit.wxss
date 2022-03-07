@@ -1,1 +1,21 @@
 /* pages/edit.wxss */
+
+button {
+    width: 60rpx;
+    height: 60rpx;
+    margin-top: 15rpx;
+    margin-bottom: 15rpx;
+    margin-left: 5rpx;
+    margin-right: 5rpx;
+    background-color: #ddfcea;
+}
+
+.button-hover {
+    background-color: cadetblue;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}

@@ -1,7 +1,14 @@
 <!--pages/edit.wxml-->
 
 <view class="page-body">
-    <view>{{type}}-{{filename}}</view>
+    <view class="button-container">
+        <view><button>1</button></view>
+        <view><button>2</button></view>
+        <view><button>3</button></view>
+        <view><button>4</button></view>
+        <view><button>5</button></view>
+        <view><button>6</button></view>
+    </view>
     <canvas
         type="2d"
         id="canvas"
@@ -9,4 +16,3 @@
         bindtap="drawCircle"
     ></canvas>
 </view>
-<view style="color: #ffe985;"></view>
