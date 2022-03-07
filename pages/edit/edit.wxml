@@ -2,17 +2,48 @@
 
 <view class="page-body">
     <view class="button-container">
-        <view><button>1</button></view>
-        <view><button>2</button></view>
-        <view><button>3</button></view>
-        <view><button>4</button></view>
-        <view><button>5</button></view>
-        <view><button>6</button></view>
+        <view wx:if="{{operand_type=='select'}}">
+            <button bindtap="tapButton" data-param="select" style="background-color: cadetblue;">1</button>
+        </view>
+        <view wx:if="{{operand_type!='select'}}">
+            <button bindtap="tapButton" data-param="select" style="background-color: #ddfcea;">1</button>
+        </view>
+        <view wx:if="{{operand_type=='state'}}">
+            <button bindtap="tapButton" data-param="state" style="background-color: cadetblue;">2</button>
+        </view>
+        <view wx:if="{{operand_type!='state'}}">
+            <button bindtap="tapButton" data-param="state" style="background-color: #ddfcea;">2</button>
+        </view>
+        <view wx:if="{{operand_type=='func'}}">
+            <button bindtap="tapButton" data-param="func" style="background-color: cadetblue;">3</button>
+        </view>
+        <view wx:if="{{operand_type!='func'}}">
+            <button bindtap="tapButton" data-param="func" style="background-color: #ddfcea;">3</button>
+        </view>
+        <view wx:if="{{operand_type=='delete'}}">
+            <button bindtap="tapButton" data-param="delete" style="background-color: cadetblue;">4</button>
+        </view>
+        <view wx:if="{{operand_type!='delete'}}">
+            <button bindtap="tapButton" data-param="delete" style="background-color: #ddfcea;">4</button>
+        </view>
+        <view wx:if="{{operand_type=='undo'}}">
+            <button bindtap="tapButton" data-param="undo" style="background-color: cadetblue;">5</button>
+        </view>
+        <view wx:if="{{operand_type!='undo'}}">
+            <button bindtap="tapButton" data-param="undo" style="background-color: #ddfcea;">5</button>
+        </view>
+        <view wx:if="{{operand_type=='rollback'}}">
+            <button bindtap="tapButton" data-param="rollback" style="background-color: cadetblue;">6</button>
+        </view>
+        <view wx:if="{{operand_type!='rollback'}}">
+            <button bindtap="tapButton" data-param="rollback" style="background-color: #ddfcea;">6</button>
+        </view>
+        <view><button bindtap="saveFile">保存</button></view>
     </view>
     <canvas
         type="2d"
         id="canvas"
-        style="position: fixed;width: 750rpx;height: 1050rpx;"
+        style="position: fixed;width: 100%;height: 100%;"
         bindtap="drawCircle"
     ></canvas>
 </view>

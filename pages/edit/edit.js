@@ -6,7 +6,8 @@ Page({
      */
     data: {
         type:null,
-        filename:"untitled.json"
+        filename:"untitled.json",
+        operand_type:"select",
     },
 
     /**
@@ -84,6 +85,17 @@ Page({
      * 用户点击右上角分享
      */
     onShareAppMessage: function () {
+
+    },
+
+    tapButton: function (e) {
+        var opr=e.currentTarget.dataset.param;
+        this.setData({
+            operand_type: opr
+        });
+    },
+
+    saveFile: function(e) {
 
     },
 
