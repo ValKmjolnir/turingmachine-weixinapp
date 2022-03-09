@@ -26,7 +26,7 @@
                 "pagePath": "pages/logs/index",
                 "iconPath": "image/icon_API.png",
                 "selectedIconPath": "image/icon_API_HL.png",
-                "text": "日志"
+                "text": "文件"
             }
         ]
     },

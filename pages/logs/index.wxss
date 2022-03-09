@@ -1,1 +1,20 @@
 /* pages/logs/index.wxss */
+button {
+    font-size: 30rpx;
+    margin-top: 10rpx;
+    margin-bottom: 5rpx;
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+    height: 100rpx;
+    background-color: #ddfcea;
+}
+
+.button-hover {
+    background-color: cadetblue;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}

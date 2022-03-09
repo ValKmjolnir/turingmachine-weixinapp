@@ -16,6 +16,7 @@ Page({
         this.setData({
             type:options.type
         });
+        this.fs=wx.getFileSystemManager();
     },
 
     /**
@@ -70,21 +71,49 @@ Page({
         }
     },
 
-    confirmSave: function() {
-        if(this.data.filename=="untitled"){
-            wx.showToast({
-              title: '文件名不能为空',
-              icon: 'error',
-              duration: 1000
-            });
-            return;
-        }
-        wx.navigateBack({
-            delta: 0,
+    inputFilename: function(e) {
+        this.setData({
+            filename:e.detail.value
         });
     },
 
+    confirmSave: function() {
+        let fname=this.data.filename;
+        let fs=this.fs;
+        if(fname=="untitled" || fname==""){
+            wx.showToast({
+                title: '文件名不能为空',
+                icon: 'error',
+                duration: 1000
+            });
+            return;
+        }
+        try{
+            fs.openSync({
+                filePath: `${wx.env.USER_DATA_PATH}/turingmachinesimulator/${fname}.json`,
+                flag: "wx"
+            });
+            let pages=getCurrentPages();
+            pages[pages.length-2].setData({
+                successSaveFile:true
+            });
+            wx.navigateBack({
+              delta: 0,
+            })
+        }catch(ex){
+            wx.showToast({
+                title: '文件名已存在',
+                icon: 'error',
+                duration: 1000
+            });
+        }
+    },
+
     cancelSave: function() {
+        let pages=getCurrentPages();
+        pages[pages.length-2].setData({
+            cancelSaveFile:true
+        });
         wx.navigateBack({
           delta: 0,
         })

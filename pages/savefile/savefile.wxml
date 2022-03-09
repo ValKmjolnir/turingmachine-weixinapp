@@ -21,6 +21,7 @@
             name="filename"
             placeholder="{{filename}}"
             type="text"
+            bindinput="inputFilename"
         />
         <view class="button-container">
             <view>

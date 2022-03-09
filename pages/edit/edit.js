@@ -12,7 +12,9 @@ Page({
     data: {
         type:null,
         filename:"untitled.json",
-        operand_type:"select"
+        operand_type:"select",
+        successSaveFile:false,
+        cancelSaveFile:false,
     },
 
     /**
@@ -57,7 +59,22 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow: function () {
-
+        if(this.data.successSaveFile)
+            wx.showToast({
+                title: '创建成功',
+                icon: 'success',
+                duration: 1000
+            });
+        else if(this.data.cancelSaveFile)
+            wx.showToast({
+                title: '取消创建',
+                icon: 'error',
+                duration: 1000
+            });
+        this.setData({
+            successSaveFile:false,
+            cancelSaveFile:false
+        });
     },
 
     /**
