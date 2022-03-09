@@ -27,6 +27,9 @@ Page({
             this.setData({
                 filename:options.filename
             });
+        wx.setNavigationBarTitle({
+          title: this.data.filename,
+        })
         wx.createSelectorQuery()
             .select('#canvas')
             .fields({node:true,size:true})
@@ -89,7 +92,10 @@ Page({
      * 用户点击右上角分享
      */
     onShareAppMessage: function () {
-
+        return {
+            title:"编辑自动机",
+            path:"/pages/edit/edit"
+        }
     },
 
     tapButton: function (e) {
@@ -100,7 +106,11 @@ Page({
     },
 
     saveFile: function(e) {
-
+        if(this.data.filename=="untitled.json")
+            wx.navigateTo({
+                url: '/pages/savefile/savefile?type='+this.data.type,
+            });
+        return;
     },
 
     drawCircle: function (e) {

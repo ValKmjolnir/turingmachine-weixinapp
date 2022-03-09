@@ -3,7 +3,8 @@
         "pages/index/index",
         "pages/logs/index",
         "pages/edit/edit",
-        "pages/files/files"
+        "pages/files/files",
+        "pages/savefile/savefile"
     ],
     "window": {
         "navigationBarTitleText": "图灵机模拟"

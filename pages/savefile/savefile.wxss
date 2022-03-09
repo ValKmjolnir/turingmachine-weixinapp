@@ -1,0 +1,45 @@
+/* pages/savefile/savefile.wxss */
+button {
+    font-weight: 700;
+    font-size: 30rpx;
+    width: fit-content;
+    margin-top: 10rpx;
+    margin-bottom: 10rpx;
+    margin-left: 50rpx;
+    margin-right: 50rpx;
+    color: #5a6877;
+    background-color: #ddfcea;
+}
+
+.button-hover {
+    background-color: cadetblue;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.button-confirm {
+    background-color: #4aec58 !important;
+}
+
+.button-cancel {
+    background-color: #f06565 !important;
+}
+
+.weui-input {
+    font-weight: 510;
+    font-size: 30rpx;
+    height: 70rpx;
+    background-color: white;
+    text-align: center;
+    margin-top: 10rpx;
+    margin-bottom: 10rpx;
+    margin-left: 5%;
+    margin-right: 5%;
+    border: 2rpx solid #5a6877;
+    border-radius: 10rpx;
+}

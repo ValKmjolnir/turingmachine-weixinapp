@@ -1,18 +1,21 @@
-// pages/index/index.js
+// pages/savefile/savefile.js
 Page({
 
     /**
      * 页面的初始数据
      */
     data: {
-        
+        type:null,
+        filename:"untitled"
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
-
+        this.setData({
+            type:options.type
+        });
     },
 
     /**
@@ -26,16 +29,7 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow: function () {
-        let fs=wx.getFileSystemManager();
-        fs.access({
-            path: `${wx.env.USER_DATA_PATH}/turingmachinesimulator`,
-            fail(res){
-                fs.mkdir({
-                    dirPath: `${wx.env.USER_DATA_PATH}/turingmachinesimulator`,
-                    recursive: false
-                });
-            }
-        });
+
     },
 
     /**
@@ -71,21 +65,28 @@ Page({
      */
     onShareAppMessage: function () {
         return {
-            title:"首页",
-            path:"/pages/index/index"
+            title:"保存文件",
+            path:"/pages/savefile/savefile"
         }
     },
 
-    gotoedit: function(param) {
-        let arg=param.currentTarget.dataset.param;
-        wx.navigateTo({
-            url: "/pages/edit/edit?type="+arg,
+    confirmSave: function() {
+        if(this.data.filename=="untitled"){
+            wx.showToast({
+              title: '文件名不能为空',
+              icon: 'error',
+              duration: 1000
+            });
+            return;
+        }
+        wx.navigateBack({
+            delta: 0,
         });
     },
 
-    gotofiles: function (param) {
-        wx.navigateTo({
-          url: '/pages/files/files',
-        });
+    cancelSave: function() {
+        wx.navigateBack({
+          delta: 0,
+        })
     }
-});
+})

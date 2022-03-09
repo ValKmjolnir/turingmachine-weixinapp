@@ -1,0 +1,34 @@
+<!--pages/savefile/savefile.wxml-->
+<view class="page-body">
+    <form>
+        <view style="text-align: center;font-weight: 700;margin-top: 20rpx;margin-bottom: 10rpx;">
+            <text style="color: #5a6877;">自动机类型</text>
+        </view>
+        <view wx:if="{{type=='normal'}}">
+            <input class="weui-input" name="type" placeholder="单带图灵机" disabled="true"/>
+        </view>
+        <view wx:if="{{type=='multiple'}}">
+            <input class="weui-input" name="type" placeholder="多带图灵机" disabled="true"/>
+        </view>
+        <view wx:if="{{type=='subprogram'}}">
+            <input class="weui-input" name="type" placeholder="带子程序的图灵机" disabled="true"/>
+        </view>
+        <view style="text-align: center;font-weight: 700;margin-top: 20rpx;margin-bottom: 10rpx;">
+            <text style="color: #5a6877;">文件名</text>
+        </view>
+        <input
+            class="weui-input"
+            name="filename"
+            placeholder="{{filename}}"
+            type="text"
+        />
+        <view class="button-container">
+            <view>
+                <button bindtap="confirmSave" form-type="submit" style="background-color: #7df8c9;" hover-class="button-confirm"> 确认 </button>
+            </view>
+            <view>
+                <button bindtap="cancelSave" form-type="reset" style="background-color: #fdc9c2;" hover-class="button-cancel"> 取消 </button>
+            </view>
+        </view>
+    </form>
+</view>
