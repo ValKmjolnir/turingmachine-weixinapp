@@ -77,5 +77,5 @@ Page({
         wx.navigateTo({
             url: "/pages/edit/edit?type=exist_file&filename="+arg,
         });
-    },
+    }
 })

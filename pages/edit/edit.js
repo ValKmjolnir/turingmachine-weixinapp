@@ -3,6 +3,10 @@ var begin_x,begin_y,end_x,end_y;
 var canvas=null;
 var ctx=null;
 const dpr=wx.getSystemInfoSync().pixelRatio;
+var canvasElements={
+    state:[],
+    func:[],
+};
 
 Page({
 
@@ -17,11 +21,35 @@ Page({
         cancelSaveFile:false,
     },
 
+    canvasDraw: function() {
+        if(ctx==undefined)
+            return;
+        let state=canvasElements.state;
+        let func=canvasElements.func;
+        ctx.fillStyle="#edf8fc";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        state.forEach(elem => {
+            ctx.beginPath();
+            ctx.arc(elem.x,elem.y,10,0,2*Math.PI);
+            ctx.fillStyle="#ffe985";
+            ctx.fill();
+            ctx.stroke();
+        });
+        func.forEach(elem =>{
+            ctx.beginPath();
+            ctx.moveTo(elem.begin_x,elem.begin_y);
+            ctx.lineTo(elem.end_x,elem.end_y);
+            ctx.stroke();
+        });
+    },
+
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
         let t=options.type;
+        canvasElements.state=[];
+        canvasElements.func=[];
         this.setData({
             type:t
         });
@@ -31,7 +59,7 @@ Page({
             });
         wx.setNavigationBarTitle({
           title: this.data.filename,
-        })
+        });
         wx.createSelectorQuery()
             .select('#canvas')
             .fields({node:true,size:true})
@@ -59,6 +87,9 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow: function () {
+        wx.setNavigationBarTitle({
+            title: this.data.filename,
+        });
         if(this.data.successSaveFile)
             wx.showToast({
                 title: '创建成功',
@@ -75,6 +106,7 @@ Page({
             successSaveFile:false,
             cancelSaveFile:false
         });
+        this.canvasDraw();
     },
 
     /**
@@ -136,11 +168,11 @@ Page({
         var x=e.detail.x-e.target.offsetLeft;
         var y=e.detail.y-e.target.offsetTop;
 
-        ctx.beginPath();
-        ctx.arc(x,y,10,0,2*Math.PI);
-        ctx.fillStyle="#ffe985";
-        ctx.fill();
-        ctx.stroke();
+        canvasElements.state.push({
+            x:x,
+            y:y
+        });
+        this.canvasDraw();
     },
 
     drawLine: function(e) {
@@ -148,16 +180,20 @@ Page({
             return;
         end_x=e.changedTouches[0].x;
         end_y=e.changedTouches[0].y;
-
-        ctx.beginPath();
-        ctx.moveTo(begin_x,begin_y);
-        ctx.lineTo(end_x,end_y);
-        ctx.stroke();
+        canvasElements.func[canvasElements.func.length-1].end_x=end_x;
+        canvasElements.func[canvasElements.func.length-1].end_y=end_y;
+        this.canvasDraw();
     },
 
     touchStart: function(e) {
         begin_x=e.touches[0].x;
         begin_y=e.touches[0].y;
+        canvasElements.func.push({
+            begin_x:begin_x,
+            begin_y:begin_y,
+            end_x:begin_x,
+            end_y:begin_y
+        });
     },
 
     touchEnd: function(e) {
@@ -165,10 +201,8 @@ Page({
             return;
         end_x=e.changedTouches[0].x;
         end_y=e.changedTouches[0].y;
-
-        ctx.beginPath();
-        ctx.moveTo(begin_x,begin_y);
-        ctx.lineTo(end_x,end_y);
-        ctx.stroke();
+        canvasElements.func[canvasElements.func.length-1].end_x=end_x;
+        canvasElements.func[canvasElements.func.length-1].end_y=end_y;
+        this.canvasDraw();
     }
 })
