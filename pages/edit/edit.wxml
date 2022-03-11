@@ -72,9 +72,9 @@
         type="2d"
         id="canvas"
         style="position: fixed;width: 100%;height: 100%;"
-        bindtap="drawCircle"
+        bindtap="tapFunction"
         bindtouchstart="touchStart"
-        bindtouchmove="drawLine"
+        bindtouchmove="touchMove"
         bindtouchend="touchEnd"
     ></canvas>
 </view>

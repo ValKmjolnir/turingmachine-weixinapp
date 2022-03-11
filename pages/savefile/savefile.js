@@ -1,6 +1,6 @@
 // pages/savefile/savefile.js
 
-function newJsonStringify(type){
+function emptyFile(type){
     let h={
         type:type,
         state:[],
@@ -114,7 +114,7 @@ Page({
             console.log(fd);
             fs.writeSync({
                 fd:fd,
-                data:newJsonStringify(type)
+                data:emptyFile(type)
             });
             let pages=getCurrentPages();
             pages[pages.length-2].setData({
