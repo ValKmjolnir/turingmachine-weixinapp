@@ -16,6 +16,7 @@ Page({
      */
     data: {
         filename:"untitled.json",
+        filedata:{},
         operand_type:"select",
         successSaveFile:false,
         cancelSaveFile:false,
@@ -187,6 +188,9 @@ Page({
      */
     saveFile: function(e) {
         let name=this.data.filename;
+        this.setData({
+            filedata:canvasElements
+        });
         if(name=="untitled.json"){
             wx.navigateTo({
                 url: '/pages/savefile/savefile?type='+canvasElements.type,

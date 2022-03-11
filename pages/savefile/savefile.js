@@ -1,14 +1,4 @@
 // pages/savefile/savefile.js
-
-function emptyFile(type){
-    let h={
-        type:type,
-        state:[],
-        func:[]
-    };
-    return JSON.stringify(h);
-}
-
 Page({
 
     /**
@@ -107,16 +97,17 @@ Page({
             return;
         }
         try{
+            let pages=getCurrentPages();
             let fd=fs.openSync({
                 filePath: `${wx.env.USER_DATA_PATH}/turingmachinesimulator/${fname}.json`,
                 flag: "wx"
             });
-            console.log(fd);
+
             fs.writeSync({
                 fd:fd,
-                data:emptyFile(type)
+                data:JSON.stringify(pages[pages.length-2].data.filedata)
             });
-            let pages=getCurrentPages();
+            
             pages[pages.length-2].setData({
                 successSaveFile:true,
                 filename:fname+".json",
