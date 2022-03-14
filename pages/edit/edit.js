@@ -9,6 +9,14 @@ var canvasElements={
     func:[],
 };
 
+class machine_state{
+
+}
+
+class transfer_equation{
+
+}
+
 Page({
 
     /**
@@ -59,23 +67,41 @@ Page({
         });
     },
 
+    loadExistFile: function(filename) {
+        try{
+            const res=this.fs.readFileSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+filename,'utf8',0);
+            canvasElements=JSON.parse(res);
+            state_counter=canvasElements.state.length;
+        }catch(e){
+            console.error(e);
+        }
+    },
+
+    createTemporaryFile: function(type) {
+        state_counter=0; // set state name counter to 0
+        canvasElements.type=type; // get type of automata
+        canvasElements.state=[];
+        canvasElements.func=[];
+    },
+
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
         /* initializing */
-        state_counter=0; // set state name counter to 0
-        canvasElements.type=options.type; // get type of automata
-        canvasElements.state=[];
-        canvasElements.func=[];
-
+        this.fs=wx.getFileSystemManager();
+        if(options.type=="exist_file"){
+            this.loadExistFile(options.filename);
+        }else{
+            this.createTemporaryFile(options.type);
+        }
         /* if options include filename, set it */
         if("filename" in options)
             this.setData({
                 filename:options.filename
             });
         wx.setNavigationBarTitle({
-          title: this.data.filename,
+            title: this.data.filename,
         });
         wx.createSelectorQuery()
             .select('#canvas')
@@ -90,6 +116,8 @@ Page({
                 // background fill color
                 ctx.fillStyle="#edf8fc";
                 ctx.fillRect(0,0,canvas.width,canvas.height);
+                // draw exist file's machine structure
+                this.canvasDraw();
             });
     },
 
@@ -196,7 +224,14 @@ Page({
                 url: '/pages/savefile/savefile?type='+canvasElements.type,
             });
         }else{
-            console.log(JSON.stringify(canvasElements));
+            try{
+                this.fs.writeFileSync(
+                    `${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+name,
+                    JSON.stringify(canvasElements),
+                    'utf8');
+            }catch(e){
+                console.error(e);
+            }
         }
         return;
     },
