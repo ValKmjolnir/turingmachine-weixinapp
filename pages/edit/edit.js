@@ -10,11 +10,15 @@ var canvasElements={
 };
 
 class machine_state{
-
+    new(){
+        return {x:0,y:0,color:"#ffe985"};
+    }
 }
 
 class transfer_equation{
-
+    new(){
+        return {begin:{},end:{},a:' ',b:' ',move:' '};
+    }
 }
 
 Page({
@@ -47,7 +51,7 @@ Page({
         state.forEach(elem => {
             ctx.beginPath();
             ctx.arc(elem.x,elem.y,15,0,2*Math.PI);
-            ctx.fillStyle="#ffe985";
+            ctx.fillStyle=elem.fillcolor;
             ctx.fill();
             ctx.stroke();
             ctx.fillStyle="#000000";
@@ -73,6 +77,7 @@ Page({
             canvasElements=JSON.parse(res);
             state_counter=canvasElements.state.length;
         }catch(e){
+            // empty file
             console.error(e);
         }
     },
@@ -243,9 +248,25 @@ Page({
         canvasElements.state.push({
             x:x,
             y:y,
-            name:"q"+String(state_counter)
+            name:"q"+String(state_counter),
+            fillcolor:"#ffe985"
         });
         state_counter+=1;
+    },
+
+    tapSelect: function(x,y){
+        let dis=1e6;
+        let tmp_state={};
+        canvasElements.state.forEach(elem => {
+            elem.fillcolor="#ffe985";
+            let t=Math.sqrt((x-elem.x)*(x-elem.x)+(y-elem.y)*(y-elem.y));
+            if(t<=dis){
+                tmp_state=elem;
+                dis=t;
+            }
+        });
+        if(dis<=15)
+            tmp_state.fillcolor="#8db7ee";
     },
 
     /**
@@ -256,7 +277,9 @@ Page({
             begin_x:x,
             begin_y:y,
             end_x:x,
-            end_y:y
+            end_y:y,
+            begin_state:null,
+            end_state:null
         });
     },
 
@@ -269,10 +292,8 @@ Page({
         let opr=this.data.operand_type;
         if(opr=="state"){
             this.tapState(x,y);
-        }else if(opr=="func"){
-            this.tapFunc(x,y);
         }else if(opr=="select"){
-            ;
+            this.tapSelect(x,y);
         }
         this.canvasDraw();
     },
