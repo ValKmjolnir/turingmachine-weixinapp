@@ -22,7 +22,6 @@ class transfer_equation{
 }
 
 Page({
-
     /**
      * 页面的初始数据
      */
@@ -34,43 +33,105 @@ Page({
         cancelSaveFile:false,
     },
 
-    canvasDraw: function() {
-        if(ctx==undefined)
-            return;
-        let state=canvasElements.state;
-        let func=canvasElements.func;
-
-        // global text setting
+    /** 
+     * 初始化文字格式 
+     */
+    stateTextStyle: function() {
         ctx.font="10rpx sans-serif"
         ctx.textAlign="center";
         ctx.textBaseline="middle";
+    },
+
+    /**
+     * 绘制状态
+     */
+    drawState: function(name,x,y,r,color) {
+        // draw circle
+        ctx.beginPath();
+        ctx.arc(x,y,r,0,2*Math.PI);
+        ctx.fillStyle=color;
+        ctx.fill();
+        ctx.stroke();
+        // set text
+        ctx.fillStyle="#000000";
+        ctx.fillText(name,x,y);
+    },
+
+    /**
+     * 绘制直线箭头
+     */
+    drawArrow: function(bx,by,ex,ey) {
+        let angle=Math.atan2(ey-by,ex-bx)/Math.PI*180;
+
+        ctx.beginPath();
+        ctx.moveTo(bx,by);
+        ctx.lineTo(ex,ey);
+        ctx.stroke();
+        
+        let angle0=(30-angle)/180*Math.PI;
+        let angle1=(60-angle)/180*Math.PI;
+        ctx.beginPath();
+        ctx.moveTo(ex,ey);
+        ctx.lineTo(ex-8*Math.cos(angle0),ey+8*Math.sin(angle0));
+        ctx.lineTo(ex-8*Math.sin(angle1),ey-8*Math.cos(angle1));
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    },
+
+    /**
+     * 绘制指向自己的箭头
+     */
+    drawSelfArrow: function(x,y) {
+
+        ctx.beginPath();
+        ctx.arc(x,y,10,0,1.5*Math.PI);  
+        ctx.stroke();
+
+        let angle=Math.PI/3;
+        let res_sin=8*Math.sin(angle);
+        let res_cos=8*Math.cos(angle);
+
+        ctx.beginPath();
+        ctx.moveTo(x,y-10);
+        ctx.lineTo(x-res_cos,y-10+res_sin);
+        ctx.lineTo(x-res_sin,y-10-res_cos);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    },
+
+    /**
+     * canvas绘制刷新主函数
+     */
+    canvasDraw: function() {
+        if(ctx==undefined)
+            return;
         // background
         ctx.fillStyle="#edf8fc";
+        ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.fillRect(0,0,canvas.width,canvas.height);
+
         // states
-        state.forEach(elem => {
-            ctx.beginPath();
-            ctx.arc(elem.x,elem.y,15,0,2*Math.PI);
-            ctx.fillStyle=elem.fillcolor;
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle="#000000";
-            ctx.fillText(elem.name,elem.x,elem.y);
+        this.stateTextStyle(); // init state text style
+        canvasElements.state.forEach(elem=>{
+            this.drawState(elem.name,elem.x,elem.y,15,elem.fillcolor);
         });
         // functions
-        func.forEach(elem =>{
-            ctx.beginPath();
+        ctx.fillStyle="#000000"; // init fill style
+        canvasElements.func.forEach(elem =>{
             if(elem.begin_x==elem.end_x && elem.begin_y==elem.end_y){
-                ctx.arc(elem.begin_x,elem.begin_y,10,0,1.5*Math.PI);
-                ctx.stroke();
+                this.drawSelfArrow(elem.begin_x,elem.begin_y);
             }else{
-                ctx.moveTo(elem.begin_x,elem.begin_y);
-                ctx.lineTo(elem.end_x,elem.end_y);
-                ctx.stroke();
+                this.drawArrow(elem.begin_x,elem.begin_y,elem.end_x,elem.end_y);
             }
         });
     },
 
+    /**
+     * 页面加载时加载文件
+     * 在有文件的时候用JSON初始化组件列表
+     */
     loadExistFile: function(filename) {
         try{
             const res=this.fs.readFileSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+filename,'utf8',0);
@@ -82,6 +143,10 @@ Page({
         }
     },
 
+    /**
+     * 页面加载时加载文件
+     * 在没有文件时初始化组件列表
+     */
     createTemporaryFile: function(type) {
         state_counter=0; // set state name counter to 0
         canvasElements.type=type; // get type of automata
@@ -118,9 +183,6 @@ Page({
                 canvas.width=res[0].width*dpr;
                 canvas.height=res[0].height*dpr;
                 ctx.scale(dpr,dpr);
-                // background fill color
-                ctx.fillStyle="#edf8fc";
-                ctx.fillRect(0,0,canvas.width,canvas.height);
                 // draw exist file's machine structure
                 this.canvasDraw();
             });
@@ -221,6 +283,9 @@ Page({
      */
     saveFile: function(e) {
         let name=this.data.filename;
+        canvasElements.state.forEach(elem =>{
+            elem.fillcolor="#ffe985";
+        });
         this.setData({
             filedata:canvasElements
         });
@@ -254,12 +319,15 @@ Page({
         state_counter+=1;
     },
 
+    /** 
+     * 单次点击选中状态 
+     */
     tapSelect: function(x,y){
         let dis=1e6;
         let tmp_state={};
         canvasElements.state.forEach(elem => {
             elem.fillcolor="#ffe985";
-            let t=Math.sqrt((x-elem.x)*(x-elem.x)+(y-elem.y)*(y-elem.y));
+            let t=Math.sqrt(Math.pow(x-elem.x,2)+Math.pow(y-elem.y,2));
             if(t<=dis){
                 tmp_state=elem;
                 dis=t;
