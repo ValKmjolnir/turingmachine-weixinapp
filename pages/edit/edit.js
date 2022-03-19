@@ -9,28 +9,45 @@ var canvasElements={
     func:[],
 };
 
-class machine_state{
-    new(){
-        return {x:0,y:0,color:"#ffe985"};
-    }
-}
-
-class transfer_equation{
-    new(){
-        return {begin:{},end:{},a:' ',b:' ',move:' '};
-    }
-}
-
 Page({
     /**
      * 页面的初始数据
      */
     data: {
+        point:{
+            isLongTap:false,
+            startx:0,
+            starty:0
+        },
+        selectedState:null,
+        touchStartTime:0,
+        touchEndTime:0,
         filename:"untitled.json",
         filedata:{},
         operand_type:"select",
         successSaveFile:false,
         cancelSaveFile:false,
+    },
+
+    /**
+     * 寻找距离点击处最近的状态
+     */
+    findNearestState: function(x,y) {
+        let dis=1e6;
+        let tmp_state={};
+        canvasElements.state.forEach(elem => {
+            elem.fillcolor="#ffe985";
+            let t=Math.sqrt(Math.pow(x-elem.x,2)+Math.pow(y-elem.y,2));
+            if(t<=dis){
+                tmp_state=elem;
+                dis=t;
+            }
+        });
+        if(dis<=15){
+            tmp_state.fillcolor="#8db7ee";
+            return tmp_state;
+        }
+        return null;
     },
 
     /** 
@@ -55,6 +72,45 @@ Page({
         // set text
         ctx.fillStyle="#000000";
         ctx.fillText(name,x,y);
+    },
+
+    /**
+     * 绘制初态侧面三角形
+     */
+    drawStateStart: function(x,y,r) {
+        ctx.beginPath();
+        ctx.moveTo(x-r,y);
+        ctx.lineTo(x-r-0.5*r,y-0.7*r);
+        ctx.lineTo(x-r-0.5*r,y+0.7*r);
+        ctx.lineTo(x-r,y);
+        ctx.fillStyle="#a0ebde";
+        ctx.fill();
+        ctx.stroke();
+    },
+
+    /**
+     * 绘制终态的小圆环
+     */
+    drawStateEnd: function(x,y,r) {
+        ctx.beginPath();
+        ctx.arc(x,y,r,0,2*Math.PI);
+        ctx.stroke();
+    },
+
+    /**
+     * 绘制选择圆环
+     */
+    drawCircleSelect: function(x,y,r) {
+        let nr=1.5;  // text offset
+        ctx.beginPath();
+        ctx.arc(x,y,2.5*r,0,2*Math.PI);
+        ctx.stroke();
+        // set text
+        ctx.fillStyle="#000000";
+        ctx.fillText("初",x-nr*r,y-r);
+        ctx.fillText("态",x-nr*r,y+r);
+        ctx.fillText("终",x+nr*r,y-r);
+        ctx.fillText("态",x+nr*r,y+r);
     },
 
     /**
@@ -89,8 +145,8 @@ Page({
         ctx.stroke();
 
         let angle=Math.PI/3;
-        let res_sin=8*Math.sin(angle);
-        let res_cos=8*Math.cos(angle);
+        let res_sin=6.5*Math.sin(angle);
+        let res_cos=6.5*Math.cos(angle);
 
         ctx.beginPath();
         ctx.moveTo(x,y-10);
@@ -116,6 +172,10 @@ Page({
         this.stateTextStyle(); // init state text style
         canvasElements.state.forEach(elem=>{
             this.drawState(elem.name,elem.x,elem.y,15,elem.fillcolor);
+            if(elem.isEnd)
+                this.drawStateEnd(elem.x,elem.y,11);
+            if(elem.isStart)
+                this.drawStateStart(elem.x,elem.y,15);
         });
         // functions
         ctx.fillStyle="#000000"; // init fill style
@@ -274,7 +334,7 @@ Page({
      */
     tapButton: function (e) {
         this.setData({
-            operand_type: e.currentTarget.dataset.param
+            operand_type:e.currentTarget.dataset.param
         });
     },
 
@@ -314,27 +374,11 @@ Page({
             x:x,
             y:y,
             name:"q"+String(state_counter),
-            fillcolor:"#ffe985"
+            fillcolor:"#ffe985",
+            isStart:0,
+            isEnd:0
         });
         state_counter+=1;
-    },
-
-    /** 
-     * 单次点击选中状态 
-     */
-    tapSelect: function(x,y){
-        let dis=1e6;
-        let tmp_state={};
-        canvasElements.state.forEach(elem => {
-            elem.fillcolor="#ffe985";
-            let t=Math.sqrt(Math.pow(x-elem.x,2)+Math.pow(y-elem.y,2));
-            if(t<=dis){
-                tmp_state=elem;
-                dis=t;
-            }
-        });
-        if(dis<=15)
-            tmp_state.fillcolor="#8db7ee";
     },
 
     /**
@@ -351,6 +395,38 @@ Page({
         });
     },
 
+    /**
+     * select下长按状态
+     */
+    tapLongTouch: function(x,y){
+        let tmp_state=this.findNearestState(x,y);
+        if(tmp_state!=null){
+            this.setData({point:{isLongTap:true,startx:tmp_state.x,starty:tmp_state.y}});
+            this.drawCircleSelect(tmp_state.x,tmp_state.y,15);
+        }
+    },
+
+    /**
+     * select下长按状态的选择
+     */
+    tapLongTouchSelect: function(x,y){
+        let start_x=this.data.point.startx;
+        let start_y=this.data.point.starty;
+        if(Math.pow((x-start_x),2)+Math.pow((y-start_y),2)>15*15){
+            canvasElements.state.forEach(elem =>{
+                let t=Math.sqrt(Math.pow(start_x-elem.x,2)+Math.pow(start_y-elem.y,2));
+                if(t<=15){
+                    if(x<start_x){
+                        elem.isStart=1-elem.isStart;
+                    }else{
+                        elem.isEnd=1-elem.isEnd;
+                    }
+                    this.canvasDraw();
+                }
+            });
+        }
+    },
+
     /** 
      * canvas单次点击事件
      */
@@ -361,7 +437,7 @@ Page({
         if(opr=="state"){
             this.tapState(x,y);
         }else if(opr=="select"){
-            this.tapSelect(x,y);
+            this.findNearestState(x,y);
         }
         this.canvasDraw();
     },
@@ -370,45 +446,84 @@ Page({
      * canvas点击移动事件
      */
     touchMove: function(e) {
-        if(this.data.operand_type!="func")
-            return;
-        let end_x=e.changedTouches[0].x;
-        let end_y=e.changedTouches[0].y;
-        let vec=canvasElements.func;
-        let index=vec.length-1;
-        vec[index].end_x=end_x;
-        vec[index].end_y=end_y;
-        this.canvasDraw();
+        let opr=this.data.operand_type;
+        let current_x=e.changedTouches[0].x;
+        let current_y=e.changedTouches[0].y;
+        if(opr=="select" && this.data.point.isLongTap==false && this.data.selectedState!=null){
+            let tmp_state=this.data.selectedState;
+            tmp_state.x=current_x;
+            tmp_state.y=current_y;
+            this.canvasDraw();
+        }else if(opr=="func"){
+            let vec=canvasElements.func;
+            let index=vec.length-1;
+            vec[index].end_x=current_x;
+            vec[index].end_y=current_y;
+            this.canvasDraw();
+        }
     },
 
     /**
      * canvas点击移动开始
      */
     touchStart: function(e) {
-        if(this.data.operand_type!="func")
-            return;
         let begin_x=e.touches[0].x;
         let begin_y=e.touches[0].y;
-        canvasElements.func.push({
-            begin_x:begin_x,
-            begin_y:begin_y,
-            end_x:begin_x,
-            end_y:begin_y
-        });
+        let opr=this.data.operand_type;
+        if(opr=="select"){
+            this.setData({
+                touchStartTime:e.timeStamp,
+                point:{
+                    isLongTap:false,
+                    startx:begin_x,
+                    starty:begin_y
+                },
+                selectedState:this.findNearestState(begin_x,begin_y)
+            });
+        }else if(opr=="func"){
+            canvasElements.func.push({
+                begin_x:begin_x,
+                begin_y:begin_y,
+                end_x:begin_x,
+                end_y:begin_y
+            });
+        }
     },
 
     /**
      * canvas点击移动结束
      */
     touchEnd: function(e) {
-        if(this.data.operand_type!="func")
-            return;
         let end_x=e.changedTouches[0].x;
         let end_y=e.changedTouches[0].y;
-        let vec=canvasElements.func;
-        let index=vec.length-1;
-        vec[index].end_x=end_x;
-        vec[index].end_y=end_y;
-        this.canvasDraw();
+        this.setData({
+            touchEndTime:e.timeStamp,
+            selectedState:null
+        });
+        if(this.data.point.isLongTap){
+            this.tapLongTouchSelect(end_x,end_y);
+        }else{
+            if(this.data.operand_type!="func")
+                return;
+            let vec=canvasElements.func;
+            let index=vec.length-1;
+            vec[index].end_x=end_x;
+            vec[index].end_y=end_y;
+            this.canvasDraw();
+        }
+        this.setData({point:{isLongTap:false}});
+    },
+
+    /**
+     * canvas长按事件 
+     */
+    longTap: function(e) {
+        let x=e.touches[0].x;
+        let y=e.touches[0].y;
+        let opr=this.data.operand_type;
+        if(opr=="select" && e.timeStamp-this.data.touchStartTime>1){
+            this.setData({point:{isLongTap:true}});
+            this.tapLongTouch(x,y);
+        }
     }
 })
