@@ -30,9 +30,9 @@ Page({
     },
 
     /**
-     * 寻找距离点击处最近的状态
+     * 寻找距离点击处最近的状态，并且更新颜色
      */
-    findNearestState: function(x,y) {
+    findColorNearestState: function(x,y) {
         let dis=1e6;
         let tmp_state={};
         canvasElements.state.forEach(elem => {
@@ -399,7 +399,7 @@ Page({
      * select下长按状态
      */
     tapLongTouch: function(x,y){
-        let tmp_state=this.findNearestState(x,y);
+        let tmp_state=this.findColorNearestState(x,y);
         if(tmp_state!=null){
             this.setData({point:{isLongTap:true,startx:tmp_state.x,starty:tmp_state.y}});
             this.drawCircleSelect(tmp_state.x,tmp_state.y,15);
@@ -437,7 +437,7 @@ Page({
         if(opr=="state"){
             this.tapState(x,y);
         }else if(opr=="select"){
-            this.findNearestState(x,y);
+            this.findColorNearestState(x,y);
         }
         this.canvasDraw();
     },
@@ -478,7 +478,7 @@ Page({
                     startx:begin_x,
                     starty:begin_y
                 },
-                selectedState:this.findNearestState(begin_x,begin_y)
+                selectedState:this.findColorNearestState(begin_x,begin_y)
             });
         }else if(opr=="func"){
             canvasElements.func.push({
