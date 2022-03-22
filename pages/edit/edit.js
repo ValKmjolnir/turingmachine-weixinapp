@@ -14,14 +14,9 @@ Page({
      * 页面的初始数据
      */
     data: {
-        point:{
-            isLongTap:false,
-            startx:0,
-            starty:0
-        },
+        isLongTap:false,
         selectedState:null,
         touchStartTime:0,
-        touchEndTime:0,
         filename:"untitled.json",
         filedata:{},
         operand_type:"select",
@@ -117,7 +112,12 @@ Page({
      * 绘制直线箭头
      */
     drawArrow: function(bx,by,ex,ey) {
-        let angle=Math.atan2(ey-by,ex-bx)/Math.PI*180;
+        let angle=Math.atan2(ey-by,ex-bx);
+        bx+=15*Math.cos(angle);
+        by+=15*Math.sin(angle);
+        ex-=15*Math.cos(angle);
+        ey-=15*Math.sin(angle);
+        angle=angle/Math.PI*180;
 
         ctx.beginPath();
         ctx.moveTo(bx,by);
@@ -139,7 +139,8 @@ Page({
      * 绘制指向自己的箭头
      */
     drawSelfArrow: function(x,y) {
-
+        x-=15;
+        y+=15;
         ctx.beginPath();
         ctx.arc(x,y,10,0,1.5*Math.PI);  
         ctx.stroke();
@@ -180,6 +181,14 @@ Page({
         // functions
         ctx.fillStyle="#000000"; // init fill style
         canvasElements.func.forEach(elem =>{
+            if(elem.begin_state!=null){
+                elem.begin_x=elem.begin_state.x;
+                elem.begin_y=elem.begin_state.y;
+            }
+            if(elem.end_state!=null){
+                elem.end_x=elem.end_state.x;
+                elem.end_y=elem.end_state.y;
+            }
             if(elem.begin_x==elem.end_x && elem.begin_y==elem.end_y){
                 this.drawSelfArrow(elem.begin_x,elem.begin_y);
             }else{
@@ -396,12 +405,12 @@ Page({
     },
 
     /**
-     * select下长按状态
+     * 绘制select下状态的长按选择圆盘
      */
-    tapLongTouch: function(x,y){
+    longTapPanel: function(x,y){
         let tmp_state=this.findColorNearestState(x,y);
         if(tmp_state!=null){
-            this.setData({point:{isLongTap:true,startx:tmp_state.x,starty:tmp_state.y}});
+            this.setData({isLongTap:true});
             this.drawCircleSelect(tmp_state.x,tmp_state.y,15);
         }
     },
@@ -409,21 +418,19 @@ Page({
     /**
      * select下长按状态的选择
      */
-    tapLongTouchSelect: function(x,y){
-        let start_x=this.data.point.startx;
-        let start_y=this.data.point.starty;
+    longTapSelect: function(x,y){
+        let state=this.data.selectedState;
+        if(state==null)
+            return;
+        let start_x=state.x;
+        let start_y=state.y;
         if(Math.pow((x-start_x),2)+Math.pow((y-start_y),2)>15*15){
-            canvasElements.state.forEach(elem =>{
-                let t=Math.sqrt(Math.pow(start_x-elem.x,2)+Math.pow(start_y-elem.y,2));
-                if(t<=15){
-                    if(x<start_x){
-                        elem.isStart=1-elem.isStart;
-                    }else{
-                        elem.isEnd=1-elem.isEnd;
-                    }
-                    this.canvasDraw();
-                }
-            });
+            if(x<start_x){
+                state.isStart=1-state.isStart;
+            }else{
+                state.isEnd=1-state.isEnd;
+            }
+            this.canvasDraw();
         }
     },
 
@@ -449,16 +456,17 @@ Page({
         let opr=this.data.operand_type;
         let current_x=e.changedTouches[0].x;
         let current_y=e.changedTouches[0].y;
-        if(opr=="select" && this.data.point.isLongTap==false && this.data.selectedState!=null){
-            let tmp_state=this.data.selectedState;
-            tmp_state.x=current_x;
-            tmp_state.y=current_y;
+        if(opr=="select" && this.data.isLongTap==false && this.data.selectedState!=null){
+            let state=this.data.selectedState;
+            state.x=current_x;
+            state.y=current_y;
             this.canvasDraw();
         }else if(opr=="func"){
             let vec=canvasElements.func;
             let index=vec.length-1;
             vec[index].end_x=current_x;
             vec[index].end_y=current_y;
+            vec[index].end_state=this.findColorNearestState(current_x,current_y);
             this.canvasDraw();
         }
     },
@@ -473,20 +481,19 @@ Page({
         if(opr=="select"){
             this.setData({
                 touchStartTime:e.timeStamp,
-                point:{
-                    isLongTap:false,
-                    startx:begin_x,
-                    starty:begin_y
-                },
+                isLongTap:false,
                 selectedState:this.findColorNearestState(begin_x,begin_y)
             });
+            this.canvasDraw();
         }else if(opr=="func"){
             canvasElements.func.push({
                 begin_x:begin_x,
                 begin_y:begin_y,
                 end_x:begin_x,
-                end_y:begin_y
+                end_y:begin_y,
+                begin_state:this.findColorNearestState(begin_x,begin_y)
             });
+            this.canvasDraw();
         }
     },
 
@@ -496,22 +503,27 @@ Page({
     touchEnd: function(e) {
         let end_x=e.changedTouches[0].x;
         let end_y=e.changedTouches[0].y;
-        this.setData({
-            touchEndTime:e.timeStamp,
-            selectedState:null
-        });
-        if(this.data.point.isLongTap){
-            this.tapLongTouchSelect(end_x,end_y);
+        if(this.data.isLongTap){
+            // select init/end state
+            this.longTapSelect(end_x,end_y);
+            this.setData({selectedState:null});
         }else{
             if(this.data.operand_type!="func")
                 return;
             let vec=canvasElements.func;
             let index=vec.length-1;
-            vec[index].end_x=end_x;
-            vec[index].end_y=end_y;
+            vec[index].end_state=this.findColorNearestState(end_x,end_y);
+            if(vec[index].begin_state==null || vec[index].end_state==null){
+                wx.showToast({
+                    title: '无效连接',
+                    icon: 'error',
+                    duration: 1000
+                });
+                vec.pop();
+            }
             this.canvasDraw();
         }
-        this.setData({point:{isLongTap:false}});
+        this.setData({isLongTap:false});
     },
 
     /**
@@ -521,9 +533,11 @@ Page({
         let x=e.touches[0].x;
         let y=e.touches[0].y;
         let opr=this.data.operand_type;
+        // longtap for more than 1 minute
         if(opr=="select" && e.timeStamp-this.data.touchStartTime>1){
-            this.setData({point:{isLongTap:true}});
-            this.tapLongTouch(x,y);
+            this.setData({isLongTap:true});
+            // draw select panel
+            this.longTapPanel(x,y);
         }
     }
 })
