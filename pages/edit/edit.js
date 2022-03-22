@@ -181,7 +181,9 @@ Page({
         // functions
         ctx.fillStyle="#000000"; // init fill style
         canvasElements.func.forEach(elem =>{
-            if(elem.begin_state!=null){
+            if(elem.begin_state==null){
+                return;
+            }else{
                 elem.begin_x=elem.begin_state.x;
                 elem.begin_y=elem.begin_state.y;
             }
@@ -394,13 +396,14 @@ Page({
      * 单次点击创建新的转移函数
      */
     tapFunc: function(x,y){
+        let state=this.findColorNearestState(x,y);
         canvasElements.func.push({
             begin_x:x,
             begin_y:y,
             end_x:x,
             end_y:y,
-            begin_state:null,
-            end_state:null
+            begin_state:state,
+            end_state:state
         });
     },
 
@@ -464,6 +467,8 @@ Page({
         }else if(opr=="func"){
             let vec=canvasElements.func;
             let index=vec.length-1;
+            if(vec[index].begin_state==null)
+                return;
             vec[index].end_x=current_x;
             vec[index].end_y=current_y;
             vec[index].end_state=this.findColorNearestState(current_x,current_y);
@@ -475,23 +480,25 @@ Page({
      * canvas点击移动开始
      */
     touchStart: function(e) {
-        let begin_x=e.touches[0].x;
-        let begin_y=e.touches[0].y;
+        let x=e.touches[0].x;
+        let y=e.touches[0].y;
         let opr=this.data.operand_type;
         if(opr=="select"){
             this.setData({
                 touchStartTime:e.timeStamp,
                 isLongTap:false,
-                selectedState:this.findColorNearestState(begin_x,begin_y)
+                selectedState:this.findColorNearestState(x,y)
             });
             this.canvasDraw();
         }else if(opr=="func"){
+            let state=this.findColorNearestState(x,y);
             canvasElements.func.push({
-                begin_x:begin_x,
-                begin_y:begin_y,
-                end_x:begin_x,
-                end_y:begin_y,
-                begin_state:this.findColorNearestState(begin_x,begin_y)
+                begin_x:x,
+                begin_y:y,
+                end_x:x,
+                end_y:y,
+                begin_state:state,
+                end_state:state
             });
             this.canvasDraw();
         }
@@ -501,24 +508,18 @@ Page({
      * canvas点击移动结束
      */
     touchEnd: function(e) {
-        let end_x=e.changedTouches[0].x;
-        let end_y=e.changedTouches[0].y;
-        if(this.data.isLongTap){
-            // select init/end state
-            this.longTapSelect(end_x,end_y);
+        let x=e.changedTouches[0].x;
+        let y=e.changedTouches[0].y;
+        if(this.data.isLongTap){// select init/end state
+            this.longTapSelect(x,y);
             this.setData({selectedState:null});
         }else{
             if(this.data.operand_type!="func")
                 return;
             let vec=canvasElements.func;
             let index=vec.length-1;
-            vec[index].end_state=this.findColorNearestState(end_x,end_y);
+            vec[index].end_state=this.findColorNearestState(x,y);
             if(vec[index].begin_state==null || vec[index].end_state==null){
-                wx.showToast({
-                    title: '无效连接',
-                    icon: 'error',
-                    duration: 1000
-                });
                 vec.pop();
             }
             this.canvasDraw();
@@ -536,8 +537,7 @@ Page({
         // longtap for more than 1 minute
         if(opr=="select" && e.timeStamp-this.data.touchStartTime>1){
             this.setData({isLongTap:true});
-            // draw select panel
-            this.longTapPanel(x,y);
+            this.longTapPanel(x,y);// draw select panel
         }
     }
 })
