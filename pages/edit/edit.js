@@ -29,18 +29,18 @@ Page({
      */
     findColorNearestState: function(x,y) {
         let dis=1e6;
-        let tmp_state={};
+        let tmp={};
         canvasElements.state.forEach(elem => {
             elem.fillcolor="#ffe985";
             let t=Math.sqrt(Math.pow(x-elem.x,2)+Math.pow(y-elem.y,2));
             if(t<=dis){
-                tmp_state=elem;
+                tmp=elem;
                 dis=t;
             }
         });
         if(dis<=15){
-            tmp_state.fillcolor="#8db7ee";
-            return tmp_state;
+            tmp.fillcolor="#8db7ee";
+            return tmp;
         }
         return null;
     },
@@ -95,12 +95,29 @@ Page({
     /**
      * 绘制选择圆环
      */
-    drawCircleSelect: function(x,y,r) {
-        let nr=1.5;  // text offset
+    drawCircleSelectPanel: function(x,y,r,isStart=0,isEnd=0) {
+        // end state choice panel
         ctx.beginPath();
-        ctx.arc(x,y,2.5*r,0,2*Math.PI);
+        ctx.moveTo(x,y-15);
+        ctx.lineTo(x,y-2.5*r);
+        ctx.arc(x,y,2.5*r,-0.5*Math.PI,0.5*Math.PI);
+        ctx.lineTo(x,y+r);
+        ctx.arc(x,y,r,0.5*Math.PI,-0.5*Math.PI,true);
+        ctx.fillStyle=isEnd?"#8cf383":"#d9dfd9";
+        ctx.fill();
+        ctx.stroke();
+        // start state choice panel
+        ctx.beginPath();
+        ctx.moveTo(x,y-15);
+        ctx.lineTo(x,y-2.5*r);
+        ctx.arc(x,y,2.5*r,-0.5*Math.PI,-1.5*Math.PI,true);
+        ctx.lineTo(x,y+r);
+        ctx.arc(x,y,r,0.5*Math.PI,-0.5*Math.PI);
+        ctx.fillStyle=isStart?"#8cf383":"#d9dfd9";
+        ctx.fill();
         ctx.stroke();
         // set text
+        let nr=1.5;  // text offset
         ctx.fillStyle="#000000";
         ctx.fillText("初",x-nr*r,y-r);
         ctx.fillText("态",x-nr*r,y+r);
@@ -411,10 +428,10 @@ Page({
      * 绘制select下状态的长按选择圆盘
      */
     longTapPanel: function(x,y){
-        let tmp_state=this.findColorNearestState(x,y);
-        if(tmp_state!=null){
+        let state=this.findColorNearestState(x,y);
+        if(state!=null){
             this.setData({isLongTap:true});
-            this.drawCircleSelect(tmp_state.x,tmp_state.y,15);
+            this.drawCircleSelectPanel(state.x,state.y,15,state.isStart,state.isEnd);
         }
     },
 
@@ -433,8 +450,8 @@ Page({
             }else{
                 state.isEnd=1-state.isEnd;
             }
-            this.canvasDraw();
         }
+        this.canvasDraw();
     },
 
     /** 
@@ -459,6 +476,16 @@ Page({
         let opr=this.data.operand_type;
         let current_x=e.changedTouches[0].x;
         let current_y=e.changedTouches[0].y;
+        // edge detection
+        if(current_x<0)
+            current_x=0;
+        if(current_x>=canvas.width/dpr)
+            current_x=canvas.width/dpr;
+        if(current_y<0)
+            current_y=0;
+        if(current_y>=canvas.height/dpr-e.target.offsetTop)
+            current_y=canvas.height/dpr-e.target.offsetTop;
+        
         if(opr=="select" && this.data.isLongTap==false && this.data.selectedState!=null){
             let state=this.data.selectedState;
             state.x=current_x;
