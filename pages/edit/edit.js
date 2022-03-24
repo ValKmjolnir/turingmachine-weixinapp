@@ -25,6 +25,17 @@ Page({
     },
 
     /**
+     * 根据名称查找状态
+     */
+    findState: function(name) {
+        let vec=canvasElements.state;
+        for(let i=0;i<vec.length;i++)
+            if(vec[i].name==name)
+                return vec[i];
+        return null;
+    },
+
+    /**
      * 寻找距离点击处最近的状态，并且更新颜色
      */
     findColorNearestState: function(x,y) {
@@ -43,6 +54,14 @@ Page({
             return tmp;
         }
         return null;
+    },
+    /**
+     * 寻找距离点击处最近的状态，并且更新颜色
+     * 只返回名称
+     */
+    findColorNearestStateName: function(x,y){
+        let state=this.findColorNearestState(x,y);
+        return (state==null)?null:state.name;
     },
 
     /** 
@@ -198,15 +217,17 @@ Page({
         // functions
         ctx.fillStyle="#000000"; // init fill style
         canvasElements.func.forEach(elem =>{
-            if(elem.begin_state==null){
+            if(elem.begin_state==null){ // no need to render invalid connection
                 return;
             }else{
-                elem.begin_x=elem.begin_state.x;
-                elem.begin_y=elem.begin_state.y;
+                let state=this.findState(elem.begin_state);
+                elem.begin_x=state.x;
+                elem.begin_y=state.y;
             }
-            if(elem.end_state!=null){
-                elem.end_x=elem.end_state.x;
-                elem.end_y=elem.end_state.y;
+            if(elem.end_state!=null){ // end state maybe null, then use end_x end_y
+                let state=this.findState(elem.end_state);
+                elem.end_x=state.x;
+                elem.end_y=state.y;
             }
             if(elem.begin_x==elem.end_x && elem.begin_y==elem.end_y){
                 this.drawSelfArrow(elem.begin_x,elem.begin_y);
@@ -225,8 +246,7 @@ Page({
             const res=this.fs.readFileSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+filename,'utf8',0);
             canvasElements=JSON.parse(res);
             state_counter=canvasElements.state.length;
-        }catch(e){
-            // empty file
+        }catch(e){ // empty file
             console.error(e);
         }
     },
@@ -236,10 +256,10 @@ Page({
      * 在没有文件时初始化组件列表
      */
     createTemporaryFile: function(type) {
-        state_counter=0; // set state name counter to 0
+        state_counter=0;          // set state name counter to 0
         canvasElements.type=type; // get type of automata
-        canvasElements.state=[];
-        canvasElements.func=[];
+        canvasElements.state=[];  // empty vector
+        canvasElements.func=[];   // empty vector
     },
 
     /**
@@ -413,14 +433,14 @@ Page({
      * 单次点击创建新的转移函数
      */
     tapFunc: function(x,y){
-        let state=this.findColorNearestState(x,y);
+        let name=this.findColorNearestStateName(x,y);
         canvasElements.func.push({
             begin_x:x,
             begin_y:y,
             end_x:x,
             end_y:y,
-            begin_state:state,
-            end_state:state
+            begin_state:name,
+            end_state:name
         });
     },
 
@@ -498,7 +518,7 @@ Page({
                 return;
             vec[index].end_x=current_x;
             vec[index].end_y=current_y;
-            vec[index].end_state=this.findColorNearestState(current_x,current_y);
+            vec[index].end_state=this.findColorNearestStateName(current_x,current_y);
             this.canvasDraw();
         }
     },
@@ -518,14 +538,14 @@ Page({
             });
             this.canvasDraw();
         }else if(opr=="func"){
-            let state=this.findColorNearestState(x,y);
+            let name=this.findColorNearestStateName(x,y);
             canvasElements.func.push({
                 begin_x:x,
                 begin_y:y,
                 end_x:x,
                 end_y:y,
-                begin_state:state,
-                end_state:state
+                begin_state:name,
+                end_state:name
             });
             this.canvasDraw();
         }
@@ -545,7 +565,7 @@ Page({
                 return;
             let vec=canvasElements.func;
             let index=vec.length-1;
-            vec[index].end_state=this.findColorNearestState(x,y);
+            vec[index].end_state=this.findColorNearestStateName(x,y);
             if(vec[index].begin_state==null || vec[index].end_state==null){
                 vec.pop();
             }
