@@ -2,9 +2,9 @@
 var canvas=null;
 var ctx=null;
 const dpr=wx.getSystemInfoSync().pixelRatio;
-var state_counter=0;
 var canvasElements={
     type:null,
+    state_counter:0,
     state:[],
     func:[],
 };
@@ -62,6 +62,41 @@ Page({
     findColorNearestStateName: function(x,y){
         let state=this.findColorNearestState(x,y);
         return (state==null)?null:state.name;
+    },
+
+    /**
+     * 寻找被点击的线段
+     */
+    findNearestFunc: function(x,y){
+        //求点到线的距离
+        let dis=1e6;
+        let tmp={} ;
+        var t,A,B;
+        canvasElements.func.forEach(elem=>{
+            if(elem.begin_state==elem.end_state){
+                t=Math.sqrt(Math.pow(x-(elem.begin_x-22),2)+Math.pow(y-(elem.begin_y+22),2));
+                if(t<=dis){
+                    tmp=elem;
+                    dis=t;
+                }
+            }
+            else{
+                if(elem.end_x==elem.begin_x)
+                    t=Math.abs(x-elem.end_x);
+                else if(x<Math.max(elem.begin_x,elem.end_x) && y<Math.max(elem.begin_y,elem.end_y)){
+                    A=(elem.begin_y-elem.end_y)/(elem.begin_x-elem.end_x);
+                    B=elem.begin_y-A*elem.begin_x;
+                    t=Math.abs((A*x+B-y)/Math.sqrt(A*A+1));
+                    if(t<=dis){
+                        tmp=elem;
+                        dis=t;
+                    }
+                }
+            }
+        });
+        if(dis<=7)
+            return tmp;
+        return null;
     },
 
     /** 
@@ -147,7 +182,7 @@ Page({
     /**
      * 绘制直线箭头
      */
-    drawArrow: function(bx,by,ex,ey) {
+    drawArrow: function(bx,by,ex,ey,transfer) {
         let angle=Math.atan2(ey-by,ex-bx);
         bx+=15*Math.cos(angle);
         by+=15*Math.sin(angle);
@@ -169,12 +204,14 @@ Page({
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+        ctx.clearRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
+        ctx.fillText(transfer,(bx+ex)/2,(by+ey)/2);
     },
 
     /**
      * 绘制指向自己的箭头
      */
-    drawSelfArrow: function(x,y) {
+    drawSelfArrow: function(x,y,transfer) {
         x-=15;
         y+=15;
         ctx.beginPath();
@@ -192,6 +229,9 @@ Page({
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+        // fill text
+        ctx.clearRect(x-8,y+2,8,8);
+        ctx.fillText(transfer,x-4,y+8);
     },
 
     /**
@@ -204,7 +244,6 @@ Page({
         ctx.fillStyle="#edf8fc";
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.fillRect(0,0,canvas.width,canvas.height);
-
         // states
         this.stateTextStyle(); // init state text style
         canvasElements.state.forEach(elem=>{
@@ -230,10 +269,9 @@ Page({
                 elem.end_y=state.y;
             }
             if(elem.begin_x==elem.end_x && elem.begin_y==elem.end_y){
-                this.drawSelfArrow(elem.begin_x,elem.begin_y);
-            }else{
-                this.drawArrow(elem.begin_x,elem.begin_y,elem.end_x,elem.end_y);
-            }
+                this.drawSelfArrow(elem.begin_x,elem.begin_y,elem.text);
+            }else
+                this.drawArrow(elem.begin_x,elem.begin_y,elem.end_x,elem.end_y,elem.text);
         });
     },
 
@@ -245,7 +283,6 @@ Page({
         try{
             const res=this.fs.readFileSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+filename,'utf8',0);
             canvasElements=JSON.parse(res);
-            state_counter=canvasElements.state.length;
         }catch(e){ // empty file
             console.error(e);
         }
@@ -256,10 +293,10 @@ Page({
      * 在没有文件时初始化组件列表
      */
     createTemporaryFile: function(type) {
-        state_counter=0;          // set state name counter to 0
-        canvasElements.type=type; // get type of automata
-        canvasElements.state=[];  // empty vector
-        canvasElements.func=[];   // empty vector
+        canvasElements.type=type;       // get type of automata
+        canvasElements.state=[];        // empty vector
+        canvasElements.func=[];         // empty vector
+        canvasElements.state_counter=0; // set state name counter to 0
     },
 
     /**
@@ -421,12 +458,12 @@ Page({
         canvasElements.state.push({
             x:x,
             y:y,
-            name:"q"+String(state_counter),
+            name:"q"+String(canvasElements.state_counter),
             fillcolor:"#ffe985",
             isStart:0,
             isEnd:0
         });
-        state_counter+=1;
+        canvasElements.state_counter+=1;
     },
 
     /**
@@ -439,6 +476,7 @@ Page({
             begin_y:y,
             end_x:x,
             end_y:y,
+            text:"&",
             begin_state:name,
             end_state:name
         });
@@ -474,6 +512,35 @@ Page({
         this.canvasDraw();
     },
 
+    /**
+     * delete删除状态
+     */
+    deleteState: function(selectState){
+        for(var i=0;i<canvasElements.func.length;i++){
+            if(canvasElements.func[i].begin_state==selectState.name|| 
+                canvasElements.func[i].end_state==selectState.name){
+                canvasElements.func.splice(i,1);
+                i--;
+            }
+        }
+        for(var i=0;i<canvasElements.state.length;i++){
+            if(canvasElements.state[i]==selectState){
+                canvasElements.state.splice(i,1);
+            }
+        }
+    },
+
+    /**
+     * delete删除转移关系
+     */
+    deleteTransfer: function(selectFunc){
+        for(var i=0;i<canvasElements.func.length;i++){
+            if(canvasElements.func[i]==selectFunc){
+                canvasElements.func.splice(i,1);
+            }
+        }
+    },
+
     /** 
      * canvas单次点击事件
      */
@@ -481,10 +548,55 @@ Page({
         let x=e.detail.x-e.target.offsetLeft;
         let y=e.detail.y-e.target.offsetTop;
         let opr=this.data.operand_type;
+        let selectFunc ,selectState;
+        let flush=this.canvasDraw;
         if(opr=="state"){
             this.tapState(x,y);
         }else if(opr=="select"){
             this.findColorNearestState(x,y);
+            selectFunc=this.findNearestFunc(x,y);
+            if(selectFunc!=null){
+                wx.showModal({
+                    title:'从'+selectFunc.begin_state+'转移到'+selectFunc.end_state,
+                    placeholderText:selectFunc.text,
+                    editable:true,
+                    cancelColor:'cancelColor',
+                    success(res){
+                        if(res.confirm){
+                            selectFunc.text=res.content;
+                        }
+                        flush();
+                    }
+                })
+            }
+        }else if(opr=="delete"){
+            selectState=this.findColorNearestState(x,y) ;
+            selectFunc=this.findNearestFunc(x,y);
+            if(selectState!=null){
+                let f=this.deleteState;
+                wx.showModal({
+                    title:'是否删除状态'+selectState.name,
+                    cancelColor:'cancelColor',
+                    success(res){
+                        if(res.confirm){
+                            f(selectState);
+                        }
+                        flush();
+                    }
+                })
+            }else if(selectFunc!=null){
+                let f=this.deleteTransfer;
+                wx.showModal({
+                    title:'是否删除从'+selectFunc.begin_state+'到'+selectFunc.end_state+'的转移',
+                    cancelColor:'cancelColor',
+                    success(res){
+                        if(res.confirm){
+                            f(selectFunc);
+                        }
+                        flush();
+                    }
+                })
+            }
         }
         this.canvasDraw();
     },
@@ -544,6 +656,7 @@ Page({
                 begin_y:y,
                 end_x:x,
                 end_y:y,
+                text:"&",
                 begin_state:name,
                 end_state:name
             });
