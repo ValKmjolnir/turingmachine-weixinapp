@@ -70,7 +70,7 @@ Page({
     findNearestFunc: function(x,y){
         //求点到线的距离
         let dis=1e6;
-        let tmp={} ;
+        let tmp={};
         var t,A,B;
         canvasElements.func.forEach(elem=>{
             if(elem.begin_state==elem.end_state){
@@ -79,8 +79,7 @@ Page({
                     tmp=elem;
                     dis=t;
                 }
-            }
-            else{
+            }else{
                 if(elem.end_x==elem.begin_x)
                     t=Math.abs(x-elem.end_x);
                 else if(x<Math.max(elem.begin_x,elem.end_x) && y<Math.max(elem.begin_y,elem.end_y)){
