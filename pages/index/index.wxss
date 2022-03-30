@@ -5,11 +5,11 @@ button {
     margin-bottom: 10rpx;
     margin-left: 30rpx;
     margin-right: 30rpx;
-    background-color: #ddfcea;
+    background-color: rgb(217,236,255);
 }
 
 .button-hover {
-    background-color: cadetblue;
+    background-color: #409eff;
 }
 
 .button-container {

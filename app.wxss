@@ -1,5 +1,5 @@
 /** app.wxss **/
 
 page {
-    background-color: #dbf3f3;
+    background-color: rgb(236,245,255);
 }

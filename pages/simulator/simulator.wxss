@@ -1,4 +1,4 @@
-/* pages/edit.wxss */
+/* pages/simulator/simulator.wxss */
 
 button {
     width: 70rpx;

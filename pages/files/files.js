@@ -81,5 +81,36 @@ Page({
         wx.navigateTo({
             url: "/pages/edit/edit?type=exist_file&filename="+arg,
         });
+    },
+
+    clearfile: function(param) {
+        let fs=this.fs;
+        let name=param.currentTarget.dataset.param;
+        wx.showModal({
+            title:"清空文件",
+            content:"是否清空并初始化文件内容？",
+            success (res) {
+                if(res.confirm){
+                    let init=null;
+                    try{
+                        const res=fs.readFileSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+name,'utf8',0);
+                        init=JSON.parse(res);
+                    }catch(e){ // empty file
+                        console.error(e);
+                    }
+                    init.state_counter=0;
+                    init.state=[];
+                    init.func=[];
+                    try{
+                        fs.writeFileSync(
+                            `${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+name,
+                            JSON.stringify(init),
+                            'utf8');
+                    }catch(e){
+                        console.error(e);
+                    }
+                }
+            }
+        });
     }
 })

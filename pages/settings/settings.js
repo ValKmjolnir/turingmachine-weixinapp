@@ -1,19 +1,18 @@
-// pages/logs/index.js
+// pages/settings/settings.js
 Page({
 
     /**
      * 页面的初始数据
      */
     data: {
-        files:[],
-        empty_file_list:true
+
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
-        this.fs=wx.getFileSystemManager();
+
     },
 
     /**
@@ -27,14 +26,7 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow: function () {
-        let fs=this.fs;
-        this.setData({
-            files:fs.readdirSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator`)
-        });
-        if(this.data.files.length>0)
-            this.setData({
-                empty_file_list:false
-            });
+
     },
 
     /**
@@ -70,12 +62,5 @@ Page({
      */
     onShareAppMessage: function () {
 
-    },
-
-    gotoedit: function(param) {
-        let arg=param.currentTarget.dataset.param;
-        wx.navigateTo({
-            url: "/pages/simulator/simulator?filename="+arg,
-        });
     }
 })

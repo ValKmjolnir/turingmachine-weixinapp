@@ -7,12 +7,13 @@ button {
     margin-bottom: 10rpx;
     margin-left: 50rpx;
     margin-right: 50rpx;
-    color: #5a6877;
-    background-color: #ddfcea;
+    color: #606266;
+    border: 2rpx solid #909399;
+    background-color: rgb(217,236,255);
 }
 
 .button-hover {
-    background-color: cadetblue;
+    background-color: #409eff;
 }
 
 .button-container {
@@ -23,11 +24,11 @@ button {
 }
 
 .button-confirm {
-    background-color: #4aec58 !important;
+    background-color: #409eff !important;
 }
 
 .button-cancel {
-    background-color: #f06565 !important;
+    background-color: #f56c6c !important;
 }
 
 .weui-input {
@@ -40,6 +41,6 @@ button {
     margin-bottom: 10rpx;
     margin-left: 5%;
     margin-right: 5%;
-    border: 2rpx solid #5a6877;
+    border: 2rpx solid #606266;
     border-radius: 10rpx;
 }

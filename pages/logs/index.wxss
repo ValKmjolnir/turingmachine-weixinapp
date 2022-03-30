@@ -6,11 +6,11 @@ button {
     margin-left: 20rpx;
     margin-right: 20rpx;
     height: 100rpx;
-    background-color: #ddfcea;
+    background-color: rgb(217,236,255);
 }
 
 .button-hover {
-    background-color: cadetblue;
+    background-color: #409eff;
 }
 
 .button-container {

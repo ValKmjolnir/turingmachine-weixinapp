@@ -1,0 +1,8 @@
+<!--pages/simulator/simulator.wxml-->
+<view>
+    <canvas
+        type="2d"
+        id="canvas"
+        style="position: fixed;width: 100%;height: 100%;"
+    ></canvas>
+</view>

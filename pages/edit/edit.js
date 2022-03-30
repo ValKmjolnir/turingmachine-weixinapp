@@ -50,11 +50,12 @@ Page({
             }
         });
         if(dis<=15){
-            tmp.fillcolor="#8db7ee";
+            tmp.fillcolor="#88c3ff";
             return tmp;
         }
         return null;
     },
+    
     /**
      * 寻找距离点击处最近的状态，并且更新颜色
      * 只返回名称
@@ -111,6 +112,7 @@ Page({
      * 绘制状态
      */
     drawState: function(name,x,y,r,color) {
+        ctx.strokeStyle="#606266";
         // draw circle
         ctx.beginPath();
         ctx.arc(x,y,r,0,2*Math.PI);
@@ -118,7 +120,7 @@ Page({
         ctx.fill();
         ctx.stroke();
         // set text
-        ctx.fillStyle="#000000";
+        ctx.fillStyle="#606266";
         ctx.fillText(name,x,y);
     },
 
@@ -126,12 +128,13 @@ Page({
      * 绘制初态侧面三角形
      */
     drawStateStart: function(x,y,r) {
+        ctx.strokeStyle="#606266";
+        ctx.fillStyle="rgb(225,243,216)";
         ctx.beginPath();
         ctx.moveTo(x-r,y);
         ctx.lineTo(x-r-0.5*r,y-0.7*r);
         ctx.lineTo(x-r-0.5*r,y+0.7*r);
         ctx.lineTo(x-r,y);
-        ctx.fillStyle="#a0ebde";
         ctx.fill();
         ctx.stroke();
     },
@@ -140,6 +143,7 @@ Page({
      * 绘制终态的小圆环
      */
     drawStateEnd: function(x,y,r) {
+        ctx.strokeStyle="#606266";
         ctx.beginPath();
         ctx.arc(x,y,r,0,2*Math.PI);
         ctx.stroke();
@@ -149,6 +153,7 @@ Page({
      * 绘制选择圆环
      */
     drawCircleSelectPanel: function(x,y,r,isStart=0,isEnd=0) {
+        ctx.strokeStyle="#606266";
         // end state choice panel
         ctx.beginPath();
         ctx.moveTo(x,y-15);
@@ -156,7 +161,7 @@ Page({
         ctx.arc(x,y,2.5*r,-0.5*Math.PI,0.5*Math.PI);
         ctx.lineTo(x,y+r);
         ctx.arc(x,y,r,0.5*Math.PI,-0.5*Math.PI,true);
-        ctx.fillStyle=isEnd?"#8cf383":"#d9dfd9";
+        ctx.fillStyle=isEnd?"rgb(225,243,216)":"#c0c4cc";
         ctx.fill();
         ctx.stroke();
         // start state choice panel
@@ -166,12 +171,12 @@ Page({
         ctx.arc(x,y,2.5*r,-0.5*Math.PI,-1.5*Math.PI,true);
         ctx.lineTo(x,y+r);
         ctx.arc(x,y,r,0.5*Math.PI,-0.5*Math.PI);
-        ctx.fillStyle=isStart?"#8cf383":"#d9dfd9";
+        ctx.fillStyle=isStart?"rgb(225,243,216)":"#c0c4cc";
         ctx.fill();
         ctx.stroke();
         // set text
         let nr=1.5;  // text offset
-        ctx.fillStyle="#000000";
+        ctx.fillStyle="#606266";
         ctx.fillText("初",x-nr*r,y-r);
         ctx.fillText("态",x-nr*r,y+r);
         ctx.fillText("终",x+nr*r,y-r);
@@ -182,6 +187,9 @@ Page({
      * 绘制直线箭头
      */
     drawArrow: function(bx,by,ex,ey,transfer) {
+        ctx.strokeStyle="#606266";
+        ctx.fillStyle="#606266";
+
         let angle=Math.atan2(ey-by,ex-bx);
         bx+=15*Math.cos(angle);
         by+=15*Math.sin(angle);
@@ -203,7 +211,11 @@ Page({
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+        // fill test
+        ctx.fillStyle="#f2f6fc";
         ctx.clearRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
+        ctx.fillRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
+        ctx.fillStyle="#606266";
         ctx.fillText(transfer,(bx+ex)/2,(by+ey)/2);
     },
 
@@ -211,6 +223,7 @@ Page({
      * 绘制指向自己的箭头
      */
     drawSelfArrow: function(x,y,transfer) {
+        ctx.strokeStyle="#606266";
         x-=15;
         y+=15;
         ctx.beginPath();
@@ -229,7 +242,10 @@ Page({
         ctx.fill();
         ctx.stroke();
         // fill text
+        ctx.fillStyle="#f2f6fc";
         ctx.clearRect(x-8,y+2,8,8);
+        ctx.fillRect(x-8,y+2,8,8);
+        ctx.fillStyle="#606266";
         ctx.fillText(transfer,x-4,y+8);
     },
 
@@ -240,7 +256,7 @@ Page({
         if(ctx==undefined)
             return;
         // background
-        ctx.fillStyle="#edf8fc";
+        ctx.fillStyle="#f2f6fc";
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.fillRect(0,0,canvas.width,canvas.height);
         // states
@@ -482,17 +498,6 @@ Page({
     },
 
     /**
-     * 绘制select下状态的长按选择圆盘
-     */
-    longTapPanel: function(x,y){
-        let state=this.findColorNearestState(x,y);
-        if(state!=null){
-            this.setData({isLongTap:true});
-            this.drawCircleSelectPanel(state.x,state.y,15,state.isStart,state.isEnd);
-        }
-    },
-
-    /**
      * select下长按状态的选择
      */
     longTapSelect: function(x,y){
@@ -547,14 +552,14 @@ Page({
         let x=e.detail.x-e.target.offsetLeft;
         let y=e.detail.y-e.target.offsetTop;
         let opr=this.data.operand_type;
-        let selectFunc ,selectState;
+        let selectFunc,selectState;
         let flush=this.canvasDraw;
         if(opr=="state"){
             this.tapState(x,y);
         }else if(opr=="select"){
-            this.findColorNearestState(x,y);
+            selectState=this.findColorNearestState(x,y);
             selectFunc=this.findNearestFunc(x,y);
-            if(selectFunc!=null){
+            if(selectState==null&&selectFunc!=null){
                 wx.showModal({
                     title:'从'+selectFunc.begin_state+'转移到'+selectFunc.end_state,
                     placeholderText:selectFunc.text,
@@ -569,7 +574,7 @@ Page({
                 })
             }
         }else if(opr=="delete"){
-            selectState=this.findColorNearestState(x,y) ;
+            selectState=this.findColorNearestState(x,y);
             selectFunc=this.findNearestFunc(x,y);
             if(selectState!=null){
                 let f=this.deleteState;
@@ -695,8 +700,12 @@ Page({
         let opr=this.data.operand_type;
         // longtap for more than 1 minute
         if(opr=="select" && e.timeStamp-this.data.touchStartTime>1){
-            this.setData({isLongTap:true});
-            this.longTapPanel(x,y);// draw select panel
+            // draw select panel
+            let state=this.findColorNearestState(x,y);
+            if(state!=null){
+                this.setData({isLongTap:true});
+                this.drawCircleSelectPanel(state.x,state.y,15,state.isStart,state.isEnd);
+            }
         }
     }
 })

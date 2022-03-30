@@ -2,7 +2,7 @@
 <view class="page-body">
     <form>
         <view style="text-align: center;font-weight: 700;margin-top: 20rpx;margin-bottom: 10rpx;">
-            <text style="color: #5a6877;">自动机类型</text>
+            <text style="color: #303133;">自动机类型</text>
         </view>
         <view wx:if="{{type=='normal'}}">
             <input class="weui-input" name="type" placeholder="单带图灵机" disabled="true"/>
@@ -14,7 +14,7 @@
             <input class="weui-input" name="type" placeholder="带子程序的图灵机" disabled="true"/>
         </view>
         <view style="text-align: center;font-weight: 700;margin-top: 20rpx;margin-bottom: 10rpx;">
-            <text style="color: #5a6877;">文件名</text>
+            <text style="color: #303133;">文件名</text>
         </view>
         <input
             class="weui-input"
@@ -25,10 +25,14 @@
         />
         <view class="button-container">
             <view>
-                <button bindtap="confirmSave" form-type="submit" style="background-color: #7df8c9;" hover-class="button-confirm"> 确认 </button>
+                <button bindtap="confirmSave" form-type="submit" style="background-color: rgb(217,236,255);" hover-class="button-confirm">
+                    <text style="color: #606266;font-weight: 600;">确认</text>
+                </button>
             </view>
             <view>
-                <button bindtap="cancelSave" form-type="reset" style="background-color: #fdc9c2;" hover-class="button-cancel"> 取消 </button>
+                <button bindtap="cancelSave" form-type="reset" style="background-color: rgb(253,226,226);" hover-class="button-cancel">
+                    <text style="color: #606266;font-weight: 600;">取消</text>
+                </button>
             </view>
         </view>
     </form>

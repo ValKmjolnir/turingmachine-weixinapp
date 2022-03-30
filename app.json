@@ -4,29 +4,38 @@
         "pages/logs/index",
         "pages/edit/edit",
         "pages/files/files",
-        "pages/savefile/savefile"
+        "pages/savefile/savefile",
+        "pages/simulator/simulator",
+        "pages/settings/settings"
     ],
     "window": {
-        "navigationBarTitleText": "图灵机模拟"
+        "navigationBarTitleText": "图灵机模拟",
+        "navigationBarBackgroundColor": "#409eff"
     },
     "tabBar": {
         "custom": false,
         "color": "#a9b7b7",
-        "selectedColor": "#11cd6e",
+        "selectedColor": "#409eff",
         "borderStyle": "black",
         "position": "bottom",
         "list": [
             {
                 "pagePath": "pages/index/index",
-                "iconPath": "image/icon_component.png",
-                "selectedIconPath": "image/icon_component_HL.png",
+                "iconPath": "image/icon_INDEX.png",
+                "selectedIconPath": "image/icon_INDEX_HL.png",
                 "text": "首页"
             },
             {
                 "pagePath": "pages/logs/index",
-                "iconPath": "image/icon_API.png",
-                "selectedIconPath": "image/icon_API_HL.png",
-                "text": "文件"
+                "iconPath": "image/icon_CPU.png",
+                "selectedIconPath": "image/icon_CPU_HL.png",
+                "text": "模拟"
+            },
+            {
+                "pagePath": "pages/settings/settings",
+                "iconPath": "image/icon_SETTING.png",
+                "selectedIconPath": "image/icon_SETTING_HL.png",
+                "text": "设置"
             }
         ]
     },

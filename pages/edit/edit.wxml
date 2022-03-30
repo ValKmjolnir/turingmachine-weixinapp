@@ -3,62 +3,62 @@
 <view class="page-body">
     <view class="button-container">
         <view wx:if="{{operand_type=='select'}}">
-            <button bindtap="tapButton" data-param="select" style="background-color: cadetblue;">
+            <button bindtap="tapButton" data-param="select" style="background-color: #409eff;">
                 <image src="/image/arrow.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='select'}}">
-            <button bindtap="tapButton" data-param="select" style="background-color: #ddfcea;">
+            <button bindtap="tapButton" data-param="select" style="background-color: rgb(217,236,255);">
                 <image src="/image/arrow.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='state'}}">
-            <button bindtap="tapButton" data-param="state" style="background-color: cadetblue;">
+            <button bindtap="tapButton" data-param="state" style="background-color: #409eff;">
                 <image src="/image/state.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='state'}}">
-            <button bindtap="tapButton" data-param="state" style="background-color: #ddfcea;">
+            <button bindtap="tapButton" data-param="state" style="background-color: rgb(217,236,255);">
                 <image src="/image/state.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='func'}}">
-            <button bindtap="tapButton" data-param="func" style="background-color: cadetblue;">
+            <button bindtap="tapButton" data-param="func" style="background-color: #409eff;">
                 <image src="/image/func.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='func'}}">
-            <button bindtap="tapButton" data-param="func" style="background-color: #ddfcea;">
+            <button bindtap="tapButton" data-param="func" style="background-color: rgb(217,236,255);">
                 <image src="/image/func.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='delete'}}">
-            <button bindtap="tapButton" data-param="delete" style="background-color: cadetblue;">
+            <button bindtap="tapButton" data-param="delete" style="background-color: #409eff;">
                 <image src="/image/delete.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='delete'}}">
-            <button bindtap="tapButton" data-param="delete" style="background-color: #ddfcea;">
+            <button bindtap="tapButton" data-param="delete" style="background-color: rgb(217,236,255);">
                 <image src="/image/delete.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='undo'}}">
-            <button bindtap="tapButton" data-param="undo" style="background-color: cadetblue;">
+            <button bindtap="tapButton" data-param="undo" style="background-color: #409eff;">
                 <image src="/image/undo.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='undo'}}">
-            <button bindtap="tapButton" data-param="undo" style="background-color: #ddfcea;">
+            <button bindtap="tapButton" data-param="undo" style="background-color: rgb(217,236,255);">
                 <image src="/image/undo.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type=='rollback'}}">
-            <button bindtap="tapButton" data-param="rollback" style="background-color: cadetblue;">
+            <button bindtap="tapButton" data-param="rollback" style="background-color: #409eff;">
                 <image src="/image/rollback.png" mode="aspectFit"></image>
             </button>
         </view>
         <view wx:if="{{operand_type!='rollback'}}">
-            <button bindtap="tapButton" data-param="rollback" style="background-color: #ddfcea;">
+            <button bindtap="tapButton" data-param="rollback" style="background-color: rgb(217,236,255);">
                 <image src="/image/rollback.png" mode="aspectFit"></image>
             </button>
         </view>
@@ -71,7 +71,7 @@
     <canvas
         type="2d"
         id="canvas"
-        style="position: fixed;width: 100%;height: 100%;"
+        style="position: fixed;height: 100%;width: 100%;"
         bindtap="tapFunction"
         bindlongtap="longTap"
         bindtouchstart="touchStart"
