@@ -10,7 +10,8 @@ Page({
      * 页面的初始数据
      */
     data: {
-
+        height:null,
+        width:null
     },
 
     /**
@@ -141,6 +142,40 @@ Page({
     },
 
     /**
+     * 绘制纸带
+     */
+    drawPaper: function() {
+        ctx.strokeStyle="#606266";
+        let acc=this.data.width/20;
+        let x=acc;
+        let y=this.data.height*0.62;
+        for(let i=0;i<18;i+=1){
+            ctx.beginPath();
+            ctx.moveTo(x,y);
+            ctx.lineTo(x+acc,y);
+            ctx.lineTo(x+acc,y+acc);
+            ctx.lineTo(x,y+acc);
+            ctx.closePath();
+            x+=acc;
+            ctx.fillStyle="rgb(217,236,255)";
+            ctx.fill();
+            ctx.stroke();
+        }
+        ctx.beginPath();
+        ctx.moveTo(1.5*acc,y+acc);
+        ctx.lineTo(1.8*acc,y+1.5*acc);
+        ctx.lineTo(1.6*acc,y+1.5*acc);
+        ctx.lineTo(1.6*acc,y+2*acc);
+        ctx.lineTo(1.4*acc,y+2*acc);
+        ctx.lineTo(1.4*acc,y+1.5*acc);
+        ctx.lineTo(1.2*acc,y+1.5*acc);
+        ctx.closePath();
+        ctx.fillStyle="#f56c6c";
+        ctx.fill();
+        ctx.stroke();
+    },
+
+    /**
      * canvas绘制刷新主函数
      */
     canvasDraw: function() {
@@ -179,6 +214,7 @@ Page({
             }else
                 this.drawArrow(elem.begin_x,elem.begin_y,elem.end_x,elem.end_y,elem.text);
         });
+        this.drawPaper();
     },
 
     /**
@@ -200,7 +236,7 @@ Page({
         this.fs=wx.getFileSystemManager();
         this.loadExistFile(options.filename);
         wx.setNavigationBarTitle({
-            title: options.filename,
+            title: "模拟器"
         });
         wx.createSelectorQuery()
             .select('#canvas')
@@ -221,7 +257,16 @@ Page({
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function () {
-
+        try{
+            const res=wx.getSystemInfoSync();
+            this.setData({
+                height:res.windowHeight,
+                width:res.windowWidth
+            });
+            this.canvasDraw();
+        }catch(e){
+            console.error(e);
+        }
     },
 
     /**
