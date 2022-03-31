@@ -67,6 +67,11 @@
                 <image src="/image/save.png" mode="aspectFit"></image>
             </button>
         </view>
+        <view>
+            <button bindtap="gotoSimulator">
+                <image src="/image/icon_CPU.png" mode="aspectFit"></image>
+            </button>
+        </view>
     </view>
     <canvas
         type="2d"

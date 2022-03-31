@@ -14,6 +14,8 @@ Page({
      * 页面的初始数据
      */
     data: {
+        width:null,
+        height:null,
         isLongTap:false,
         selectedState:null,
         touchStartTime:0,
@@ -259,6 +261,12 @@ Page({
         ctx.fillStyle="#f2f6fc";
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.beginPath();
+        ctx.moveTo(1,1);
+        ctx.lineTo(canvas.width/dpr-1,1);
+        ctx.closePath();
+        ctx.strokeStyle="#e4e7ed";
+        ctx.stroke();
         // states
         this.stateTextStyle(); // init state text style
         canvasElements.state.forEach(elem=>{
@@ -352,7 +360,16 @@ Page({
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function() {
-        
+        try{
+            const res=wx.getSystemInfoSync();
+            this.setData({
+                height:res.windowHeight,
+                width:res.windowWidth
+            });
+            this.canvasDraw();
+        }catch(e){
+            console.error(e);
+        }
     },
 
     /**
@@ -464,6 +481,21 @@ Page({
             }
         }
         return;
+    },
+
+    /** 
+     * 跳转到模拟页面
+    */
+    gotoSimulator: function () {
+        canvasElements.state.forEach(elem =>{
+            elem.fillcolor="#ffe985";
+        });
+        this.setData({
+            filedata:canvasElements
+        });
+        wx.navigateTo({
+            url: "/pages/simulator/simulator?type=fromedit",
+        });
     },
 
     /**

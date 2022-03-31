@@ -3,6 +3,7 @@ var canvas=null;
 var ctx=null;
 const dpr=wx.getSystemInfoSync().pixelRatio;
 var canvasElements=null;
+var simu_panel_pos=null;
 
 Page({
 
@@ -11,7 +12,8 @@ Page({
      */
     data: {
         height:null,
-        width:null
+        width:null,
+        panel_selected:false
     },
 
     /**
@@ -142,13 +144,37 @@ Page({
     },
 
     /**
-     * 绘制纸带
+     * 绘制纸带模拟状态栏
      */
     drawPaper: function() {
         ctx.strokeStyle="#606266";
         let acc=this.data.width/20;
         let x=acc;
-        let y=this.data.height*0.62;
+        let y=simu_panel_pos;
+
+        // draw panel base
+        // width: this.data.width-2
+        // height: 80
+        ctx.beginPath();
+        ctx.moveTo(acc,y);
+        ctx.lineTo(this.data.width-acc,y);
+        ctx.quadraticCurveTo(this.data.width-1,y,this.data.width-1,y+10);
+        ctx.lineTo(this.data.width-1,y+10);
+        ctx.lineTo(this.data.width-1,y+70);
+        ctx.quadraticCurveTo(this.data.width-1,y+80,this.data.width-acc,y+80);
+        ctx.lineTo(this.data.width-acc,y+80);
+        ctx.lineTo(acc,y+80);
+        ctx.quadraticCurveTo(1,y+80,1,y+70);
+        ctx.lineTo(1,y+70);
+        ctx.lineTo(1,y+10);
+        ctx.quadraticCurveTo(1,y,acc,y);
+        ctx.closePath();
+        ctx.fillStyle="#f2f6fc";
+        ctx.fill();
+        ctx.stroke();
+
+        // draw paper
+        y+=10;
         for(let i=0;i<18;i+=1){
             ctx.beginPath();
             ctx.moveTo(x,y);
@@ -161,6 +187,8 @@ Page({
             ctx.fill();
             ctx.stroke();
         }
+        // draw arrow which pointing to the place
+        // that turing machine is r/w now
         ctx.beginPath();
         ctx.moveTo(1.5*acc,y+acc);
         ctx.lineTo(1.8*acc,y+1.5*acc);
@@ -234,7 +262,12 @@ Page({
      */
     onLoad: function (options) {
         this.fs=wx.getFileSystemManager();
-        this.loadExistFile(options.filename);
+        if("type" in options && options.type=="fromedit"){
+            let pages=getCurrentPages();
+            canvasElements=pages[pages.length-2].data.filedata;
+        }else{
+            this.loadExistFile(options.filename);
+        }
         wx.setNavigationBarTitle({
             title: "模拟器"
         });
@@ -267,6 +300,8 @@ Page({
         }catch(e){
             console.error(e);
         }
+        // load default simulator panel's y position
+        simu_panel_pos=this.data.height*0.62;
     },
 
     /**
@@ -309,5 +344,48 @@ Page({
      */
     onShareAppMessage: function () {
 
+    },
+
+    touchStart: function (e) {
+        let x=e.touches[0].x;
+        let y=e.touches[0].y-40;
+        if(simu_panel_pos-40<=y && y<=simu_panel_pos+40){
+            this.setData({panel_selected:true});
+        }else{
+            return;
+        }
+        if(y<=0)
+            y=0;
+        if(y>=this.data.height-80)
+            y=this.data.height-80;
+        simu_panel_pos=y;
+        this.canvasDraw();
+    },
+
+    touchMove: function (e) {
+        if(!this.data.panel_selected)
+            return;
+        let current_x=e.changedTouches[0].x;
+        let current_y=e.changedTouches[0].y-40;
+        if(current_y<=0)
+            current_y=0;
+        if(current_y>=this.data.height-80)
+            current_y=this.data.height-80;
+        simu_panel_pos=current_y;
+        this.canvasDraw();
+    },
+
+    touchEnd: function (e) {
+        if(!this.data.panel_selected)
+            return;
+        let x=e.changedTouches[0].x;
+        let y=e.changedTouches[0].y-40;
+        if(y<=0)
+            y=0;
+        if(y>=this.data.height-80)
+            y=this.data.height-80;
+        simu_panel_pos=y;
+        this.canvasDraw();
+        this.setData({panel_selected:false});
     }
 })

@@ -72,7 +72,7 @@ Page({
 
     },
 
-    gotoedit: function(param) {
+    gotoSimulator: function(param) {
         let arg=param.currentTarget.dataset.param;
         wx.navigateTo({
             url: "/pages/simulator/simulator?filename="+arg,

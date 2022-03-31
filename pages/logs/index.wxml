@@ -8,7 +8,7 @@
             啊哦，什么都没有...
         </view>
         <view wx:for="{{files}}">
-            <button bindtap="gotoedit" data-param="{{item}}" style="color: #606266;">
+            <button bindtap="gotoSimulator" data-param="{{item}}" style="color: #606266;">
                 {{item}}
             </button>
         </view>
