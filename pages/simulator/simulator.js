@@ -231,6 +231,8 @@ Page({
     drawPaper: function() {
         ctx.strokeStyle="#606266";
         let acc=this.data.width/20;
+        if(acc>25)
+            acc=25;
         let x=acc;
         let y=simu_panel_pos;
 
@@ -257,6 +259,26 @@ Page({
 
         // draw paper
         y+=10;
+        ctx.beginPath();
+        ctx.moveTo(acc+2,y);
+        ctx.lineTo(acc+2,y-4);
+        ctx.lineTo(acc-1,y-4);
+        ctx.lineTo(acc-1,y+acc+4);
+        ctx.lineTo(acc+2,y+acc+4);
+        ctx.closePath();
+        ctx.fillStyle="#606266";
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(acc*19-2,y);
+        ctx.lineTo(acc*19-2,y-4);
+        ctx.lineTo(acc*19+1,y-4);
+        ctx.lineTo(acc*19+1,y+acc+4);
+        ctx.lineTo(acc*19-2,y+acc+4);
+        ctx.closePath();
+        ctx.fillStyle="#606266";
+        ctx.fill();
+        ctx.stroke();
         for(let i=0;i<18;i+=1){
             ctx.beginPath();
             ctx.moveTo(x,y);
@@ -269,6 +291,7 @@ Page({
             ctx.fill();
             ctx.stroke();
         }
+        
         // draw arrow which pointing to the place
         // that turing machine is r/w now
         ctx.beginPath();
