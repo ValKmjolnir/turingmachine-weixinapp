@@ -76,19 +76,51 @@ Page({
         let tmp={};
         var t,A,B;
         canvasElements.func.forEach(elem=>{
-            if(elem.begin_state==elem.end_state){
-                t=Math.sqrt(Math.pow(x-(elem.begin_x-22),2)+Math.pow(y-(elem.begin_y+22),2));
-                if(t<=dis){
-                    tmp=elem;
-                    dis=t;
+            if(elem.isAlone){
+                if(elem.begin_state==elem.end_state){
+                    t=Math.sqrt(Math.pow(x-(elem.begin_x-22),2)+Math.pow(y-(elem.begin_y+22),2));
+                    if(t<=dis){
+                        tmp=elem;
+                        dis=t;
+                    }
+                }else{
+                    if(elem.end_x==elem.begin_x)
+                        t=Math.abs(x-elem.end_x);
+                    else if(x<Math.max(elem.begin_x,elem.end_x) && y<Math.max(elem.begin_y,elem.end_y)){
+                        A=(elem.begin_y-elem.end_y)/(elem.begin_x-elem.end_x);
+                        B=elem.begin_y-A*elem.begin_x;
+                        t=Math.abs((A*x+B-y)/Math.sqrt(A*A+1));
+                        if(t<=dis){
+                            tmp=elem;
+                            dis=t;
+                        }
+                    }
                 }
             }else{
-                if(elem.end_x==elem.begin_x)
-                    t=Math.abs(x-elem.end_x);
-                else if(x<Math.max(elem.begin_x,elem.end_x) && y<Math.max(elem.begin_y,elem.end_y)){
-                    A=(elem.begin_y-elem.end_y)/(elem.begin_x-elem.end_x);
-                    B=elem.begin_y-A*elem.begin_x;
-                    t=Math.abs((A*x+B-y)/Math.sqrt(A*A+1));
+                let bx=elem.begin_x;
+                let by=elem.begin_y;
+                let ex=elem.end_x;
+                let ey=elem.end_y;
+                if(x<Math.max(ex,bx) && x>Math.min(ex,bx) && 
+                    y<Math.max(ey,by) && y>Math.min(ey,by)){
+                    let O_x,O_y,m=10,k=(ey-by)/(ex-bx); //圆心,凸点距离直线距离
+                    let M=Math.sqrt((ey-by)*(ey-by)+(ex-bx)*(ex-bx))/2; //直线长度的一半
+                    let R=(M*M+m*m)/(m*2); //圆半径
+                    let i=(R-m)/Math.sqrt(k*k+1);
+                    if(bx<ex && by<ey){
+                        O_x = (ex+bx)/2 - Math.abs(k)*i ;
+                        O_y = (ey+by)/2 + i ;
+                    }else if(bx>ex && by>ey){
+                        O_x = (ex+bx)/2 + Math.abs(k)*i ;
+                        O_y = (ey+by)/2 - i ;
+                    }else if(bx<ex && by>ey){
+                        O_x = Math.abs(k)*i + (ex+bx)/2 ;
+                        O_y = (ey+by)/2 + i ;
+                    }else{
+                        O_x = (ex+bx)/2 - Math.abs(k)*i ;
+                        O_y = (ey+by)/2 - i ;
+                    }
+                    t = Math.abs( Math.sqrt((x-O_x)*(x-O_x)+(y-O_y)*(y-O_y)) - R ) ;
                     if(t<=dis){
                         tmp=elem;
                         dis=t;
@@ -104,7 +136,7 @@ Page({
     /** 
      * 初始化文字格式 
      */
-    stateTextStyle: function() {
+    textStyle: function() {
         ctx.font="10rpx sans-serif"
         ctx.textAlign="center";
         ctx.textBaseline="middle";
@@ -222,6 +254,88 @@ Page({
     },
 
     /**
+     * 绘制弧线箭头
+     */
+     drawArcArrow: function(bx,by,ex,ey,transfer) {
+        ctx.strokeStyle="#606266";
+        ctx.fillStyle="#606266";
+
+        let O_x,O_y,m=10,k=(ey-by)/(ex-bx);            //圆心,凸点距离状态圆心连线的直线距离
+        let M=Math.sqrt((ey-by)*(ey-by)+(ex-bx)*(ex-bx))/2; //直线长度的一半
+        let R = (M*M+m*m)/(m*2);    //圆半径
+        let i = (R-m)/Math.sqrt(k*k+1);
+        if( bx < ex && by < ey ){
+            O_x = (ex+bx)/2 - Math.abs(k)*i ;
+            O_y = (ey+by)/2 + i ;
+        }else if( bx > ex && by > ey ){
+            O_x = (ex+bx)/2 + Math.abs(k)*i ;
+            O_y = (ey+by)/2 - i ;
+        }else if( bx < ex && by > ey ){
+            O_x = Math.abs(k)*i + (ex+bx)/2 ;
+            O_y = (ey+by)/2 + i ;
+        }else{
+            O_x = (ex+bx)/2 - Math.abs(k)*i ;
+            O_y = (ey+by)/2 - i ;
+        }
+        ctx.moveTo(bx,by);
+        ctx.beginPath();
+        let bAngle = Math.atan(Math.abs(by-O_y)/Math.abs(bx-O_x)) ,
+            eAngle = Math.atan(Math.abs(ey-O_y)/Math.abs(ex-O_x));
+        if( bx < O_x )
+            bAngle = Math.PI + (O_y-by)/Math.abs(O_y-by)*bAngle;
+        else
+            bAngle = ( by < O_y )?(2*Math.PI - bAngle):bAngle ;
+        if( ex < O_x ){
+            eAngle = Math.PI + (O_y-ey)/Math.abs(O_y-ey)*eAngle;
+        }
+        else
+            eAngle = ( ey < O_y )?(2*Math.PI - eAngle):eAngle ;
+        ctx.arc(O_x,O_y,R,bAngle+Math.asin(15/R),eAngle-Math.asin(15/R));
+        ctx.stroke();
+        
+        let ta_x,ta_y;
+        if( ( ex < bx && O_y-ey <=7.5 ) || ( ex > bx && ey > by && ey - O_y >= 7.5) ){
+            if( ey < by || ( ey > by && O_x - ex > 7.5 ) ){
+                ta_x = ex + 15*Math.abs(O_y-ey)/R ;
+                ta_y = ey + 15*Math.abs(O_x-ex)/R ;
+            }else{
+                    ta_x = ex + 15*Math.abs(O_y-ey)/R ;
+                    ta_y = ey - 15*Math.abs(O_x-ex)/R ;
+            }
+        }
+        else{
+            if( ey > by || ( ey < by && ex-O_x > 7.5 ) ){
+                ta_x = ex - 15*Math.abs(O_y-ey)/R ;
+                ta_y = ey - 15*Math.abs(O_x-ex)/R ;
+            }else{
+                ta_x = ex - 15*Math.abs(O_y-ey)/R ;
+                ta_y = ey + 15*Math.abs(O_x-ex)/R ;
+            }
+        }
+        
+        let angle=Math.atan2(ey-by,ex-bx);
+        angle=angle/Math.PI*180;
+        let angle0=(30-angle)/180*Math.PI;
+        let angle1=(60-angle)/180*Math.PI;
+        ctx.beginPath();
+        ctx.moveTo(ta_x,ta_y);
+        ctx.lineTo(ta_x-8*Math.cos(angle0),ta_y+8*Math.sin(angle0));
+        ctx.lineTo(ta_x-8*Math.sin(angle1),ta_y-8*Math.cos(angle1));
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // fill test
+        ctx.fillStyle="#f2f6fc";
+        let fill_x,fill_y;
+        fill_x = O_x + ( (ex+bx)/2 - O_x )*(R/(R-m)) ;
+        fill_y = O_y + ( (ey+by)/2 - O_y )*(R/(R-m)) ;
+        ctx.clearRect(fill_x-4,fill_y-4,8,8);
+        ctx.fillRect(fill_x-4,fill_y-4,8,8);
+        ctx.fillStyle="#606266";
+        ctx.fillText(transfer,fill_x,fill_y);
+    },
+
+    /**
      * 绘制指向自己的箭头
      */
     drawSelfArrow: function(x,y,transfer) {
@@ -267,17 +381,21 @@ Page({
         ctx.closePath();
         ctx.strokeStyle="#e4e7ed";
         ctx.stroke();
-        // states
-        this.stateTextStyle(); // init state text style
-        canvasElements.state.forEach(elem=>{
-            this.drawState(elem.name,elem.x,elem.y,15,elem.fillcolor);
-            if(elem.isEnd)
-                this.drawStateEnd(elem.x,elem.y,11);
-            if(elem.isStart)
-                this.drawStateStart(elem.x,elem.y,15);
-        });
+
+        this.textStyle(); // init text style
         // functions
         ctx.fillStyle="#000000"; // init fill style
+        canvasElements.func.forEach(elem0 =>{
+            elem0.isAlone=true;
+            canvasElements.func.forEach(elem1 =>{
+                if( elem0.begin_state == elem1.end_state && 
+                    elem0.end_state == elem1.begin_state && 
+                    elem0.begin_state != elem0.end_state){
+                    elem0.isAlone=false;
+                    elem1.isAlone=false;
+                }
+            });
+        });
         canvasElements.func.forEach(elem =>{
             if(elem.begin_state==null){ // no need to render invalid connection
                 return;
@@ -293,8 +411,19 @@ Page({
             }
             if(elem.begin_x==elem.end_x && elem.begin_y==elem.end_y){
                 this.drawSelfArrow(elem.begin_x,elem.begin_y,elem.text);
-            }else
+            }else if(elem.isAlone){
                 this.drawArrow(elem.begin_x,elem.begin_y,elem.end_x,elem.end_y,elem.text);
+            }else{
+                this.drawArcArrow(elem.begin_x,elem.begin_y,elem.end_x,elem.end_y,elem.text);
+            }
+        });
+        // states
+        canvasElements.state.forEach(elem=>{
+            this.drawState(elem.name,elem.x,elem.y,15,elem.fillcolor);
+            if(elem.isEnd)
+                this.drawStateEnd(elem.x,elem.y,11);
+            if(elem.isStart)
+                this.drawStateStart(elem.x,elem.y,15);
         });
     },
 
@@ -524,6 +653,7 @@ Page({
             end_x:x,
             end_y:y,
             text:"&",
+            isAlone:true,
             begin_state:name,
             end_state:name
         });
