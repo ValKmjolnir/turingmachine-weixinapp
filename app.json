@@ -6,7 +6,8 @@
         "pages/files/files",
         "pages/savefile/savefile",
         "pages/simulator/simulator",
-        "pages/settings/settings"
+        "pages/settings/settings",
+        "pages/auth/auth"
     ],
     "window": {
         "navigationBarTitleText": "图灵机模拟",

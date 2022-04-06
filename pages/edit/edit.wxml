@@ -68,6 +68,11 @@
             </button>
         </view>
         <view>
+            <button bindtap="savePic">
+                <image src="/image/savepic.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
             <button bindtap="gotoSimulator">
                 <image src="/image/icon_CPU.png" mode="aspectFit"></image>
             </button>

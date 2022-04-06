@@ -105,7 +105,7 @@ Page({
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        // fill test
+        // fill text
         ctx.fillStyle="#f2f6fc";
         ctx.clearRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
         ctx.fillRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
@@ -452,7 +452,10 @@ Page({
      * 用户点击右上角分享
      */
     onShareAppMessage: function () {
-
+        return {
+            title:"图灵机验证",
+            path:"/pages/simulator/simulator"
+        }
     },
 
     touchStart: function (e) {

@@ -1,4 +1,4 @@
-// pages/settings/settings.js
+// pages/auth/auth.js
 Page({
 
     /**
@@ -62,8 +62,8 @@ Page({
      */
     onShareAppMessage: function () {
         return {
-            title:"自动机设置",
-            path:"/pages/settings/settings"
+            title:"权限设置",
+            path:"/pages/auth/auth"
         }
     }
 })

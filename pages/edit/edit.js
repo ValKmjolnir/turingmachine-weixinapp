@@ -86,7 +86,8 @@ Page({
                 }else{
                     if(elem.end_x==elem.begin_x)
                         t=Math.abs(x-elem.end_x);
-                    else if(x<Math.max(elem.begin_x,elem.end_x) && y<Math.max(elem.begin_y,elem.end_y)){
+                    else if(x>Math.min(elem.begin_x,elem.end_x) && y>Math.min(elem.begin_y,elem.end_y) &&
+                        x<Math.max(elem.begin_x,elem.end_x) && y<Math.max(elem.begin_y,elem.end_y)){
                         A=(elem.begin_y-elem.end_y)/(elem.begin_x-elem.end_x);
                         B=elem.begin_y-A*elem.begin_x;
                         t=Math.abs((A*x+B-y)/Math.sqrt(A*A+1));
@@ -869,5 +870,40 @@ Page({
                 this.drawCircleSelectPanel(state.x,state.y,15,state.isStart,state.isEnd);
             }
         }
+    },
+
+    /**
+     *  保存为图片
+     */
+    savePic: function(e) {
+        wx.canvasToTempFilePath({
+          canvas: canvas,
+          fileType: 'png',
+          success(res){
+                wx.saveImageToPhotosAlbum({
+                    filePath: res.tempFilePath,
+                    success(res){
+                        wx.showToast({
+                            title: '保存成功',
+                            icon: 'success',
+                            duration: 1000
+                        });
+                    },
+                    fail(err){
+                        if(err.errMsg=="saveImageToPhotosAlbum:fail auth deny"){
+                            wx.navigateTo({
+                                url: '/pages/auth/auth',
+                            });
+                        }else{
+                            wx.showToast({
+                                title: '取消保存',
+                                icon: 'error',
+                                duration: 1000
+                            });
+                        }
+                    }
+                });
+            }
+        });
     }
 })

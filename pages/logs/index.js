@@ -69,7 +69,10 @@ Page({
      * 用户点击右上角分享
      */
     onShareAppMessage: function () {
-
+        return {
+            title:"模拟器",
+            path:"/pages/logs/index"
+        }
     },
 
     gotoSimulator: function(param) {

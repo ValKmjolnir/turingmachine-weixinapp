@@ -16,5 +16,9 @@
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 500;">
         <text style="color: #606266;">4 ...</text>
     </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 500;">
+        <text style="color: #606266;">无保存权限请设置：</text>
+    </view>
+    <button open-type="openSetting">权限设置</button>
 </view>
 
