@@ -109,19 +109,19 @@ Page({
                     let R=(M*M+m*m)/(m*2); //圆半径
                     let i=(R-m)/Math.sqrt(k*k+1);
                     if(bx<ex && by<ey){
-                        O_x = (ex+bx)/2 - Math.abs(k)*i ;
-                        O_y = (ey+by)/2 + i ;
+                        O_x=(ex+bx)/2-Math.abs(k)*i;
+                        O_y=(ey+by)/2+i;
                     }else if(bx>ex && by>ey){
-                        O_x = (ex+bx)/2 + Math.abs(k)*i ;
-                        O_y = (ey+by)/2 - i ;
+                        O_x=(ex+bx)/2+Math.abs(k)*i;
+                        O_y=(ey+by)/2-i;
                     }else if(bx<ex && by>ey){
-                        O_x = Math.abs(k)*i + (ex+bx)/2 ;
-                        O_y = (ey+by)/2 + i ;
+                        O_x=Math.abs(k)*i+(ex+bx)/2;
+                        O_y=(ey+by)/2+i;
                     }else{
-                        O_x = (ex+bx)/2 - Math.abs(k)*i ;
-                        O_y = (ey+by)/2 - i ;
+                        O_x=(ex+bx)/2-Math.abs(k)*i;
+                        O_y=(ey+by)/2-i;
                     }
-                    t = Math.abs( Math.sqrt((x-O_x)*(x-O_x)+(y-O_y)*(y-O_y)) - R ) ;
+                    t=Math.abs(Math.sqrt((x-O_x)*(x-O_x)+(y-O_y)*(y-O_y))-R);
                     if(t<=dis){
                         tmp=elem;
                         dis=t;
@@ -246,76 +246,80 @@ Page({
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        // fill test
-        ctx.fillStyle="#f2f6fc";
-        ctx.clearRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
-        ctx.fillRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
-        ctx.fillStyle="#606266";
-        ctx.fillText(transfer,(bx+ex)/2,(by+ey)/2);
+        // fill text
+        ctx.save();
+        ctx.translate((bx+ex)/2,(by+ey)/2);
+        if(angle<-90)     angle+=180;
+        else if(angle>90) angle-=180;
+        ctx.rotate(angle*Math.PI/180);
+        ctx.fillText(transfer,0,-8);
+        ctx.restore();
     },
 
     /**
      * 绘制弧线箭头
      */
      drawArcArrow: function(bx,by,ex,ey,transfer) {
+        // avoid special situaion
+        if(ex==bx)
+            ex+=0.01;
+        if(ey==by)
+            ey+=0.01;
         ctx.strokeStyle="#606266";
         ctx.fillStyle="#606266";
 
-        let O_x,O_y,m=10,k=(ey-by)/(ex-bx);            //圆心,凸点距离状态圆心连线的直线距离
+        let O_x,O_y,m=10,k=(ey-by)/(ex-bx); //圆心,凸点距离状态圆心连线的直线距离
         let M=Math.sqrt((ey-by)*(ey-by)+(ex-bx)*(ex-bx))/2; //直线长度的一半
-        let R = (M*M+m*m)/(m*2);    //圆半径
-        let i = (R-m)/Math.sqrt(k*k+1);
-        if( bx < ex && by < ey ){
-            O_x = (ex+bx)/2 - Math.abs(k)*i ;
-            O_y = (ey+by)/2 + i ;
-        }else if( bx > ex && by > ey ){
-            O_x = (ex+bx)/2 + Math.abs(k)*i ;
-            O_y = (ey+by)/2 - i ;
-        }else if( bx < ex && by > ey ){
-            O_x = Math.abs(k)*i + (ex+bx)/2 ;
-            O_y = (ey+by)/2 + i ;
+        let R=(M*M+m*m)/(m*2); //圆半径
+        let i=(R-m)/Math.sqrt(k*k+1);
+        if(bx<ex && by<ey){
+            O_x=(ex+bx)/2-Math.abs(k)*i;
+            O_y=(ey+by)/2+i;
+        }else if(bx>ex && by>ey){
+            O_x=(ex+bx)/2+Math.abs(k)*i;
+            O_y=(ey+by)/2-i;
+        }else if(bx<ex && by>ey){
+            O_x=Math.abs(k)*i+(ex+bx)/2;
+            O_y=(ey+by)/2+i;
         }else{
-            O_x = (ex+bx)/2 - Math.abs(k)*i ;
-            O_y = (ey+by)/2 - i ;
+            O_x=(ex+bx)/2-Math.abs(k)*i;
+            O_y=(ey+by)/2-i;
         }
         ctx.moveTo(bx,by);
         ctx.beginPath();
-        let bAngle = Math.atan(Math.abs(by-O_y)/Math.abs(bx-O_x)) ,
-            eAngle = Math.atan(Math.abs(ey-O_y)/Math.abs(ex-O_x));
-        if( bx < O_x )
-            bAngle = Math.PI + (O_y-by)/Math.abs(O_y-by)*bAngle;
+        let bAngle=Math.atan(Math.abs(by-O_y)/Math.abs(bx-O_x));
+        let eAngle=Math.atan(Math.abs(ey-O_y)/Math.abs(ex-O_x));
+        if(bx<O_x)
+            bAngle=Math.PI+(O_y-by)/Math.abs(O_y-by)*bAngle;
         else
-            bAngle = ( by < O_y )?(2*Math.PI - bAngle):bAngle ;
-        if( ex < O_x ){
-            eAngle = Math.PI + (O_y-ey)/Math.abs(O_y-ey)*eAngle;
-        }
+            bAngle=(by<O_y)?(2*Math.PI-bAngle):bAngle;
+        if(ex<O_x)
+            eAngle=Math.PI+(O_y-ey)/Math.abs(O_y-ey)*eAngle;
         else
-            eAngle = ( ey < O_y )?(2*Math.PI - eAngle):eAngle ;
+            eAngle=(ey<O_y)?(2*Math.PI-eAngle):eAngle;
         ctx.arc(O_x,O_y,R,bAngle+Math.asin(15/R),eAngle-Math.asin(15/R));
         ctx.stroke();
         
         let ta_x,ta_y;
-        if( ( ex < bx && O_y-ey <=7.5 ) || ( ex > bx && ey > by && ey - O_y >= 7.5) ){
-            if( ey < by || ( ey > by && O_x - ex > 7.5 ) ){
-                ta_x = ex + 15*Math.abs(O_y-ey)/R ;
-                ta_y = ey + 15*Math.abs(O_x-ex)/R ;
+        if((ex<bx && O_y-ey<=7.5) || (ex>bx && ey>by && ey-O_y>=7.5)){
+            if(ey<by || (ey>by && O_x-ex>7.5)){
+                ta_x=ex+15*Math.abs(O_y-ey)/R;
+                ta_y=ey+15*Math.abs(O_x-ex)/R;
             }else{
-                    ta_x = ex + 15*Math.abs(O_y-ey)/R ;
-                    ta_y = ey - 15*Math.abs(O_x-ex)/R ;
+                ta_x=ex+15*Math.abs(O_y-ey)/R;
+                ta_y=ey-15*Math.abs(O_x-ex)/R;
             }
-        }
-        else{
-            if( ey > by || ( ey < by && ex-O_x > 7.5 ) ){
-                ta_x = ex - 15*Math.abs(O_y-ey)/R ;
-                ta_y = ey - 15*Math.abs(O_x-ex)/R ;
+        }else{
+            if(ey>by || (ey<by && ex-O_x>7.5)){
+                ta_x=ex-15*Math.abs(O_y-ey)/R;
+                ta_y=ey-15*Math.abs(O_x-ex)/R;
             }else{
-                ta_x = ex - 15*Math.abs(O_y-ey)/R ;
-                ta_y = ey + 15*Math.abs(O_x-ex)/R ;
+                ta_x=ex-15*Math.abs(O_y-ey)/R;
+                ta_y=ey+15*Math.abs(O_x-ex)/R;
             }
         }
         
-        let angle=Math.atan2(ey-by,ex-bx);
-        angle=angle/Math.PI*180;
+        let angle=Math.atan2(ey-by,ex-bx)/Math.PI*180;
         let angle0=(30-angle)/180*Math.PI;
         let angle1=(60-angle)/180*Math.PI;
         ctx.beginPath();
@@ -325,15 +329,18 @@ Page({
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        // fill test
-        ctx.fillStyle="#f2f6fc";
-        let fill_x,fill_y;
-        fill_x = O_x + ( (ex+bx)/2 - O_x )*(R/(R-m)) ;
-        fill_y = O_y + ( (ey+by)/2 - O_y )*(R/(R-m)) ;
-        ctx.clearRect(fill_x-4,fill_y-4,8,8);
-        ctx.fillRect(fill_x-4,fill_y-4,8,8);
+        // fill text
+        let fill_x=O_x+((ex+bx)/2-O_x)*(R/(R-m));
+        let fill_y=O_y+((ey+by)/2-O_y)*(R/(R-m));
+        ctx.save();
+        ctx.translate(fill_x,fill_y);
+        if(angle<-90)     angle+=180;
+        else if(angle>90) angle-=180;
+        ctx.rotate(angle*Math.PI/180);
         ctx.fillStyle="#606266";
-        ctx.fillText(transfer,fill_x,fill_y);
+        if(ex<bx) ctx.fillText(transfer,0,8);
+        else      ctx.fillText(transfer,0,-8);
+        ctx.restore();
     },
 
     /**
@@ -359,11 +366,7 @@ Page({
         ctx.fill();
         ctx.stroke();
         // fill text
-        ctx.fillStyle="#f2f6fc";
-        ctx.clearRect(x-8,y+2,8,8);
-        ctx.fillRect(x-8,y+2,8,8);
-        ctx.fillStyle="#606266";
-        ctx.fillText(transfer,x-4,y+8);
+        ctx.fillText(transfer,x-4,y+16);
     },
 
     /**
@@ -434,7 +437,9 @@ Page({
      */
     loadExistFile: function(filename) {
         try{
-            const res=this.fs.readFileSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+filename,'utf8',0);
+            const res=this.fs.readFileSync(
+                `${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+filename,
+                'utf8',0);
             canvasElements=JSON.parse(res);
         }catch(e){ // empty file
             console.error(e);
@@ -590,16 +595,12 @@ Page({
      */
     saveFile: function(e) {
         let name=this.data.filename;
-        canvasElements.state.forEach(elem =>{
+        canvasElements.state.forEach(elem=>{
             elem.fillcolor="#ffe985";
         });
-        this.setData({
-            filedata:canvasElements
-        });
+        this.setData({filedata:canvasElements});
         if(name=="untitled.json"){
-            wx.navigateTo({
-                url: '/pages/savefile/savefile?type='+canvasElements.type,
-            });
+            wx.navigateTo({url: '/pages/savefile/savefile?type='+canvasElements.type});
         }else{
             try{
                 this.fs.writeFileSync(
@@ -633,31 +634,13 @@ Page({
      */
     tapState: function(x,y){
         canvasElements.state.push({
-            x:x,
-            y:y,
+            x:x,y:y,
             name:"q"+String(canvasElements.state_counter),
             fillcolor:"#ffe985",
             isStart:0,
             isEnd:0
         });
         canvasElements.state_counter+=1;
-    },
-
-    /**
-     * 单次点击创建新的转移函数
-     */
-    tapFunc: function(x,y){
-        let name=this.findColorNearestStateName(x,y);
-        canvasElements.func.push({
-            begin_x:x,
-            begin_y:y,
-            end_x:x,
-            end_y:y,
-            text:"&",
-            isAlone:true,
-            begin_state:name,
-            end_state:name
-        });
     },
 
     /**
@@ -711,7 +694,7 @@ Page({
     /** 
      * canvas单次点击事件
      */
-    tapFunction: function (e) {
+    tap: function (e) {
         let x=e.detail.x-e.target.offsetLeft;
         let y=e.detail.y-e.target.offsetTop;
         let opr=this.data.operand_type;
@@ -727,7 +710,6 @@ Page({
                     title:'从'+selectFunc.begin_state+'转移到'+selectFunc.end_state,
                     placeholderText:selectFunc.text,
                     editable:true,
-                    cancelColor:'cancelColor',
                     success(res){
                         if(res.confirm){
                             selectFunc.text=res.content;
@@ -743,26 +725,24 @@ Page({
                 let f=this.deleteState;
                 wx.showModal({
                     title:'是否删除状态'+selectState.name,
-                    cancelColor:'cancelColor',
                     success(res){
                         if(res.confirm){
                             f(selectState);
                         }
                         flush();
                     }
-                })
+                });
             }else if(selectFunc!=null){
                 let f=this.deleteTransfer;
                 wx.showModal({
                     title:'是否删除从'+selectFunc.begin_state+'到'+selectFunc.end_state+'的转移',
-                    cancelColor:'cancelColor',
                     success(res){
                         if(res.confirm){
                             f(selectFunc);
                         }
                         flush();
                     }
-                })
+                });
             }
         }
         this.canvasDraw();
@@ -819,11 +799,9 @@ Page({
         }else if(opr=="func"){
             let name=this.findColorNearestStateName(x,y);
             canvasElements.func.push({
-                begin_x:x,
-                begin_y:y,
-                end_x:x,
-                end_y:y,
-                text:"&",
+                begin_x:x,begin_y:y,
+                end_x:x,end_y:y,
+                text:"-;-;R",
                 begin_state:name,
                 end_state:name
             });
@@ -877,29 +855,17 @@ Page({
      */
     savePic: function(e) {
         wx.canvasToTempFilePath({
-          canvas: canvas,
-          fileType: 'png',
-          success(res){
+            canvas:canvas,
+            fileType:'png',
+            success(res){
                 wx.saveImageToPhotosAlbum({
                     filePath: res.tempFilePath,
-                    success(res){
-                        wx.showToast({
-                            title: '保存成功',
-                            icon: 'success',
-                            duration: 1000
-                        });
-                    },
+                    success(res){wx.showToast({title:'保存成功',icon:'success',duration:1000});},
                     fail(err){
                         if(err.errMsg=="saveImageToPhotosAlbum:fail auth deny"){
-                            wx.navigateTo({
-                                url: '/pages/auth/auth',
-                            });
+                            wx.navigateTo({url:'/pages/auth/auth?info=无图片保存权限，请设置',});
                         }else{
-                            wx.showToast({
-                                title: '取消保存',
-                                icon: 'error',
-                                duration: 1000
-                            });
+                            wx.showToast({title:'取消保存',icon:'error',duration:1000});
                         }
                     }
                 });

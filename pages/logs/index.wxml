@@ -7,7 +7,7 @@
         <view wx:if="{{empty_file_list}}" style="font-size: 27rpx;font-weight: 400;color: #606266;">
             啊哦，什么都没有...
         </view>
-        <view wx:for="{{files}}">
+        <view wx:for="{{files}}" wx:key="*this">
             <button bindtap="gotoSimulator" data-param="{{item}}" style="color: #606266;">
                 {{item}}
             </button>

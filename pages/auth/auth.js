@@ -5,14 +5,15 @@ Page({
      * 页面的初始数据
      */
     data: {
-
+        info:"权限设置"
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
-
+        if("info" in options)
+            this.setData({info:options.info})
     },
 
     /**
@@ -65,5 +66,11 @@ Page({
             title:"权限设置",
             path:"/pages/auth/auth"
         }
+    },
+
+    settingNavigateBack: function() {
+        wx.navigateBack({
+          delta: 0,
+        });
     }
 })

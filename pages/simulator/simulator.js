@@ -106,75 +106,79 @@ Page({
         ctx.fill();
         ctx.stroke();
         // fill text
-        ctx.fillStyle="#f2f6fc";
-        ctx.clearRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
-        ctx.fillRect((bx+ex)/2-4,(by+ey)/2-4,8,8);
-        ctx.fillStyle="#606266";
-        ctx.fillText(transfer,(bx+ex)/2,(by+ey)/2);
+        ctx.save();
+        ctx.translate((bx+ex)/2,(by+ey)/2);
+        if(angle<-90)     angle+=180;
+        else if(angle>90) angle-=180;
+        ctx.rotate(angle*Math.PI/180);
+        ctx.fillText(transfer,0,-8);
+        ctx.restore();
     },
 
     /**
      * 绘制弧线箭头
      */
-    drawArcArrow: function(bx,by,ex,ey,transfer) {
+     drawArcArrow: function(bx,by,ex,ey,transfer) {
+        // avoid special situation
+        if(ex==bx)
+            ex+=0.01;
+        if(ey==by)
+            ey+=0.01;
         ctx.strokeStyle="#606266";
         ctx.fillStyle="#606266";
 
         let O_x,O_y,m=10,k=(ey-by)/(ex-bx); //圆心,凸点距离状态圆心连线的直线距离
         let M=Math.sqrt((ey-by)*(ey-by)+(ex-bx)*(ex-bx))/2; //直线长度的一半
-        let R = (M*M+m*m)/(m*2); //圆半径
-        let i = (R-m)/Math.sqrt(k*k+1);
-        if( bx < ex && by < ey ){
-            O_x = (ex+bx)/2 - Math.abs(k)*i ;
-            O_y = (ey+by)/2 + i ;
-        }else if( bx > ex && by > ey ){
-            O_x = (ex+bx)/2 + Math.abs(k)*i ;
-            O_y = (ey+by)/2 - i ;
-        }else if( bx < ex && by > ey ){
-            O_x = Math.abs(k)*i + (ex+bx)/2 ;
-            O_y = (ey+by)/2 + i ;
+        let R=(M*M+m*m)/(m*2); //圆半径
+        let i=(R-m)/Math.sqrt(k*k+1);
+        if(bx<ex && by<ey){
+            O_x=(ex+bx)/2-Math.abs(k)*i;
+            O_y=(ey+by)/2+i;
+        }else if(bx>ex && by>ey){
+            O_x=(ex+bx)/2+Math.abs(k)*i;
+            O_y=(ey+by)/2-i;
+        }else if(bx<ex && by>ey){
+            O_x=Math.abs(k)*i+(ex+bx)/2;
+            O_y=(ey+by)/2+i;
         }else{
-            O_x = (ex+bx)/2 - Math.abs(k)*i ;
-            O_y = (ey+by)/2 - i ;
+            O_x=(ex+bx)/2-Math.abs(k)*i;
+            O_y=(ey+by)/2-i;
         }
         ctx.moveTo(bx,by);
         ctx.beginPath();
-        let bAngle = Math.atan(Math.abs(by-O_y)/Math.abs(bx-O_x)) ,
-            eAngle = Math.atan(Math.abs(ey-O_y)/Math.abs(ex-O_x));
-        if( bx < O_x )
-            bAngle = Math.PI + (O_y-by)/Math.abs(O_y-by)*bAngle;
+        let bAngle=Math.atan(Math.abs(by-O_y)/Math.abs(bx-O_x));
+        let eAngle=Math.atan(Math.abs(ey-O_y)/Math.abs(ex-O_x));
+        if(bx<O_x)
+            bAngle=Math.PI+(O_y-by)/Math.abs(O_y-by)*bAngle;
         else
-            bAngle = ( by < O_y )?(2*Math.PI - bAngle):bAngle ;
-        if( ex < O_x ){
-            eAngle = Math.PI + (O_y-ey)/Math.abs(O_y-ey)*eAngle;
-        }
+            bAngle=(by<O_y)?(2*Math.PI-bAngle):bAngle;
+        if(ex<O_x)
+            eAngle=Math.PI+(O_y-ey)/Math.abs(O_y-ey)*eAngle;
         else
-            eAngle = ( ey < O_y )?(2*Math.PI - eAngle):eAngle ;
+            eAngle=(ey<O_y)?(2*Math.PI-eAngle):eAngle;
         ctx.arc(O_x,O_y,R,bAngle+Math.asin(15/R),eAngle-Math.asin(15/R));
         ctx.stroke();
         
         let ta_x,ta_y;
-        if( ( ex < bx && O_y-ey <=7.5 ) || ( ex > bx && ey > by && ey - O_y >= 7.5) ){
-            if( ey < by || ( ey > by && O_x - ex > 7.5 ) ){
-                ta_x = ex + 15*Math.abs(O_y-ey)/R ;
-                ta_y = ey + 15*Math.abs(O_x-ex)/R ;
+        if((ex<bx && O_y-ey<=7.5) || (ex>bx && ey>by && ey-O_y>=7.5)){
+            if(ey<by || (ey>by && O_x-ex>7.5)){
+                ta_x=ex+15*Math.abs(O_y-ey)/R;
+                ta_y=ey+15*Math.abs(O_x-ex)/R;
             }else{
-                    ta_x = ex + 15*Math.abs(O_y-ey)/R ;
-                    ta_y = ey - 15*Math.abs(O_x-ex)/R ;
+                ta_x=ex+15*Math.abs(O_y-ey)/R;
+                ta_y=ey-15*Math.abs(O_x-ex)/R;
             }
-        }
-        else{
-            if( ey > by || ( ey < by && ex-O_x > 7.5 ) ){
-                ta_x = ex - 15*Math.abs(O_y-ey)/R ;
-                ta_y = ey - 15*Math.abs(O_x-ex)/R ;
+        }else{
+            if(ey>by || (ey<by && ex-O_x>7.5)){
+                ta_x=ex-15*Math.abs(O_y-ey)/R;
+                ta_y=ey-15*Math.abs(O_x-ex)/R;
             }else{
-                ta_x = ex - 15*Math.abs(O_y-ey)/R ;
-                ta_y = ey + 15*Math.abs(O_x-ex)/R ;
+                ta_x=ex-15*Math.abs(O_y-ey)/R;
+                ta_y=ey+15*Math.abs(O_x-ex)/R;
             }
         }
         
-        let angle=Math.atan2(ey-by,ex-bx);
-        angle=angle/Math.PI*180;
+        let angle=Math.atan2(ey-by,ex-bx)/Math.PI*180;
         let angle0=(30-angle)/180*Math.PI;
         let angle1=(60-angle)/180*Math.PI;
         ctx.beginPath();
@@ -184,15 +188,18 @@ Page({
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        // fill test
-        ctx.fillStyle="#f2f6fc";
-        let fill_x,fill_y;
-        fill_x = O_x + ( (ex+bx)/2 - O_x )*(R/(R-m)) ;
-        fill_y = O_y + ( (ey+by)/2 - O_y )*(R/(R-m)) ;
-        ctx.clearRect(fill_x-4,fill_y-4,8,8);
-        ctx.fillRect(fill_x-4,fill_y-4,8,8);
+        // fill text
+        let fill_x=O_x+((ex+bx)/2-O_x)*(R/(R-m));
+        let fill_y=O_y+((ey+by)/2-O_y)*(R/(R-m));
+        ctx.save();
+        ctx.translate(fill_x,fill_y);
+        if(angle<-90)     angle+=180;
+        else if(angle>90) angle-=180;
+        ctx.rotate(angle*Math.PI/180);
         ctx.fillStyle="#606266";
-        ctx.fillText(transfer,fill_x,fill_y);
+        if(ex<bx) ctx.fillText(transfer,0,8);
+        else      ctx.fillText(transfer,0,-8);
+        ctx.restore();
     },
 
     /**
@@ -218,11 +225,7 @@ Page({
         ctx.fill();
         ctx.stroke();
         // fill text
-        ctx.fillStyle="#f2f6fc";
-        ctx.clearRect(x-8,y+2,8,8);
-        ctx.fillRect(x-8,y+2,8,8);
-        ctx.fillStyle="#606266";
-        ctx.fillText(transfer,x-4,y+8);
+        ctx.fillText(transfer,x-4,y+16);
     },
 
     /**

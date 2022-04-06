@@ -82,10 +82,11 @@
         type="2d"
         id="canvas"
         style="position: fixed;height: 100%;width: 100%;"
-        bindtap="tapFunction"
+        bindtap="tap"
         bindlongtap="longTap"
         bindtouchstart="touchStart"
         bindtouchmove="touchMove"
         bindtouchend="touchEnd"
-    ></canvas>
+    >
+    </canvas>
 </view>

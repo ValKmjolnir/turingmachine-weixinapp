@@ -65,5 +65,27 @@ Page({
             title:"自动机设置",
             path:"/pages/settings/settings"
         }
+    },
+
+    /**
+     * 编辑功能教程提示
+     */
+    tapEditFunctionTips: function(param) {
+        const tips={
+            select: "选择组件",
+            state: "创建状态",
+            transfer: "创建状态转移函数",
+            delete: "删除",
+            undo: "撤回",
+            rollback: "取消撤回",
+            savefile: "保存文件",
+            savepic: "保存为图片",
+            simulation: "跳转到模拟器"
+        };
+        wx.showToast({
+          title: tips[param.currentTarget.dataset.param],
+          icon: "none",
+          duration: 1000
+        })
     }
 })

@@ -8,12 +8,31 @@ button {
     background-color: rgb(217,236,255);
 }
 
+.button-edit {
+    width: 70rpx;
+    height: 70rpx;
+    margin-top: 10rpx;
+    margin-bottom: 10rpx;
+    margin-left: 5rpx;
+    margin-right: 5rpx;
+    background-color: rgb(217,236,255);
+    padding: 15rpx;
+}
+
 .button-hover {
     background-color: #409eff;
 }
 
 .button-container {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+image {
+    width: 40rpx;
+    height: 40rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

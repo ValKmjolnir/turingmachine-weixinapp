@@ -1,7 +1,7 @@
 <!--pages/auth/auth.wxml-->
 <view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 500;">
-        <text style="color: #606266;">无图片保存权限,请设置：</text>
+        <text style="color: #606266;">{{info}}:</text>
     </view>
-    <button open-type="openSetting">权限设置</button>
+    <button open-type="openSetting" bindopensetting="settingNavigateBack">权限设置</button>
 </view>

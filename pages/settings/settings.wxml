@@ -4,21 +4,59 @@
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 700;">
         <text style="color: #303133;">设置</text>
     </view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 500;">
-        <text style="color: #606266;">1 ...</text>
-    </view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 500;">
-        <text style="color: #606266;">2 ...</text>
-    </view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 500;">
-        <text style="color: #606266;">3 ...</text>
-    </view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 500;">
-        <text style="color: #606266;">4 ...</text>
-    </view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 500;">
-        <text style="color: #606266;">无保存权限请设置：</text>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;">
+        <text style="color: #606266;">· 小程序权限设置</text>
     </view>
     <button open-type="openSetting">权限设置</button>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;">
+        <text style="color: #606266;">· 编辑功能提示(点击显示)</text>
+    </view>
+    <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="select" class="button-edit">
+                <image src="/image/arrow.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="state" class="button-edit">
+                <image src="/image/state.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="transfer" class="button-edit">
+                <image src="/image/func.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="delete" class="button-edit">
+                <image src="/image/delete.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="undo" class="button-edit">
+                <image src="/image/undo.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="rollback" class="button-edit">
+                <image src="/image/rollback.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="savefile" class="button-edit">
+                <image src="/image/save.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="savepic" class="button-edit">
+                <image src="/image/savepic.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapEditFunctionTips" data-param="simulation" class="button-edit">
+                <image src="/image/icon_CPU.png" mode="aspectFit"></image>
+            </button>
+        </view>
+    </view>
 </view>
 
