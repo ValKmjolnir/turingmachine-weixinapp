@@ -9,6 +9,36 @@ var canvasElements={
     func:[],
 };
 
+function propertyParse(str){
+    let vec=str.split(';');
+    if(vec.length!=3){
+        wx.showToast({
+            title: '格式错误,正确格式: -;-;-',
+            icon: 'none',
+            duration: 2500
+        });
+        return false;
+    }
+    for(let i=0;i<3;i++)
+        if(vec[i].length!=1){
+            wx.showToast({
+                title: '输入输出与移动方向必须都为单个字符',
+                icon: 'none',
+                duration: 2500
+            })
+            return false;
+        }
+    if(vec[2]!="R" && vec[2]!="L" && vec[2]!="S"){
+        wx.showToast({
+          title: '指针移动方向必须为R,L,S中的一个',
+          icon: 'none',
+          duration: 2500
+        });
+        return false;
+    }
+    return true;
+}
+
 Page({
     /**
      * 页面的初始数据
@@ -18,7 +48,6 @@ Page({
         height:null,
         isLongTap:false,
         selectedState:null,
-        touchStartTime:0,
         filename:"untitled.json",
         filedata:{},
         operand_type:"select",
@@ -700,9 +729,7 @@ Page({
         let opr=this.data.operand_type;
         let selectFunc,selectState;
         let flush=this.canvasDraw;
-        if(opr=="state"){
-            this.tapState(x,y);
-        }else if(opr=="select"){
+        if(opr=="select"){
             selectState=this.findColorNearestState(x,y);
             selectFunc=this.findNearestFunc(x,y);
             if(selectState==null&&selectFunc!=null){
@@ -711,12 +738,12 @@ Page({
                     placeholderText:selectFunc.text,
                     editable:true,
                     success(res){
-                        if(res.confirm){
+                        if(res.confirm && propertyParse(res.content)){
                             selectFunc.text=res.content;
                         }
                         flush();
-                    }
-                })
+                    },
+                });
             }
         }else if(opr=="delete"){
             selectState=this.findColorNearestState(x,y);
@@ -770,6 +797,12 @@ Page({
             state.x=current_x;
             state.y=current_y;
             this.canvasDraw();
+        }else if(opr=="state"){
+            let vec=canvasElements.state;
+            let index=vec.length-1;
+            vec[index].x=current_x;
+            vec[index].y=current_y;
+            this.canvasDraw();
         }else if(opr=="func"){
             let vec=canvasElements.func;
             let index=vec.length-1;
@@ -791,17 +824,19 @@ Page({
         let opr=this.data.operand_type;
         if(opr=="select"){
             this.setData({
-                touchStartTime:e.timeStamp,
                 isLongTap:false,
                 selectedState:this.findColorNearestState(x,y)
             });
+            this.canvasDraw();
+        }else if(opr=="state"){
+            this.tapState(x,y);
             this.canvasDraw();
         }else if(opr=="func"){
             let name=this.findColorNearestStateName(x,y);
             canvasElements.func.push({
                 begin_x:x,begin_y:y,
                 end_x:x,end_y:y,
-                text:"-;-;R",
+                text:"-;-;S",
                 begin_state:name,
                 end_state:name
             });
@@ -815,12 +850,27 @@ Page({
     touchEnd: function(e) {
         let x=e.changedTouches[0].x;
         let y=e.changedTouches[0].y;
+        let opr=this.data.operand_type;
+        // edge detection
+        if(x<0)
+            x=0;
+        if(x>=canvas.width/dpr)
+            x=canvas.width/dpr;
+        if(y<0)
+            y=0;
+        if(y>=canvas.height/dpr-e.target.offsetTop)
+            y=canvas.height/dpr-e.target.offsetTop;
+        
         if(this.data.isLongTap){// select init/end state
             this.longTapSelect(x,y);
             this.setData({selectedState:null});
-        }else{
-            if(this.data.operand_type!="func")
-                return;
+        }else if(opr=="state"){
+            let vec=canvasElements.state;
+            let index=vec.length-1;
+            vec[index].x=x;
+            vec[index].y=y;
+            this.canvasDraw();
+        }else if(opr=="func"){
             let vec=canvasElements.func;
             let index=vec.length-1;
             vec[index].end_state=this.findColorNearestStateName(x,y);
@@ -839,8 +889,8 @@ Page({
         let x=e.touches[0].x;
         let y=e.touches[0].y;
         let opr=this.data.operand_type;
-        // longtap for more than 1 minute
-        if(opr=="select" && e.timeStamp-this.data.touchStartTime>1){
+
+        if(opr=="select"){
             // draw select panel
             let state=this.findColorNearestState(x,y);
             if(state!=null){
