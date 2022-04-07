@@ -1,5 +1,12 @@
 <!--pages/simulator/simulator.wxml-->
-<view>
+<view class="page-body">
+    <view class="button-container">
+        <view>
+            <button>
+                <image src="/image/arrow.png" mode="aspectFit"></image>
+            </button>
+        </view>
+    </view>
     <canvas
         type="2d"
         id="canvas"

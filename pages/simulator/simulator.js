@@ -289,10 +289,12 @@ Page({
             ctx.lineTo(x+acc,y+acc);
             ctx.lineTo(x,y+acc);
             ctx.closePath();
-            x+=acc;
             ctx.fillStyle="rgb(217,236,255)";
             ctx.fill();
             ctx.stroke();
+            ctx.fillStyle="#606266";
+            ctx.fillText('O',x+acc/2,y+acc/2);
+            x+=acc;
         }
         
         // draw arrow which pointing to the place
@@ -321,6 +323,13 @@ Page({
         ctx.fillStyle="#f2f6fc";
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.beginPath();
+        ctx.moveTo(1,1);
+        ctx.lineTo(canvas.width/dpr-1,1);
+        ctx.closePath();
+        ctx.strokeStyle="#e4e7ed";
+        ctx.stroke();
+
         this.textStyle(); // init text style
         // functions
         ctx.fillStyle="#000000"; // init fill style
@@ -414,6 +423,7 @@ Page({
         }
         // load default simulator panel's y position
         simu_panel_pos=this.data.height*0.62;
+        this.canvasDraw();
     },
 
     /**
@@ -471,8 +481,8 @@ Page({
         }
         if(y<=0)
             y=0;
-        if(y>=this.data.height-80)
-            y=this.data.height-80;
+        if(y>=this.data.height-80-e.target.offsetTop)
+            y=this.data.height-80-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
     },
@@ -484,8 +494,8 @@ Page({
         let current_y=e.changedTouches[0].y-40;
         if(current_y<=0)
             current_y=0;
-        if(current_y>=this.data.height-80)
-            current_y=this.data.height-80;
+        if(current_y>=this.data.height-80-e.target.offsetTop)
+            current_y=this.data.height-80-e.target.offsetTop;
         simu_panel_pos=current_y;
         this.canvasDraw();
     },
@@ -497,8 +507,8 @@ Page({
         let y=e.changedTouches[0].y-40;
         if(y<=0)
             y=0;
-        if(y>=this.data.height-80)
-            y=this.data.height-80;
+        if(y>=this.data.height-80-e.target.offsetTop)
+            y=this.data.height-80-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
         this.setData({panel_selected:false});
