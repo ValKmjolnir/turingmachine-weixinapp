@@ -4,79 +4,118 @@ var ctx=null;
 const dpr=wx.getSystemInfoSync().pixelRatio;
 var canvasElements=null;
 var simu_panel_pos=null;
-var paper_string="";
-var simulation_start=false;
-var ptr=0;
-var turingMachine=null;
+var instance=null;
 
-function generateMachine() {
-    let tm={
-        state:[],
-        initial_state:null,
-        final_state:[]
-    };
-    tm.state=canvasElements.state;
-    for(let i=0;i<tm.state.length;i++){
-        if(tm.state[i].isStart)
-            tm.initial_state=i;
-        if(tm.state[i].isEnd)
-            tm.final_state.push(i);
-        tm.state[i].transfer=[];
-        canvasElements.func.forEach(elem=>{
-            if(elem.begin_state==tm.state[i].name){
-                let s=elem.text.split(";");
-                tm.state[i].transfer.push({
-                    to: elem.end_state,
-                    read: s[0],
-                    write: s[1],
-                    move: s[2]
-                });
-            }
-        });
+// queue data structure
+function queue(){
+    let val=[];
+    this.push=function(data){
+        val.unshift(data);
     }
-    tm.state.forEach(elem=>{
-        let name=elem.name;
-        elem.transfer.forEach(elem1=>{
-            console.log(name,' ',elem1);
-        });
-    });
-    return tm;
+    this.pop=function(){
+        if(val.length==0)
+            return null;
+        return val.pop();
+    }
 }
-function checkCorrectTuringMachine() {
-    let init_cnt=0;
-    let final_cnt=0;
-    if(canvasElements==null)
-        return false;
-    canvasElements.state.forEach(elem=>{
-        if(elem.isStart)
-            init_cnt++;
-        if(elem.isEnd)
-            final_cnt++;
-    });
-    if(init_cnt>1){
-        wx.showToast({
-            title: '只能有一个初态',
-            icon: 'error',
-            duration: 2500
-        });
-        return false;
-    }else if(init_cnt==0){
-        wx.showToast({
-            title: '至少有一个初态',
-            icon: 'error',
-            duration: 2500
-        });
-        return false;
+
+function machine(data) {
+    let state=[];
+    let initial_state=null;
+    let final_state=[];
+    let paper="";
+    let pointer=0;
+    let simulation_start=false;
+    let que=new queue();
+    this.generate=function(){
+        state=data.state;
+        for(let i=0;i<state.length;i++){
+            if(state[i].isStart)
+                initial_state=i;
+            if(state[i].isEnd)
+                final_state.push(i);
+            state[i].transfer=[];
+            data.func.forEach(elem=>{
+                if(elem.begin_state==state[i].name){
+                    let s=elem.text.split(";");
+                    state[i].transfer.push({
+                        to: elem.end_state,
+                        read: s[0],
+                        write: s[1],
+                        move: s[2]
+                    });
+                }
+            });
+        }
+        // state.forEach(elem=>{
+        //     let name=elem.name;
+        //     elem.transfer.forEach(elem1=>{
+        //         console.log(name,' ',elem1);
+        //     });
+        // });
     }
-    if(final_cnt==0){
-        wx.showToast({
-            title: '至少有一个终态',
-            icon: 'error',
-            duration: 2500
+    this.check=function() {
+        let init_cnt=0;
+        let final_cnt=0;
+        if(data==null)
+            return false;
+        data.state.forEach(elem=>{
+            if(elem.isStart)
+                init_cnt++;
+            if(elem.isEnd)
+                final_cnt++;
         });
-        return false;
+        if(init_cnt>1){
+            wx.showToast({
+                title: '只能有一个初态',
+                icon: 'error',
+                duration: 800
+            });
+            return false;
+        }else if(init_cnt==0){
+            wx.showToast({
+                title: '至少有一个初态',
+                icon: 'error',
+                duration: 800
+            });
+            return false;
+        }
+        if(final_cnt==0){
+            wx.showToast({
+                title: '至少有一个终态',
+                icon: 'error',
+                duration: 800
+            });
+            return false;
+        }
+        return true;
     }
-    return true;
+    this.setpaper=function(str){
+        paper=str;
+    }
+    this.getpaper=function(){
+        return paper;
+    }
+    this.isrunning=function(){
+        return simulation_start;
+    }
+    this.start=function(){
+        simulation_start=true;
+        pointer=0;
+        que.push(state[initial_state]);
+        state[initial_state].fillcolor="#88c3ff";
+    }
+    this.stop=function(){
+        simulation_start=false;
+    }
+    this.next=function(){
+        let tmp=que.pop();
+        while(tmp!=null){
+            tmp.fillcolor="#ffe985";
+            // unfinished
+            tmp=que.pop();
+        }
+    }
 }
 
 Page({
@@ -357,6 +396,7 @@ Page({
         ctx.fillStyle="#606266";
         ctx.fill();
         ctx.stroke();
+        let paper=instance.getpaper();
         for(let i=0;i<18;i+=1){
             ctx.beginPath();
             ctx.moveTo(x,y);
@@ -368,8 +408,8 @@ Page({
             ctx.fill();
             ctx.stroke();
             ctx.fillStyle="#606266";
-            if(i<paper_string.length)
-                ctx.fillText(paper_string[i],x+acc/2,y+acc/2);
+            if(i<paper.length)
+                ctx.fillText(paper[i],x+acc/2,y+acc/2);
             else
                 ctx.fillText(' ',x+acc/2,y+acc/2);
             x+=acc;
@@ -468,10 +508,8 @@ Page({
         wx.setNavigationBarTitle({
             title: "模拟器"
         });
-        // initializing
-        paper_string="";
-        simulation_start=false;
-        ptr=0;
+        // initialize turing machine
+        instance=new machine(canvasElements);
         // initialize canvas context
         wx.createSelectorQuery()
             .select('#canvas')
@@ -619,57 +657,69 @@ Page({
     },
 
     inputString: function() {
+        if(instance.isrunning()){
+            wx.showToast({
+                title: '请中止模拟后再试',
+                icon: 'none',
+                duration: 800
+            });
+            return;
+        }
         let flush=this.canvasDraw;
         wx.showModal({
             title: "请输入要验证的字符串",
             editable: true,
             success(res){
                 if(res.confirm){
-                    paper_string=res.content;
-                    simulation_start=checkCorrectTuringMachine();
-                    turingMachine=generateMachine();
+                    instance.setpaper(res.content);
+                    if(instance.check()){
+                        instance.generate();
+                        instance.start();
+                    }
                     flush();
                 }else if(res.cancel){
-                    simulation_start=false;
+                    instance.stop();
                 }
             }
         });
     },
 
     nextStep: function() {
-        if(!simulation_start){
+        if(!instance.isrunning()){
             wx.showToast({
                 title: '模拟器未启动，输入待验证字符串以启动模拟器',
                 icon: 'none',
-                duration: 1500
+                duration: 1000
             });
             return;
         }
+        instance.next();
+        this.canvasDraw();
     },
 
     terminateSimulation: function() {
-        if(!simulation_start){
+        if(!instance.isrunning()){
             wx.showToast({
                 title: '模拟器未启动',
                 icon: 'none',
-                duration: 1000
+                duration: 800
             });
             return;
         }
         wx.showToast({
             title: '运行中止',
             icon: 'none',
-            duration: 1000
+            duration: 800
         });
-        simulation_start=false;
+        instance.stop();
     },
 
     fastRun: function() {
-        if(!simulation_start){
+        if(!instance.isrunning()){
             wx.showToast({
                 title: '模拟器未启动，输入待验证字符串以启动模拟器',
                 icon: 'none',
-                duration: 1500
+                duration: 1000
             });
             return;
         }
