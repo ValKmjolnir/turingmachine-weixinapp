@@ -587,9 +587,13 @@ Page({
             title: "请输入要验证的字符串",
             editable: true,
             success(res){
-                paper_string=res.content;
-                simulation_start=checkCorrectTuringMachine();
-                flush();
+                if(res.confirm){
+                    paper_string=res.content;
+                    simulation_start=checkCorrectTuringMachine();
+                    flush();
+                }else if(res.cancel){
+                    simulation_start=false;
+                }
             }
         });
     },
