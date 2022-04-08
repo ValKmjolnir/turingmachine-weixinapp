@@ -12,7 +12,9 @@ Page({
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
-
+        wx.setNavigationBarTitle({
+            title: '设置',
+        });
     },
 
     /**
@@ -70,7 +72,7 @@ Page({
     /**
      * 编辑功能教程提示
      */
-    tapEditFunctionTips: function(param) {
+    tapTips: function(param) {
         const tips={
             select: "选择组件",
             state: "创建状态",
@@ -80,7 +82,11 @@ Page({
             rollback: "取消撤回",
             savefile: "保存文件",
             savepic: "保存为图片",
-            simulation: "跳转到模拟器"
+            simulation: "跳转到模拟器",
+            input: "输入待验证字符串",
+            next: "单步执行",
+            terminate: "中止模拟",
+            fastrun: "快速执行(直接得到结果)"
         };
         wx.showToast({
           title: tips[param.currentTarget.dataset.param],

@@ -8,7 +8,7 @@ button {
     background-color: rgb(217,236,255);
 }
 
-.button-edit {
+.button-tips {
     width: 70rpx;
     height: 70rpx;
     margin-top: 10rpx;

@@ -13,48 +13,78 @@
     </view>
     <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="select" class="button-edit">
+            <button bindtap="tapTips" data-param="select" class="button-tips">
                 <image src="/image/arrow.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="state" class="button-edit">
+            <button bindtap="tapTips" data-param="state" class="button-tips">
                 <image src="/image/state.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="transfer" class="button-edit">
+            <button bindtap="tapTips" data-param="transfer" class="button-tips">
                 <image src="/image/func.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="delete" class="button-edit">
+            <button bindtap="tapTips" data-param="delete" class="button-tips">
                 <image src="/image/delete.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="undo" class="button-edit">
+            <button bindtap="tapTips" data-param="undo" class="button-tips">
                 <image src="/image/undo.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="rollback" class="button-edit">
+            <button bindtap="tapTips" data-param="rollback" class="button-tips">
                 <image src="/image/rollback.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="savefile" class="button-edit">
+            <button bindtap="tapTips" data-param="savefile" class="button-tips">
                 <image src="/image/save.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="savepic" class="button-edit">
+            <button bindtap="tapTips" data-param="savepic" class="button-tips">
                 <image src="/image/savepic.png" mode="aspectFit"></image>
             </button>
         </view>
         <view>
-            <button bindtap="tapEditFunctionTips" data-param="simulation" class="button-edit">
+            <button bindtap="tapTips" data-param="simulation" class="button-tips">
                 <image src="/image/icon_CPU.png" mode="aspectFit"></image>
+            </button>
+        </view>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;">
+        <text style="color: #606266;">· 模拟器功能提示(点击显示)</text>
+    </view>
+    <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
+        <view>
+            <button bindtap="tapTips" data-param="input" class="button-tips">
+                <image src="/image/input.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapTips" data-param="savepic" class="button-tips">
+                <image src="/image/savepic.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapTips" data-param="next" class="button-tips">
+                <image src="/image/next.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapTips" data-param="terminate" class="button-tips">
+                <image src="/image/stop.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="tapTips" data-param="fastrun" class="button-tips">
+                <image src="/image/start.png" mode="aspectFit"></image>
             </button>
         </view>
     </view>

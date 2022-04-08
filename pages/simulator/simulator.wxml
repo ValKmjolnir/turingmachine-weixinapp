@@ -21,6 +21,11 @@
                 <image src="/image/stop.png" mode="aspectFit"></image>
             </button>
         </view>
+        <view>
+            <button bindtap="fastRun">
+                <image src="/image/start.png" mode="aspectFit"></image>
+            </button>
+        </view>
     </view>
     <canvas
         type="2d"

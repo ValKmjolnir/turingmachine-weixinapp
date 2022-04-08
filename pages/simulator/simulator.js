@@ -5,6 +5,45 @@ const dpr=wx.getSystemInfoSync().pixelRatio;
 var canvasElements=null;
 var simu_panel_pos=null;
 var paper_string="";
+var simulation_start=false;
+var ptr=0;
+
+function checkCorrectTuringMachine() {
+    let init_cnt=0;
+    let final_cnt=0;
+    if(canvasElements==null)
+        return false;
+    canvasElements.state.forEach(elem=>{
+        if(elem.isStart)
+            init_cnt++;
+        if(elem.isEnd)
+            final_cnt++;
+    });
+    if(init_cnt>1){
+        wx.showToast({
+            title: '只能有一个初态',
+            icon: 'error',
+            duration: 2500
+        });
+        return false;
+    }else if(init_cnt==0){
+        wx.showToast({
+            title: '至少有一个初态',
+            icon: 'error',
+            duration: 2500
+        });
+        return false;
+    }
+    if(final_cnt==0){
+        wx.showToast({
+            title: '至少有一个终态',
+            icon: 'error',
+            duration: 2500
+        });
+        return false;
+    }
+    return true;
+}
 
 Page({
 
@@ -234,7 +273,8 @@ Page({
      */
     drawPaper: function() {
         ctx.strokeStyle="#606266";
-        let acc=this.data.width/20;
+        let width=this.data.width;
+        let acc=width/20;
         if(acc>25)
             acc=25;
         let x=acc;
@@ -245,12 +285,12 @@ Page({
         // height: 60
         ctx.beginPath();
         ctx.moveTo(acc,y);
-        ctx.lineTo(this.data.width-acc,y);
-        ctx.quadraticCurveTo(this.data.width-1,y,this.data.width-1,y+10);
-        ctx.lineTo(this.data.width-1,y+10);
-        ctx.lineTo(this.data.width-1,y+50);
-        ctx.quadraticCurveTo(this.data.width-1,y+60,this.data.width-acc,y+60);
-        ctx.lineTo(this.data.width-acc,y+60);
+        ctx.lineTo(width-acc,y);
+        ctx.quadraticCurveTo(width-1,y,width-1,y+10);
+        ctx.lineTo(width-1,y+10);
+        ctx.lineTo(width-1,y+50);
+        ctx.quadraticCurveTo(width-1,y+60,width-acc,y+60);
+        ctx.lineTo(width-acc,y+60);
         ctx.lineTo(acc,y+60);
         ctx.quadraticCurveTo(1,y+60,1,y+50);
         ctx.lineTo(1,y+50);
@@ -262,23 +302,23 @@ Page({
         ctx.stroke();
 
         // draw paper
-        y+=10;
+        y+=15;
         ctx.beginPath();
         ctx.moveTo(acc+2,y);
-        ctx.lineTo(acc+2,y-4);
-        ctx.lineTo(acc-1,y-4);
-        ctx.lineTo(acc-1,y+acc+4);
-        ctx.lineTo(acc+2,y+acc+4);
+        ctx.lineTo(acc+2,y-2);
+        ctx.lineTo(acc-1,y-2);
+        ctx.lineTo(acc-1,y+acc+2);
+        ctx.lineTo(acc+2,y+acc+2);
         ctx.closePath();
         ctx.fillStyle="#606266";
         ctx.fill();
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(acc*19-2,y);
-        ctx.lineTo(acc*19-2,y-4);
-        ctx.lineTo(acc*19+1,y-4);
-        ctx.lineTo(acc*19+1,y+acc+4);
-        ctx.lineTo(acc*19-2,y+acc+4);
+        ctx.lineTo(acc*19-2,y-2);
+        ctx.lineTo(acc*19+1,y-2);
+        ctx.lineTo(acc*19+1,y+acc+2);
+        ctx.lineTo(acc*19-2,y+acc+2);
         ctx.closePath();
         ctx.fillStyle="#606266";
         ctx.fill();
@@ -392,7 +432,10 @@ Page({
         wx.setNavigationBarTitle({
             title: "模拟器"
         });
+        // initializing
         paper_string="";
+        simulation_start=false;
+        ptr=0;
         wx.createSelectorQuery()
             .select('#canvas')
             .fields({node:true,size:true})
@@ -545,20 +588,48 @@ Page({
             editable: true,
             success(res){
                 paper_string=res.content;
+                simulation_start=checkCorrectTuringMachine();
                 flush();
             }
         });
     },
 
     nextStep: function() {
-
+        if(!simulation_start){
+            wx.showToast({
+                title: '模拟器未启动，输入待验证字符串以启动模拟器',
+                icon: 'none',
+                duration: 1500
+            });
+            return;
+        }
     },
 
     terminateSimulation: function() {
-
+        if(!simulation_start){
+            wx.showToast({
+                title: '模拟器未启动',
+                icon: 'none',
+                duration: 1000
+            });
+            return;
+        }
+        wx.showToast({
+            title: '运行中止',
+            icon: 'none',
+            duration: 1000
+        });
+        simulation_start=false;
     },
 
     fastRun: function() {
-
+        if(!simulation_start){
+            wx.showToast({
+                title: '模拟器未启动，输入待验证字符串以启动模拟器',
+                icon: 'none',
+                duration: 1500
+            });
+            return;
+        }
     }
 })
