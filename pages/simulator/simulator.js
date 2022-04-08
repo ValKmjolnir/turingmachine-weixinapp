@@ -7,7 +7,41 @@ var simu_panel_pos=null;
 var paper_string="";
 var simulation_start=false;
 var ptr=0;
+var turingMachine=null;
 
+function generateMachine() {
+    let tm={
+        state:[],
+        initial_state:null,
+        final_state:[]
+    };
+    tm.state=canvasElements.state;
+    for(let i=0;i<tm.state.length;i++){
+        if(tm.state[i].isStart)
+            tm.initial_state=i;
+        if(tm.state[i].isEnd)
+            tm.final_state.push(i);
+        tm.state[i].transfer=[];
+        canvasElements.func.forEach(elem=>{
+            if(elem.begin_state==tm.state[i].name){
+                let s=elem.text.split(";");
+                tm.state[i].transfer.push({
+                    to: elem.end_state,
+                    read: s[0],
+                    write: s[1],
+                    move: s[2]
+                });
+            }
+        });
+    }
+    tm.state.forEach(elem=>{
+        let name=elem.name;
+        elem.transfer.forEach(elem1=>{
+            console.log(name,' ',elem1);
+        });
+    });
+    return tm;
+}
 function checkCorrectTuringMachine() {
     let init_cnt=0;
     let final_cnt=0;
@@ -425,7 +459,9 @@ Page({
         this.fs=wx.getFileSystemManager();
         if("type" in options && options.type=="fromedit"){
             let pages=getCurrentPages();
-            canvasElements=pages[pages.length-2].data.filedata;
+            // do deep copy
+            let tmp=JSON.stringify(pages[pages.length-2].data.filedata);
+            canvasElements=JSON.parse(tmp);
         }else{
             this.loadExistFile(options.filename);
         }
@@ -436,6 +472,7 @@ Page({
         paper_string="";
         simulation_start=false;
         ptr=0;
+        // initialize canvas context
         wx.createSelectorQuery()
             .select('#canvas')
             .fields({node:true,size:true})
@@ -590,6 +627,7 @@ Page({
                 if(res.confirm){
                     paper_string=res.content;
                     simulation_start=checkCorrectTuringMachine();
+                    turingMachine=generateMachine();
                     flush();
                 }else if(res.cancel){
                     simulation_start=false;
