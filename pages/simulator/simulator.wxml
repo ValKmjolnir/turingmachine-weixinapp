@@ -2,8 +2,23 @@
 <view class="page-body">
     <view class="button-container">
         <view>
-            <button>
-                <image src="/image/arrow.png" mode="aspectFit"></image>
+            <button bindtap="inputString">
+                <image src="/image/input.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="savePic">
+                <image src="/image/savepic.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="nextStep">
+                <image src="/image/next.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button bindtap="terminateSimulation">
+                <image src="/image/stop.png" mode="aspectFit"></image>
             </button>
         </view>
     </view>

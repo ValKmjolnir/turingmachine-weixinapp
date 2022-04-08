@@ -4,6 +4,7 @@ var ctx=null;
 const dpr=wx.getSystemInfoSync().pixelRatio;
 var canvasElements=null;
 var simu_panel_pos=null;
+var paper_string="";
 
 Page({
 
@@ -241,18 +242,18 @@ Page({
 
         // draw panel base
         // width: this.data.width-2
-        // height: 80
+        // height: 60
         ctx.beginPath();
         ctx.moveTo(acc,y);
         ctx.lineTo(this.data.width-acc,y);
         ctx.quadraticCurveTo(this.data.width-1,y,this.data.width-1,y+10);
         ctx.lineTo(this.data.width-1,y+10);
-        ctx.lineTo(this.data.width-1,y+70);
-        ctx.quadraticCurveTo(this.data.width-1,y+80,this.data.width-acc,y+80);
-        ctx.lineTo(this.data.width-acc,y+80);
-        ctx.lineTo(acc,y+80);
-        ctx.quadraticCurveTo(1,y+80,1,y+70);
-        ctx.lineTo(1,y+70);
+        ctx.lineTo(this.data.width-1,y+50);
+        ctx.quadraticCurveTo(this.data.width-1,y+60,this.data.width-acc,y+60);
+        ctx.lineTo(this.data.width-acc,y+60);
+        ctx.lineTo(acc,y+60);
+        ctx.quadraticCurveTo(1,y+60,1,y+50);
+        ctx.lineTo(1,y+50);
         ctx.lineTo(1,y+10);
         ctx.quadraticCurveTo(1,y,acc,y);
         ctx.closePath();
@@ -293,7 +294,10 @@ Page({
             ctx.fill();
             ctx.stroke();
             ctx.fillStyle="#606266";
-            ctx.fillText('O',x+acc/2,y+acc/2);
+            if(i<paper_string.length)
+                ctx.fillText(paper_string[i],x+acc/2,y+acc/2);
+            else
+                ctx.fillText(' ',x+acc/2,y+acc/2);
             x+=acc;
         }
         
@@ -302,10 +306,6 @@ Page({
         ctx.beginPath();
         ctx.moveTo(1.5*acc,y+acc);
         ctx.lineTo(1.8*acc,y+1.5*acc);
-        ctx.lineTo(1.6*acc,y+1.5*acc);
-        ctx.lineTo(1.6*acc,y+2*acc);
-        ctx.lineTo(1.4*acc,y+2*acc);
-        ctx.lineTo(1.4*acc,y+1.5*acc);
         ctx.lineTo(1.2*acc,y+1.5*acc);
         ctx.closePath();
         ctx.fillStyle="#f56c6c";
@@ -392,6 +392,7 @@ Page({
         wx.setNavigationBarTitle({
             title: "模拟器"
         });
+        paper_string="";
         wx.createSelectorQuery()
             .select('#canvas')
             .fields({node:true,size:true})
@@ -473,16 +474,16 @@ Page({
 
     touchStart: function (e) {
         let x=e.touches[0].x;
-        let y=e.touches[0].y-40;
-        if(simu_panel_pos-40<=y && y<=simu_panel_pos+40){
+        let y=e.touches[0].y-30;
+        if(simu_panel_pos-30<=y && y<=simu_panel_pos+30){
             this.setData({panel_selected:true});
         }else{
             return;
         }
         if(y<=0)
             y=0;
-        if(y>=this.data.height-80-e.target.offsetTop)
-            y=this.data.height-80-e.target.offsetTop;
+        if(y>=this.data.height-60-e.target.offsetTop)
+            y=this.data.height-60-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
     },
@@ -491,11 +492,11 @@ Page({
         if(!this.data.panel_selected)
             return;
         let current_x=e.changedTouches[0].x;
-        let current_y=e.changedTouches[0].y-40;
+        let current_y=e.changedTouches[0].y-30;
         if(current_y<=0)
             current_y=0;
-        if(current_y>=this.data.height-80-e.target.offsetTop)
-            current_y=this.data.height-80-e.target.offsetTop;
+        if(current_y>=this.data.height-60-e.target.offsetTop)
+            current_y=this.data.height-60-e.target.offsetTop;
         simu_panel_pos=current_y;
         this.canvasDraw();
     },
@@ -504,13 +505,60 @@ Page({
         if(!this.data.panel_selected)
             return;
         let x=e.changedTouches[0].x;
-        let y=e.changedTouches[0].y-40;
+        let y=e.changedTouches[0].y-30;
         if(y<=0)
             y=0;
-        if(y>=this.data.height-80-e.target.offsetTop)
-            y=this.data.height-80-e.target.offsetTop;
+        if(y>=this.data.height-60-e.target.offsetTop)
+            y=this.data.height-60-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
         this.setData({panel_selected:false});
+    },
+
+    /**
+     *  保存为图片
+     */
+    savePic: function(e) {
+        wx.canvasToTempFilePath({
+            canvas:canvas,
+            fileType:'png',
+            success(res){
+                wx.saveImageToPhotosAlbum({
+                    filePath: res.tempFilePath,
+                    success(res){wx.showToast({title:'保存成功',icon:'success',duration:1000});},
+                    fail(err){
+                        if(err.errMsg=="saveImageToPhotosAlbum:fail auth deny"){
+                            wx.navigateTo({url:'/pages/auth/auth?info=无图片保存权限，请设置',});
+                        }else{
+                            wx.showToast({title:'取消保存',icon:'error',duration:1000});
+                        }
+                    }
+                });
+            }
+        });
+    },
+
+    inputString: function() {
+        let flush=this.canvasDraw;
+        wx.showModal({
+            title: "请输入要验证的字符串",
+            editable: true,
+            success(res){
+                paper_string=res.content;
+                flush();
+            }
+        });
+    },
+
+    nextStep: function() {
+
+    },
+
+    terminateSimulation: function() {
+
+    },
+
+    fastRun: function() {
+
     }
 })
