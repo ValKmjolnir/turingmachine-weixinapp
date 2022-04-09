@@ -26,9 +26,16 @@ function machine(data) {
     let paper="";
     let pointer=0;
     let simulation_start=false;
-    let que=new queue();
+    //let que=new queue();
+    let que=[]; 
     this.generate=function(){
         state=data.state;
+        let findByName=function(name){
+            for(let i=0;i<state.length;i++)
+                if(state[i].name==name)
+                    return state[i];
+            return null;
+        }
         for(let i=0;i<state.length;i++){
             if(state[i].isStart)
                 initial_state=i;
@@ -39,7 +46,7 @@ function machine(data) {
                 if(elem.begin_state==state[i].name){
                     let s=elem.text.split(";");
                     state[i].transfer.push({
-                        to: elem.end_state,
+                        to: findByName(elem.end_state),
                         read: s[0],
                         write: s[1],
                         move: s[2]
@@ -102,6 +109,7 @@ function machine(data) {
     this.start=function(){
         simulation_start=true;
         pointer=0;
+        que=[];
         que.push(state[initial_state]);
         state[initial_state].fillcolor="#88c3ff";
     }
@@ -109,12 +117,18 @@ function machine(data) {
         simulation_start=false;
     }
     this.next=function(){
-        let tmp=que.pop();
-        while(tmp!=null){
-            tmp.fillcolor="#ffe985";
-            // unfinished
-            tmp=que.pop();
-        }
+        let vec=[];
+        que.forEach(elem=>{
+            elem.fillcolor="#ffe985";
+            elem.transfer.forEach(e=>{
+                e.read;
+                e.write;
+                e.move;
+                e.to.fillcolor="#88c3ff";
+                vec.push(e.to);
+            });
+        });
+        que=vec;
     }
 }
 
@@ -712,6 +726,10 @@ Page({
             duration: 800
         });
         instance.stop();
+        canvasElements.state.forEach(elem=>{
+            elem.fillcolor="#ffe985";
+        });
+        this.canvasDraw();
     },
 
     fastRun: function() {
