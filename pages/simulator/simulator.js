@@ -98,10 +98,16 @@ function machine(data) {
         return true;
     }
     this.setpaper=function(str){
-        paper=str;
+        paper=str.split("");
+        // let copy=[...paper];
+        // copy[0]="!";
+        // console.log(paper,' ',copy);
     }
     this.getpaper=function(){
         return paper;
+    }
+    this.getptr=function(){
+        return pointer;
     }
     this.isrunning=function(){
         return simulation_start;
@@ -120,15 +126,34 @@ function machine(data) {
         let vec=[];
         que.forEach(elem=>{
             elem.fillcolor="#ffe985";
+            let tmp=paper[pointer];
             elem.transfer.forEach(e=>{
-                e.read;
-                e.write;
-                e.move;
-                e.to.fillcolor="#88c3ff";
-                vec.push(e.to);
+                if(pointer>paper.length){
+                    return;
+                }
+                if(e.read==tmp){
+                    paper[pointer]=e.write;
+                    if(e.move=="L"){
+                        pointer--;
+                    }else if(e.move=="R"){
+                        pointer++;
+                    }
+                    e.to.fillcolor="#88c3ff";
+                    vec.push(e.to);
+                }else{
+                    return;
+                }
             });
         });
         que=vec;
+        if(que.length==0){
+            wx.showToast({
+                title: '运行结束',
+                icon: 'none',
+                duration: 800
+            });
+            this.stop();
+        }
     }
 }
 
@@ -411,7 +436,9 @@ Page({
         ctx.fill();
         ctx.stroke();
         let paper=instance.getpaper();
-        for(let i=0;i<18;i+=1){
+        let ptr=instance.getptr();
+        let begin=Math.floor(ptr/18)*18;
+        for(let i=begin;i<begin+18;i+=1){
             ctx.beginPath();
             ctx.moveTo(x,y);
             ctx.lineTo(x+acc,y);
@@ -431,10 +458,11 @@ Page({
         
         // draw arrow which pointing to the place
         // that turing machine is r/w now
+        ptr%=18;
         ctx.beginPath();
-        ctx.moveTo(1.5*acc,y+acc);
-        ctx.lineTo(1.8*acc,y+1.5*acc);
-        ctx.lineTo(1.2*acc,y+1.5*acc);
+        ctx.moveTo((1.5+ptr)*acc,y+acc);
+        ctx.lineTo((1.8+ptr)*acc,y+1.5*acc);
+        ctx.lineTo((1.2+ptr)*acc,y+1.5*acc);
         ctx.closePath();
         ctx.fillStyle="#f56c6c";
         ctx.fill();
