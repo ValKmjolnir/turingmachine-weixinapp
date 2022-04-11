@@ -24,9 +24,8 @@ function machine(data) {
     let initial_state=null;
     let final_state=[];
     let paper="";
-    let pointer=0;
     let simulation_start=false;
-    //let que=new queue();
+
     let que=[]; 
     this.generate=function(){
         state=data.state;
@@ -54,12 +53,6 @@ function machine(data) {
                 }
             });
         }
-        // state.forEach(elem=>{
-        //     let name=elem.name;
-        //     elem.transfer.forEach(elem1=>{
-        //         console.log(name,' ',elem1);
-        //     });
-        // });
     }
     this.check=function() {
         let init_cnt=0;
@@ -99,24 +92,14 @@ function machine(data) {
     }
     this.setpaper=function(str){
         paper=str.split("");
-        // let copy=[...paper];
-        // copy[0]="!";
-        // console.log(paper,' ',copy);
-    }
-    this.getpaper=function(){
-        return paper;
-    }
-    this.getptr=function(){
-        return pointer;
     }
     this.isrunning=function(){
         return simulation_start;
     }
     this.start=function(){
         simulation_start=true;
-        pointer=0;
-        que=[];
-        que.push(state[initial_state]);
+        // state paper pointer
+        que=[[state[initial_state],[...paper],0]];
         state[initial_state].fillcolor="#88c3ff";
     }
     this.stop=function(){
@@ -124,36 +107,54 @@ function machine(data) {
     }
     this.next=function(){
         let vec=[];
+        // remove highlight
         que.forEach(elem=>{
-            elem.fillcolor="#ffe985";
-            let tmp=paper[pointer];
-            elem.transfer.forEach(e=>{
-                if(pointer>paper.length){
+            elem[0].fillcolor="#ffe985";
+        });
+        que.forEach(elem=>{
+            let state=elem[0];
+            let p=elem[1];
+            state.transfer.forEach(e=>{
+                let ptr=elem[2];
+                if(ptr>p.length){
                     return;
                 }
-                if(e.read==tmp){
-                    paper[pointer]=e.write;
+                if(e.read==p[ptr]){
+                    let tmp=[...p];
+                    tmp[ptr]=e.write;
                     if(e.move=="L"){
-                        pointer--;
+                        ptr--;
                     }else if(e.move=="R"){
-                        pointer++;
+                        ptr++;
                     }
-                    e.to.fillcolor="#88c3ff";
-                    vec.push(e.to);
+                    if(ptr<0){
+                        tmp.unshift(null);
+                        ptr=0;
+                    }
+                    vec.push([e.to,tmp,ptr]);
                 }else{
                     return;
                 }
             });
         });
-        que=vec;
-        if(que.length==0){
+        if(vec.length==0){
             wx.showToast({
                 title: '运行结束',
                 icon: 'none',
                 duration: 800
             });
             this.stop();
+            return;
         }
+
+        // highlight nodes
+        que=vec;
+        que.forEach(elem=>{
+            elem[0].fillcolor="#88c3ff";
+        });
+    }
+    this.result=function(){
+        return que;
     }
 }
 
@@ -435,8 +436,15 @@ Page({
         ctx.fillStyle="#606266";
         ctx.fill();
         ctx.stroke();
-        let paper=instance.getpaper();
-        let ptr=instance.getptr();
+
+        let result=instance.result();
+        if(result.length==0){
+            result=[null,[],0];
+        }else{
+            result=result[0];
+        }
+        let paper=result[1];
+        let ptr=result[2];
         let begin=Math.floor(ptr/18)*18;
         for(let i=begin;i<begin+18;i+=1){
             ctx.beginPath();
@@ -450,7 +458,7 @@ Page({
             ctx.stroke();
             ctx.fillStyle="#606266";
             if(i<paper.length)
-                ctx.fillText(paper[i],x+acc/2,y+acc/2);
+                ctx.fillText(paper[i]!=null?paper[i]:' ',x+acc/2,y+acc/2);
             else
                 ctx.fillText(' ',x+acc/2,y+acc/2);
             x+=acc;
