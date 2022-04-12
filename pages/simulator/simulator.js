@@ -43,12 +43,12 @@ function machine(data) {
             state[i].transfer=[];
             data.func.forEach(elem=>{
                 if(elem.begin_state==state[i].name){
-                    let s=elem.text.split(";");
+                    let s=elem.text.split("");
                     state[i].transfer.push({
                         to: findByName(elem.end_state),
                         read: s[0],
-                        write: s[1],
-                        move: s[2]
+                        write: s[2],
+                        move: s[4]
                     });
                 }
             });
@@ -119,7 +119,7 @@ function machine(data) {
                 if(ptr>p.length){
                     return;
                 }
-                if(e.read==p[ptr]){
+                if(e.read==p[ptr] || e.read=="ε"){
                     let tmp=[...p];
                     tmp[ptr]=e.write;
                     if(e.move=="L"){
@@ -130,6 +130,8 @@ function machine(data) {
                     if(ptr<0){
                         tmp.unshift(null);
                         ptr=0;
+                    }else if(ptr>tmp.length){
+                        tmp.push(null);
                     }
                     vec.push([e.to,tmp,ptr]);
                 }else{
@@ -146,12 +148,13 @@ function machine(data) {
             this.stop();
             return;
         }
-
         // highlight nodes
         que=vec;
         que.forEach(elem=>{
             elem[0].fillcolor="#88c3ff";
+            //console.log(elem[0].name,' ',elem[1],' ',elem[2]);
         });
+        //console.log(' ');
     }
     this.result=function(){
         return que;
@@ -166,7 +169,8 @@ Page({
     data: {
         height:null,
         width:null,
-        panel_selected:false
+        panel_selected:false,
+        result_index:0
     },
 
     /**
@@ -415,7 +419,13 @@ Page({
         ctx.stroke();
 
         // draw paper
-        y+=15;
+        y+=8;
+        ctx.fillStyle="#606266";
+        let res_size=instance.result().length;
+        let text="Result "+(res_size==0?0:this.data.result_index+1)+"/total "+res_size;
+        ctx.fillText(text,3*acc,y);
+
+        y+=8;
         ctx.beginPath();
         ctx.moveTo(acc+2,y);
         ctx.lineTo(acc+2,y-2);
@@ -441,7 +451,7 @@ Page({
         if(result.length==0){
             result=[null,[],0];
         }else{
-            result=result[0];
+            result=result[this.data.result_index];
         }
         let paper=result[1];
         let ptr=result[2];
@@ -739,11 +749,12 @@ Page({
             wx.showToast({
                 title: '模拟器未启动，输入待验证字符串以启动模拟器',
                 icon: 'none',
-                duration: 1000
+                duration: 1500
             });
             return;
         }
         instance.next();
+        this.setData({result_index:0});
         this.canvasDraw();
     },
 
@@ -765,6 +776,7 @@ Page({
         canvasElements.state.forEach(elem=>{
             elem.fillcolor="#ffe985";
         });
+        this.setData({result_index:0});
         this.canvasDraw();
     },
 
@@ -773,9 +785,25 @@ Page({
             wx.showToast({
                 title: '模拟器未启动，输入待验证字符串以启动模拟器',
                 icon: 'none',
-                duration: 1000
+                duration: 1500
             });
             return;
         }
+    },
+
+    nextResult: function() {
+        if(!instance.isrunning()){
+            wx.showToast({
+                title: '模拟器未启动',
+                icon: 'none',
+                duration: 800
+            });
+            return;
+        }
+        let size=this.data.result_index+1;
+        if(size>=instance.result().length)
+            size=0;
+        this.setData({result_index:size});
+        this.canvasDraw();
     }
 })

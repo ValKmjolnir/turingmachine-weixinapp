@@ -86,7 +86,8 @@ Page({
             input: "输入待验证字符串",
             next: "单步执行",
             terminate: "中止模拟",
-            fastrun: "快速执行(直接得到结果)"
+            fastrun: "快速执行(直接得到结果)",
+            nextresult: "展示下个结果"
         };
         wx.showToast({
           title: tips[param.currentTarget.dataset.param],

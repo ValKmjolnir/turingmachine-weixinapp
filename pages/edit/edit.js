@@ -10,25 +10,23 @@ var canvasElements={
 };
 
 function propertyParse(str){
-    let vec=str.split(';');
-    if(vec.length!=3){
+    let vec=str.split("");
+    if(vec.length<5 || (vec.length==5 && (vec[1]!=";" || vec[3]!=";"))){
         wx.showToast({
             title: '格式错误,正确格式: -;-;-',
             icon: 'none',
             duration: 2500
         });
         return false;
+    }else if(vec.length>5){
+        wx.showToast({
+            title: '输入输出与移动方向必须都为单个字符',
+            icon: 'none',
+            duration: 2500
+        })
+        return false;
     }
-    for(let i=0;i<3;i++)
-        if(vec[i].length!=1){
-            wx.showToast({
-                title: '输入输出与移动方向必须都为单个字符',
-                icon: 'none',
-                duration: 2500
-            })
-            return false;
-        }
-    if(vec[2]!="R" && vec[2]!="L" && vec[2]!="S"){
+    if(vec[4]!="R" && vec[4]!="L" && vec[4]!="S"){
         wx.showToast({
           title: '指针移动方向必须为R,L,S中的一个',
           icon: 'none',

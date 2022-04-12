@@ -26,6 +26,11 @@
                 <image src="/image/start.png" mode="aspectFit"></image>
             </button>
         </view>
+        <view>
+            <button bindtap="nextResult">
+                <image src="/image/next_result.png" mode="aspectFit"></image>
+            </button>
+        </view>
     </view>
     <canvas
         type="2d"
