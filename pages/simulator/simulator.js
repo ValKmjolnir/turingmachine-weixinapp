@@ -99,8 +99,9 @@ function machine(data) {
     this.start=function(){
         simulation_start=true;
         // state paper pointer
-        que=[[state[initial_state],[...paper],0]];
-        state[initial_state].fillcolor="#88c3ff";
+        let init=state[initial_state];
+        que=[[init,[...paper],0,""+init.name]];
+        init.fillcolor="#88c3ff";
     }
     this.stop=function(){
         simulation_start=false;
@@ -115,6 +116,10 @@ function machine(data) {
             let state=elem[0];
             let p=elem[1];
             state.transfer.forEach(e=>{
+                // avoid result length overflow
+                // this may cause fatal memory
+                if(vec.length>=1024)
+                    return;
                 let ptr=elem[2];
                 if(ptr>p.length){
                     return;
@@ -133,7 +138,7 @@ function machine(data) {
                     }else if(ptr>tmp.length){
                         tmp.push(null);
                     }
-                    vec.push([e.to,tmp,ptr]);
+                    vec.push([e.to,tmp,ptr,elem[3]+"->"+e.to.name]);
                 }else{
                     return;
                 }
@@ -154,6 +159,14 @@ function machine(data) {
             elem[0].fillcolor="#88c3ff";
             //console.log(elem[0].name,' ',elem[1],' ',elem[2]);
         });
+        if(que.length>=1024){
+            wx.showToast({
+                title: '结果数量溢出',
+                icon: 'error',
+                duration: 1000
+            });
+            this.stop();
+        }
         //console.log(' ');
     }
     this.result=function(){
@@ -399,18 +412,18 @@ Page({
 
         // draw panel base
         // width: this.data.width-2
-        // height: 60
+        // height: 80
         ctx.beginPath();
         ctx.moveTo(acc,y);
         ctx.lineTo(width-acc,y);
         ctx.quadraticCurveTo(width-1,y,width-1,y+10);
         ctx.lineTo(width-1,y+10);
-        ctx.lineTo(width-1,y+50);
-        ctx.quadraticCurveTo(width-1,y+60,width-acc,y+60);
-        ctx.lineTo(width-acc,y+60);
-        ctx.lineTo(acc,y+60);
-        ctx.quadraticCurveTo(1,y+60,1,y+50);
-        ctx.lineTo(1,y+50);
+        ctx.lineTo(width-1,y+70);
+        ctx.quadraticCurveTo(width-1,y+80,width-acc,y+80);
+        ctx.lineTo(width-acc,y+80);
+        ctx.lineTo(acc,y+80);
+        ctx.quadraticCurveTo(1,y+80,1,y+70);
+        ctx.lineTo(1,y+70);
         ctx.lineTo(1,y+10);
         ctx.quadraticCurveTo(1,y,acc,y);
         ctx.closePath();
@@ -420,10 +433,13 @@ Page({
 
         // draw paper
         y+=8;
+        ctx.save();
         ctx.fillStyle="#606266";
+        ctx.textAlign="left"
         let res_size=instance.result().length;
         let text="Result "+(res_size==0?0:this.data.result_index+1)+"/total "+res_size;
-        ctx.fillText(text,3*acc,y);
+        ctx.fillText(text,acc,y);
+        ctx.restore();
 
         y+=8;
         ctx.beginPath();
@@ -449,7 +465,7 @@ Page({
 
         let result=instance.result();
         if(result.length==0){
-            result=[null,[],0];
+            result=[null,[],0,""];
         }else{
             result=result[this.data.result_index];
         }
@@ -485,6 +501,13 @@ Page({
         ctx.fillStyle="#f56c6c";
         ctx.fill();
         ctx.stroke();
+
+        // fill execution path
+        ctx.save();
+        ctx.fillStyle="#606266";
+        ctx.textAlign="left"
+        ctx.fillText(result[3],acc,y+2*acc);
+        ctx.restore();
     },
 
     /**
@@ -652,16 +675,16 @@ Page({
 
     touchStart: function (e) {
         let x=e.touches[0].x;
-        let y=e.touches[0].y-30;
-        if(simu_panel_pos-30<=y && y<=simu_panel_pos+30){
+        let y=e.touches[0].y-40;
+        if(simu_panel_pos-40<=y && y<=simu_panel_pos+40){
             this.setData({panel_selected:true});
         }else{
             return;
         }
         if(y<=0)
             y=0;
-        if(y>=this.data.height-60-e.target.offsetTop)
-            y=this.data.height-60-e.target.offsetTop;
+        if(y>=this.data.height-80-e.target.offsetTop)
+            y=this.data.height-80-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
     },
@@ -670,11 +693,11 @@ Page({
         if(!this.data.panel_selected)
             return;
         let current_x=e.changedTouches[0].x;
-        let current_y=e.changedTouches[0].y-30;
+        let current_y=e.changedTouches[0].y-40;
         if(current_y<=0)
             current_y=0;
-        if(current_y>=this.data.height-60-e.target.offsetTop)
-            current_y=this.data.height-60-e.target.offsetTop;
+        if(current_y>=this.data.height-80-e.target.offsetTop)
+            current_y=this.data.height-80-e.target.offsetTop;
         simu_panel_pos=current_y;
         this.canvasDraw();
     },
@@ -683,11 +706,11 @@ Page({
         if(!this.data.panel_selected)
             return;
         let x=e.changedTouches[0].x;
-        let y=e.changedTouches[0].y-30;
+        let y=e.changedTouches[0].y-40;
         if(y<=0)
             y=0;
-        if(y>=this.data.height-60-e.target.offsetTop)
-            y=this.data.height-60-e.target.offsetTop;
+        if(y>=this.data.height-80-e.target.offsetTop)
+            y=this.data.height-80-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
         this.setData({panel_selected:false});
@@ -789,20 +812,26 @@ Page({
             });
             return;
         }
+        let count=0;
+        while(instance.isrunning()){
+            instance.next();
+            count+=1;
+            if(count==100)
+                break;
+        }
+        this.canvasDraw();
     },
 
     nextResult: function() {
-        if(!instance.isrunning()){
+        let size=this.data.result_index+1;
+        if(size>=instance.result().length){
             wx.showToast({
-                title: '模拟器未启动',
+                title: '没有更多...',
                 icon: 'none',
                 duration: 800
             });
-            return;
-        }
-        let size=this.data.result_index+1;
-        if(size>=instance.result().length)
             size=0;
+        }
         this.setData({result_index:size});
         this.canvasDraw();
     }
