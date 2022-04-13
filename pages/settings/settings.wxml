@@ -88,6 +88,11 @@
             </button>
         </view>
         <view>
+            <button bindtap="tapTips" data-param="prevresult" class="button-tips">
+                <image src="/image/prev_result.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
             <button bindtap="tapTips" data-param="nextresult" class="button-tips">
                 <image src="/image/next_result.png" mode="aspectFit"></image>
             </button>

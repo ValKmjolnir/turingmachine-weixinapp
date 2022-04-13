@@ -25,9 +25,16 @@ function machine(data) {
     let final_state=[];
     let paper="";
     let simulation_start=false;
+    let hashmap=null;
+    this.isfinal=function(name){
+        if((name in hashmap) && hashmap[name].isEnd==1)
+            return true;
+        return false;
+    }
 
     let que=[]; 
     this.generate=function(){
+        hashmap={};
         state=data.state;
         let findByName=function(name){
             for(let i=0;i<state.length;i++)
@@ -36,6 +43,7 @@ function machine(data) {
             return null;
         }
         for(let i=0;i<state.length;i++){
+            hashmap[state[i].name]=state[i];
             if(state[i].isStart)
                 initial_state=i;
             if(state[i].isEnd)
@@ -138,7 +146,7 @@ function machine(data) {
                     }else if(ptr>tmp.length){
                         tmp.push(null);
                     }
-                    vec.push([e.to,tmp,ptr,elem[3]+"->"+e.to.name]);
+                    vec.push([e.to,tmp,ptr,elem[3]+":"+e.to.name]);
                 }else{
                     return;
                 }
@@ -436,6 +444,7 @@ Page({
         ctx.save();
         ctx.fillStyle="#606266";
         ctx.textAlign="left"
+        ctx.font="8rpx sans-serif"
         let res_size=instance.result().length;
         let text="Result "+(res_size==0?0:this.data.result_index+1)+"/total "+res_size;
         ctx.fillText(text,acc,y);
@@ -495,19 +504,45 @@ Page({
         ptr%=18;
         ctx.beginPath();
         ctx.moveTo((1.5+ptr)*acc,y+acc);
-        ctx.lineTo((1.8+ptr)*acc,y+1.5*acc);
-        ctx.lineTo((1.2+ptr)*acc,y+1.5*acc);
+        ctx.lineTo((1.7+ptr)*acc,y+1.4*acc);
+        ctx.lineTo((1.3+ptr)*acc,y+1.4*acc);
         ctx.closePath();
         ctx.fillStyle="#f56c6c";
         ctx.fill();
         ctx.stroke();
 
-        // fill execution path
-        ctx.save();
-        ctx.fillStyle="#606266";
-        ctx.textAlign="left"
-        ctx.fillText(result[3],acc,y+2*acc);
-        ctx.restore();
+        // draw execution path
+        const max_path_show=Math.floor(18*acc/27);
+        let tmp=result[3].split(":");
+        if(tmp.length==1 && tmp[0].length==0)
+            return;
+        if(tmp.length>=max_path_show){
+            tmp=tmp.slice(tmp.length-max_path_show+1);
+            tmp.unshift("...");
+        }
+        let state_x=1.5*acc;
+        const state_y=y+1.4*acc+3+12;
+        for(var i=0;i<tmp.length;i++){
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle="#ffe985";
+            ctx.arc(state_x,state_y,12,0,2*Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            if(instance.isfinal(tmp[i])){
+                ctx.beginPath();
+                ctx.fillStyle="#ffe985";
+                ctx.arc(state_x,state_y,10,0,2*Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+            ctx.fillStyle="#606266";
+            let rpx=Math.floor(18/tmp[i].length);
+            ctx.font=rpx+"rpx sans-serif"
+            ctx.fillText(tmp[i],state_x,state_y);
+            ctx.restore();
+            state_x+=27;
+        }
     },
 
     /**
@@ -816,20 +851,31 @@ Page({
         while(instance.isrunning()){
             instance.next();
             count+=1;
-            if(count==100)
+            if(count==200)
                 break;
         }
+        if(count==200){
+            wx.showToast({
+                title: '执行次数过多,暂停',
+                icon: 'none',
+                duration: 1500
+            });
+        }
+        this.canvasDraw();
+    },
+
+    prevResult: function() {
+        let size=this.data.result_index-1;
+        if(size<0){
+            size=instance.result().length-1;
+        }
+        this.setData({result_index:size});
         this.canvasDraw();
     },
 
     nextResult: function() {
         let size=this.data.result_index+1;
         if(size>=instance.result().length){
-            wx.showToast({
-                title: '没有更多...',
-                icon: 'none',
-                duration: 800
-            });
             size=0;
         }
         this.setData({result_index:size});
