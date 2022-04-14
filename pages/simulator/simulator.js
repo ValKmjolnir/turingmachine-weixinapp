@@ -51,12 +51,20 @@ function machine(data) {
             state[i].transfer=[];
             data.func.forEach(elem=>{
                 if(elem.begin_state==state[i].name){
-                    let s=elem.text.split("");
-                    state[i].transfer.push({
-                        to: findByName(elem.end_state),
-                        read: s[0],
-                        write: s[2],
-                        move: s[4]
+                    let vec=null;
+                    if(typeof(elem.text)=="string"){
+                        vec=[elem.text];
+                    }else{
+                        vec=elem.text;
+                    }
+                    vec.forEach(txt=>{
+                        let s=txt.split("");
+                            state[i].transfer.push({
+                            to: findByName(elem.end_state),
+                            read: s[0],
+                            write: s[2],
+                            move: s[4]
+                        });
                     });
                 }
             });
@@ -74,26 +82,14 @@ function machine(data) {
                 final_cnt++;
         });
         if(init_cnt>1){
-            wx.showToast({
-                title: '只能有一个初态',
-                icon: 'error',
-                duration: 800
-            });
+            wx.showToast({title:'只能有一个初态',icon:'error',duration:800});
             return false;
         }else if(init_cnt==0){
-            wx.showToast({
-                title: '至少有一个初态',
-                icon: 'error',
-                duration: 800
-            });
+            wx.showToast({title:'至少有一个初态',icon:'error',duration:800});
             return false;
         }
         if(final_cnt==0){
-            wx.showToast({
-                title: '至少有一个终态',
-                icon: 'error',
-                duration: 800
-            });
+            wx.showToast({title:'至少有一个终态',icon:'error',duration:800});
             return false;
         }
         return true;
@@ -108,6 +104,7 @@ function machine(data) {
         simulation_start=true;
         // state paper pointer
         let init=state[initial_state];
+        // initial state,deep copy of paper,pointer,execute path
         que=[[init,[...paper],0,""+init.name]];
         init.fillcolor="#88c3ff";
     }

@@ -725,47 +725,74 @@ Page({
         let x=e.detail.x-e.target.offsetLeft;
         let y=e.detail.y-e.target.offsetTop;
         let opr=this.data.operand_type;
-        let selectFunc,selectState;
         let flush=this.canvasDraw;
         if(opr=="select"){
-            selectState=this.findColorNearestState(x,y);
-            selectFunc=this.findNearestFunc(x,y);
-            if(selectState==null&&selectFunc!=null){
+            let state=this.findColorNearestState(x,y);
+            let transfer=this.findNearestFunc(x,y);
+            if(state==null && transfer!=null){
+                const isstr=(typeof(transfer.text)=="string");
+                const title="从"+transfer.begin_state+"到"+transfer.end_state;
+                let multiple_transfer_set=function(index){
+                    if(isNaN(index) || index<=0 || index>transfer.text.length){
+                        wx.showToast({
+                            title:"必须填写在数组长度范围内的正确数字",
+                            icon:"none"
+                        });
+                    }else{
+                        wx.showModal({
+                            title:"修改"+title+"的第"+index+"个转移函数",
+                            placeholderText: transfer.text[index-1],
+                            editable:true,
+                            success(r){
+                                if(r.confirm && propertyParse(r.content)){
+                                    transfer.text[index-1]=r.content;
+                                    flush();
+                                }
+                            }
+                        });
+                    }
+                    return;
+                }
+
                 wx.showModal({
-                    title:'从'+selectFunc.begin_state+'转移到'+selectFunc.end_state,
-                    placeholderText:selectFunc.text,
+                    title: isstr?title:"修改"+title+"的第几个转移函数?",
+                    placeholderText: isstr?transfer.text:"",
                     editable:true,
                     success(res){
-                        if(res.confirm && propertyParse(res.content)){
-                            selectFunc.text=res.content;
+                        if(res.confirm){
+                            if(isstr && propertyParse(res.content)){
+                                transfer.text=res.content;
+                            }else if(!isstr){
+                                multiple_transfer_set(Number(res.content));
+                            }
+                            flush();
                         }
-                        flush();
-                    },
+                    }
                 });
             }
         }else if(opr=="delete"){
-            selectState=this.findColorNearestState(x,y);
-            selectFunc=this.findNearestFunc(x,y);
-            if(selectState!=null){
+            let state=this.findColorNearestState(x,y);
+            let transfer=this.findNearestFunc(x,y);
+            if(state!=null){
                 let f=this.deleteState;
                 wx.showModal({
-                    title:'是否删除状态'+selectState.name,
+                    title:'是否删除状态'+state.name,
                     success(res){
                         if(res.confirm){
-                            f(selectState);
+                            f(state);
+                            flush();
                         }
-                        flush();
                     }
                 });
-            }else if(selectFunc!=null){
+            }else if(transfer!=null){
                 let f=this.deleteTransfer;
                 wx.showModal({
-                    title:'是否删除从'+selectFunc.begin_state+'到'+selectFunc.end_state+'的转移',
+                    title:'是否删除从'+transfer.begin_state+'到'+transfer.end_state+'的转移',
                     success(res){
                         if(res.confirm){
-                            f(selectFunc);
+                            f(transfer);
+                            flush();
                         }
-                        flush();
                     }
                 });
             }
@@ -874,6 +901,18 @@ Page({
             vec[index].end_state=this.findColorNearestStateName(x,y);
             if(vec[index].begin_state==null || vec[index].end_state==null){
                 vec.pop();
+            }else{
+                for(let i=0;i<vec.length-1;i++)
+                    if(vec[i].begin_state==vec[index].begin_state &&
+                        vec[i].end_state==vec[index].end_state){
+                            if(typeof(vec[i].text)!="string"){
+                                vec[i].text.push("-;-;S");
+                            }else{
+                                vec[i].text=[vec[i].text,"-;-;S"];
+                            }
+                            vec.pop();
+                            break;
+                        }
             }
             this.canvasDraw();
         }
