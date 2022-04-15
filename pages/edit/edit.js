@@ -2,12 +2,49 @@
 var canvas=null;
 var ctx=null;
 const dpr=wx.getSystemInfoSync().pixelRatio;
+
 var canvasElements={
     type:null,
     state_counter:0,
     state:[],
     func:[],
 };
+
+var operations=null;
+var last_x,last_y;
+
+function operation_undo_rollback() {
+    let ud=[];
+    let rb=[];
+    this.push=function(){
+        ud.push(JSON.stringify(canvasElements));
+        if(ud.length>16){
+            ud=ud.slice(1);
+        }
+        rb=[];
+    }
+    this.pop=function(){
+        ud.pop();
+    }
+    this.undo=function(){
+        if(ud.length==0)
+            return;
+        rb.push(JSON.stringify(canvasElements));
+        canvasElements=JSON.parse(ud.pop());
+    }
+    this.rollback=function(){
+        if(rb.length==0)
+            return;
+        ud.push(JSON.stringify(canvasElements));
+        canvasElements=JSON.parse(rb.pop());
+    }
+    this.undo_size=function(){
+        return ud.length;
+    }
+    this.rollback_size=function(){
+        return rb.length;
+    }
+}
 
 function propertyParse(str){
     let vec=str.split("");
@@ -50,7 +87,7 @@ Page({
         filedata:{},
         operand_type:"select",
         successSaveFile:false,
-        cancelSaveFile:false,
+        cancelSaveFile:false
     },
 
     /**
@@ -503,6 +540,7 @@ Page({
         wx.setNavigationBarTitle({
             title: this.data.filename,
         });
+        operations=new operation_undo_rollback();
         wx.createSelectorQuery()
             .select('#canvas')
             .fields({node:true,size:true})
@@ -685,6 +723,9 @@ Page({
             }else{
                 state.isEnd=1-state.isEnd;
             }
+        }else{
+            // cancel setting init/final state, pop
+            operations.pop();
         }
         this.canvasDraw();
     },
@@ -745,6 +786,7 @@ Page({
                             editable:true,
                             success(r){
                                 if(r.confirm && propertyParse(r.content)){
+                                    operations.push();
                                     transfer.text[index-1]=r.content;
                                     flush();
                                 }
@@ -761,11 +803,12 @@ Page({
                     success(res){
                         if(res.confirm){
                             if(isstr && propertyParse(res.content)){
+                                operations.push();
                                 transfer.text=res.content;
+                                flush();
                             }else if(!isstr){
                                 multiple_transfer_set(Number(res.content));
                             }
-                            flush();
                         }
                     }
                 });
@@ -779,6 +822,7 @@ Page({
                     title:'是否删除状态'+state.name,
                     success(res){
                         if(res.confirm){
+                            operations.push();
                             f(state);
                             flush();
                         }
@@ -790,6 +834,7 @@ Page({
                     title:'是否删除从'+transfer.begin_state+'到'+transfer.end_state+'的转移',
                     success(res){
                         if(res.confirm){
+                            operations.push();
                             f(transfer);
                             flush();
                         }
@@ -818,6 +863,7 @@ Page({
             current_y=canvas.height/dpr-e.target.offsetTop;
         
         if(opr=="select" && this.data.isLongTap==false && this.data.selectedState!=null){
+            // this is select move operation
             let state=this.data.selectedState;
             state.x=current_x;
             state.y=current_y;
@@ -848,16 +894,27 @@ Page({
         let y=e.touches[0].y;
         let opr=this.data.operand_type;
         if(opr=="select"){
+            let state=this.findColorNearestState(x,y);
+            if(state!=null){
+                operations.push();
+                // last_x/y is used to make sure the state
+                // is really moved for a bit of range
+                last_x=state.x;
+                last_y=state.y;
+            }
+            // this operation binds 'select move', 'select set init/final'
             this.setData({
                 isLongTap:false,
-                selectedState:this.findColorNearestState(x,y)
+                selectedState:state
             });
             this.canvasDraw();
         }else if(opr=="state"){
+            operations.push();
             this.tapState(x,y);
             this.canvasDraw();
         }else if(opr=="func"){
             let name=this.findColorNearestStateName(x,y);
+            operations.push();
             canvasElements.func.push({
                 begin_x:x,begin_y:y,
                 end_x:x,end_y:y,
@@ -886,9 +943,19 @@ Page({
         if(y>=canvas.height/dpr-e.target.offsetTop)
             y=canvas.height/dpr-e.target.offsetTop;
         
-        if(this.data.isLongTap){// select init/end state
+        if(this.data.isLongTap){
+            // this is select set init/final state operation
             this.longTapSelect(x,y);
             this.setData({selectedState:null});
+        }else if(opr=="select" && this.data.selectedState!=null){
+            let state=this.data.selectedState;
+            let range=Math.sqrt((last_x-state.x)*(last_x-state.x)+(last_y-state.y)*(last_y-state.y));
+            console.log(range);
+            if(range<5){
+                // move range is too short, pop
+                console.log("Pop");
+                operations.pop();
+            }
         }else if(opr=="state"){
             let vec=canvasElements.state;
             let index=vec.length-1;
@@ -900,7 +967,9 @@ Page({
             let index=vec.length-1;
             vec[index].end_state=this.findColorNearestStateName(x,y);
             if(vec[index].begin_state==null || vec[index].end_state==null){
+                // cancel creating new transfer, pop
                 vec.pop();
+                operations.pop();
             }else{
                 for(let i=0;i<vec.length-1;i++)
                     if(vec[i].begin_state==vec[index].begin_state &&
@@ -958,5 +1027,19 @@ Page({
                 });
             }
         });
+    },
+
+    undo: function() {
+        if(operations.undo_size()==0)
+            return;
+        operations.undo();
+        this.canvasDraw();
+    },
+
+    rollback: function() {
+        if(operations.rollback_size()==0)
+            return;
+        operations.rollback();
+        this.canvasDraw();
     }
 })

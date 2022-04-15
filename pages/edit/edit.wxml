@@ -42,23 +42,13 @@
                 <image src="/image/delete.png" mode="aspectFit"></image>
             </button>
         </view>
-        <view wx:if="{{operand_type=='undo'}}">
-            <button bindtap="tapButton" data-param="undo" style="background-color: #409eff;">
+        <view>
+            <button bindtap="undo">
                 <image src="/image/undo.png" mode="aspectFit"></image>
             </button>
         </view>
-        <view wx:if="{{operand_type!='undo'}}">
-            <button bindtap="tapButton" data-param="undo" style="background-color: rgb(217,236,255);">
-                <image src="/image/undo.png" mode="aspectFit"></image>
-            </button>
-        </view>
-        <view wx:if="{{operand_type=='rollback'}}">
-            <button bindtap="tapButton" data-param="rollback" style="background-color: #409eff;">
-                <image src="/image/rollback.png" mode="aspectFit"></image>
-            </button>
-        </view>
-        <view wx:if="{{operand_type!='rollback'}}">
-            <button bindtap="tapButton" data-param="rollback" style="background-color: rgb(217,236,255);">
+        <view>
+            <button bindtap="rollback">
                 <image src="/image/rollback.png" mode="aspectFit"></image>
             </button>
         </view>
