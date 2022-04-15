@@ -58,6 +58,7 @@
             </button>
         </view>
     </view>
+    <button bindtap="setClipboard">ε通配符(点击复制到剪贴板)</button>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;">
         <text style="color: #606266;">· 模拟器功能提示(点击显示)</text>
     </view>
