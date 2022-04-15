@@ -228,7 +228,7 @@ Page({
      */
     drawStateStart: function(x,y,r) {
         ctx.strokeStyle="#606266";
-        ctx.fillStyle="rgb(225,243,216)";
+        ctx.fillStyle="#e1f3d8";
         ctx.beginPath();
         ctx.moveTo(x-r,y);
         ctx.lineTo(x-r-0.5*r,y-0.7*r);
@@ -260,7 +260,7 @@ Page({
         ctx.arc(x,y,2.5*r,-0.5*Math.PI,0.5*Math.PI);
         ctx.lineTo(x,y+r);
         ctx.arc(x,y,r,0.5*Math.PI,-0.5*Math.PI,true);
-        ctx.fillStyle=isEnd?"rgb(225,243,216)":"#c0c4cc";
+        ctx.fillStyle=isEnd?"#e1f3d8":"#c0c4cc";
         ctx.fill();
         ctx.stroke();
         // start state choice panel
@@ -270,7 +270,7 @@ Page({
         ctx.arc(x,y,2.5*r,-0.5*Math.PI,-1.5*Math.PI,true);
         ctx.lineTo(x,y+r);
         ctx.arc(x,y,r,0.5*Math.PI,-0.5*Math.PI);
-        ctx.fillStyle=isStart?"rgb(225,243,216)":"#c0c4cc";
+        ctx.fillStyle=isStart?"#e1f3d8":"#c0c4cc";
         ctx.fill();
         ctx.stroke();
         // set text
@@ -950,10 +950,8 @@ Page({
         }else if(opr=="select" && this.data.selectedState!=null){
             let state=this.data.selectedState;
             let range=Math.sqrt((last_x-state.x)*(last_x-state.x)+(last_y-state.y)*(last_y-state.y));
-            console.log(range);
             if(range<5){
                 // move range is too short, pop
-                console.log("Pop");
                 operations.pop();
             }
         }else if(opr=="state"){

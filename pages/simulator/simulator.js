@@ -5,6 +5,7 @@ const dpr=wx.getSystemInfoSync().pixelRatio;
 var canvasElements=null;
 var simu_panel_pos=null;
 var instance=null;
+var result_index=0;
 
 // queue data structure
 function queue(){
@@ -162,7 +163,6 @@ function machine(data) {
         que=vec;
         que.forEach(elem=>{
             elem[0].fillcolor="#88c3ff";
-            //console.log(elem[0].name,' ',elem[1],' ',elem[2]);
         });
         if(que.length>=1024){
             wx.showToast({
@@ -172,7 +172,6 @@ function machine(data) {
             });
             this.stop();
         }
-        //console.log(' ');
     }
     this.result=function(){
         return que;
@@ -187,8 +186,7 @@ Page({
     data: {
         height:null,
         width:null,
-        panel_selected:false,
-        result_index:0
+        panel_selected:false
     },
 
     /**
@@ -232,7 +230,7 @@ Page({
      */
     drawStateStart: function(x,y,r) {
         ctx.strokeStyle="#606266";
-        ctx.fillStyle="rgb(225,243,216)";
+        ctx.fillStyle="#e1f3d8";
         ctx.beginPath();
         ctx.moveTo(x-r,y);
         ctx.lineTo(x-r-0.5*r,y-0.7*r);
@@ -443,7 +441,7 @@ Page({
         ctx.textAlign="left"
         ctx.font="8rpx sans-serif"
         let res_size=instance.result().length;
-        let text="Result "+(res_size==0?0:this.data.result_index+1)+"/total "+res_size;
+        let text="Result "+(res_size==0?0:result_index+1)+"/total "+res_size;
         ctx.fillText(text,acc,y);
         ctx.restore();
 
@@ -473,7 +471,7 @@ Page({
         if(result.length==0){
             result=[null,[],0,""];
         }else{
-            result=result[this.data.result_index];
+            result=result[result_index];
         }
         let paper=result[1];
         let ptr=result[2];
@@ -520,15 +518,15 @@ Page({
         let state_x=1.5*acc;
         const state_y=y+1.4*acc+3+12;
         for(var i=0;i<tmp.length;i++){
+            let isfinal=instance.isfinal(tmp[i]);
             ctx.save();
             ctx.beginPath();
-            ctx.fillStyle="#ffe985";
+            ctx.fillStyle=(isfinal)?"#e1f3d8":"#ffe985";
             ctx.arc(state_x,state_y,12,0,2*Math.PI);
             ctx.fill();
             ctx.stroke();
-            if(instance.isfinal(tmp[i])){
+            if(isfinal){
                 ctx.beginPath();
-                ctx.fillStyle="#ffe985";
                 ctx.arc(state_x,state_y,10,0,2*Math.PI);
                 ctx.fill();
                 ctx.stroke();
@@ -625,6 +623,7 @@ Page({
         });
         // initialize turing machine
         instance=new machine(canvasElements);
+        result_index=0;
         // initialize canvas context
         wx.createSelectorQuery()
             .select('#canvas')
@@ -706,7 +705,6 @@ Page({
     },
 
     touchStart: function (e) {
-        let x=e.touches[0].x;
         let y=e.touches[0].y-40;
         if(simu_panel_pos-40<=y && y<=simu_panel_pos+40){
             this.setData({panel_selected:true});
@@ -724,13 +722,12 @@ Page({
     touchMove: function (e) {
         if(!this.data.panel_selected)
             return;
-        let current_x=e.changedTouches[0].x;
-        let current_y=e.changedTouches[0].y-40;
-        if(current_y<=0)
-            current_y=0;
-        if(current_y>=this.data.height-80-e.target.offsetTop)
-            current_y=this.data.height-80-e.target.offsetTop;
-        simu_panel_pos=current_y;
+        let y=e.changedTouches[0].y-40;
+        if(y<=0)
+            y=0;
+        if(y>=this.data.height-80-e.target.offsetTop)
+            y=this.data.height-80-e.target.offsetTop;
+        simu_panel_pos=y;
         this.canvasDraw();
     },
 
@@ -791,6 +788,7 @@ Page({
                         instance.generate();
                         instance.start();
                     }
+                    result_index=0;
                     flush();
                 }else if(res.cancel){
                     instance.stop();
@@ -809,29 +807,21 @@ Page({
             return;
         }
         instance.next();
-        this.setData({result_index:0});
+        result_index=0;
         this.canvasDraw();
     },
 
     terminateSimulation: function() {
         if(!instance.isrunning()){
-            wx.showToast({
-                title: '模拟器未启动',
-                icon: 'none',
-                duration: 800
-            });
+            wx.showToast({title:'模拟器未启动',icon:'none',duration:800});
             return;
         }
-        wx.showToast({
-            title: '运行中止',
-            icon: 'none',
-            duration: 800
-        });
+        wx.showToast({title:'运行中止',icon:'none',duration:800});
         instance.stop();
         canvasElements.state.forEach(elem=>{
             elem.fillcolor="#ffe985";
         });
-        this.setData({result_index:0});
+        result_index=0;
         this.canvasDraw();
     },
 
@@ -847,35 +837,32 @@ Page({
         let count=0;
         while(instance.isrunning()){
             instance.next();
+            result_index=0;
             count+=1;
             if(count==200)
                 break;
         }
         if(count==200){
-            wx.showToast({
-                title: '执行次数过多,暂停',
-                icon: 'none',
-                duration: 1500
-            });
+            wx.showToast({title:'执行次数过多,暂停',icon:'none',duration:1500});
         }
         this.canvasDraw();
     },
 
     prevResult: function() {
-        let size=this.data.result_index-1;
+        let size=result_index-1;
         if(size<0){
             size=instance.result().length-1;
         }
-        this.setData({result_index:size});
+        result_index=size;
         this.canvasDraw();
     },
 
     nextResult: function() {
-        let size=this.data.result_index+1;
+        let size=result_index+1;
         if(size>=instance.result().length){
             size=0;
         }
-        this.setData({result_index:size});
+        result_index=size;
         this.canvasDraw();
     }
 })
