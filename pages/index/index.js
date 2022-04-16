@@ -78,6 +78,14 @@ Page({
 
     gotoedit: function(param) {
         let arg=param.currentTarget.dataset.param;
+        if(arg=="multiple" || arg=="subprogram"){
+            wx.showToast({
+                title: "施工中...",
+                icon: "none",
+                duration: 800
+            });
+            return;
+        }
         wx.navigateTo({
             url: "/pages/edit/edit?type="+arg,
         });
