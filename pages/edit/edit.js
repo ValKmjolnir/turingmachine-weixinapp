@@ -918,7 +918,7 @@ Page({
             canvasElements.func.push({
                 begin_x:x,begin_y:y,
                 end_x:x,end_y:y,
-                text:"-;-;S",
+                text:" ",
                 begin_state:name,
                 end_state:name
             });
@@ -968,20 +968,56 @@ Page({
                 // cancel creating new transfer, pop
                 vec.pop();
                 operations.pop();
+                this.canvasDraw();
             }else{
-                for(let i=0;i<vec.length-1;i++)
-                    if(vec[i].begin_state==vec[index].begin_state &&
-                        vec[i].end_state==vec[index].end_state){
-                            if(typeof(vec[i].text)!="string"){
-                                vec[i].text.push("-;-;S");
-                            }else{
-                                vec[i].text=[vec[i].text,"-;-;S"];
-                            }
+                let flush=this.canvasDraw;
+                wx.showModal({
+                    title:"从"+vec[index].begin_state+"到"+vec[index].end_state,
+                    editable:true,
+                    placeholderText:vec[index].text,
+                    success(res){
+                        if(res.cancel){
                             vec.pop();
-                            break;
+                            operations.pop();
+                            flush();
+                            return;
                         }
+                        let parse_result=propertyParse(res.content);
+                        if(!parse_result){
+                            vec.pop();
+                            operations.pop();
+                            flush();
+                            return;
+                        }
+                        vec[index].text=res.content;
+                        // check different transfers have same begin/end state
+                        for(let i=0;i<vec.length-1;i++){
+                            if(vec[i].begin_state==vec[index].begin_state &&
+                                vec[i].end_state==vec[index].end_state){
+                                    let exist=false;
+                                    if(typeof(vec[i].text)!="string"){
+                                        vec[i].text.forEach(e=>{if(e==vec[index].text)exist=true;});
+                                    }else{
+                                        exist=(vec[i].text==vec[index].text);
+                                    }
+                                    if(exist){
+                                        vec.pop();
+                                        operations.pop();
+                                        break;
+                                    }
+                                    if(typeof(vec[i].text)!="string"){
+                                        vec[i].text.push(vec[index].text);
+                                    }else{
+                                        vec[i].text=[vec[i].text,vec[index].text];
+                                    }
+                                    vec.pop();
+                                    break;
+                                }
+                        }
+                        flush();
+                    }
+                });
             }
-            this.canvasDraw();
         }
         this.setData({isLongTap:false});
     },

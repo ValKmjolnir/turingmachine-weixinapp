@@ -27,6 +27,7 @@ function machine(data) {
     let paper="";
     let simulation_start=false;
     let hashmap=null;
+    let accepted=false;
     this.isfinal=function(name){
         if((name in hashmap) && hashmap[name].isEnd==1)
             return true;
@@ -103,6 +104,7 @@ function machine(data) {
     }
     this.start=function(){
         simulation_start=true;
+        accepted=false;
         // state paper pointer
         let init=state[initial_state];
         // initial state,deep copy of paper,pointer,execute path
@@ -113,6 +115,7 @@ function machine(data) {
         simulation_start=false;
     }
     this.next=function(){
+        accepted=false;
         let vec=[];
         // remove highlight
         que.forEach(elem=>{
@@ -163,6 +166,8 @@ function machine(data) {
         que=vec;
         que.forEach(elem=>{
             elem[0].fillcolor="#88c3ff";
+            if(elem[0].isEnd)
+                accepted=true;
         });
         if(que.length>=1024){
             wx.showToast({
@@ -170,11 +175,15 @@ function machine(data) {
                 icon: 'error',
                 duration: 1000
             });
+            accepted=false;
             this.stop();
         }
     }
     this.result=function(){
         return que;
+    }
+    this.accept=function(){
+        return accepted;
     }
 }
 
@@ -839,11 +848,13 @@ Page({
             instance.next();
             result_index=0;
             count+=1;
-            if(count==200)
+            if(count==200 || instance.accept())
                 break;
         }
         if(count==200){
             wx.showToast({title:'执行次数过多,暂停',icon:'none',duration:1500});
+        }else if(instance.accept()){
+            wx.showToast({title:'有接受状态，暂停',icon:'none',duration:1000});
         }
         this.canvasDraw();
     },
