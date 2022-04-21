@@ -933,6 +933,7 @@ Page({
         let x=e.changedTouches[0].x;
         let y=e.changedTouches[0].y;
         let opr=this.data.operand_type;
+        let flush=this.canvasDraw;
         // edge detection
         if(x<0)
             x=0;
@@ -959,7 +960,7 @@ Page({
             let index=vec.length-1;
             vec[index].x=x;
             vec[index].y=y;
-            this.canvasDraw();
+            flush();
         }else if(opr=="func"){
             let vec=canvasElements.func;
             let index=vec.length-1;
@@ -968,28 +969,18 @@ Page({
                 // cancel creating new transfer, pop
                 vec.pop();
                 operations.pop();
-                this.canvasDraw();
+                flush();
             }else{
-                let flush=this.canvasDraw;
                 wx.showModal({
                     title:"从"+vec[index].begin_state+"到"+vec[index].end_state,
                     editable:true,
                     placeholderText:vec[index].text,
                     success(res){
                         if(res.cancel){
-                            vec.pop();
-                            operations.pop();
-                            flush();
-                            return;
+                            vec[index].text="ε;ε;S";
+                        }else{
+                            vec[index].text=propertyParse(res.content)?res.content:"ε;ε;S";
                         }
-                        let parse_result=propertyParse(res.content);
-                        if(!parse_result){
-                            vec.pop();
-                            operations.pop();
-                            flush();
-                            return;
-                        }
-                        vec[index].text=res.content;
                         // check different transfers have same begin/end state
                         for(let i=0;i<vec.length-1;i++){
                             if(vec[i].begin_state==vec[index].begin_state &&
