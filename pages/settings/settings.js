@@ -78,6 +78,7 @@ Page({
             state: "创建状态",
             transfer: "创建状态转移函数",
             delete: "删除",
+            module: "添加模块(子程序)",
             undo: "撤回",
             rollback: "取消撤回",
             savefile: "保存文件",

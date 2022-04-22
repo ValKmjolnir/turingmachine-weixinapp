@@ -33,6 +33,13 @@
             </button>
         </view>
         <view>
+            <button bindtap="tapTips" data-param="module" class="button-tips">
+                <image src="/image/module.png" mode="aspectFit"></image>
+            </button>
+        </view>
+    </view>
+    <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
+        <view>
             <button bindtap="tapTips" data-param="undo" class="button-tips">
                 <image src="/image/undo.png" mode="aspectFit"></image>
             </button>

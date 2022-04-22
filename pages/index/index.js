@@ -78,17 +78,30 @@ Page({
 
     gotoedit: function(param) {
         let arg=param.currentTarget.dataset.param;
-        if(arg=="multiple" || arg=="subprogram"){
-            wx.showToast({
-                title: "施工中...",
-                icon: "none",
-                duration: 800
+        if(arg=="multiple"){
+            let tape=2;
+            wx.showModal({
+                title:"输入纸带数(2~5)",
+                editable:true,
+                placeholderText:"2",
+                success(res){
+                    if(res.confirm){
+                        if(res.content.length)
+                            tape=Number(res.content);
+                        if(isNaN(tape) || (2<=tape && tape<=5)){
+                            wx.navigateTo({
+                                url: "/pages/edit/edit?type=multiple&tapes="+tape,
+                            });
+                        }
+                    }
+                }
             });
-            return;
         }
-        wx.navigateTo({
-            url: "/pages/edit/edit?type="+arg,
-        });
+        if(arg=="normal" || arg=="subprogram"){
+            wx.navigateTo({
+                url: "/pages/edit/edit?type="+arg,
+            });
+        }
     },
 
     gotofiles: function (param) {

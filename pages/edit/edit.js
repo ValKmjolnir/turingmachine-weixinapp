@@ -73,6 +73,38 @@ function propertyParse(str){
     }
     return true;
 }
+function multiplePropertyParse(str){
+    const tapes=canvasElements.tape;
+    const len=6*tapes-1;
+    let vec=str.split("");
+    if(vec.length<len || vec.length>len){
+        wx.showToast({
+            title: '格式错误',
+            icon: 'none',
+            duration: 800
+        });
+        return false;
+    }
+    for(let i=0;i<len;i+=6){
+        if(vec[i+1]!=";" || vec[i+3]!=";" || (i+5!=len && vec[i+5]!="|")){
+            wx.showToast({
+                title: '格式错误: '+vec[i]+vec[i+1]+vec[i+2]+vec[i+3]+vec[i+4],
+                icon: 'none',
+                duration: 800
+            });
+            return false;
+        }
+        if(vec[i+4]!="R" && vec[i+4]!="L" && vec[i+4]!="S"){
+            wx.showToast({
+              title: '指针移动方向必须为R,L,S中的一个',
+              icon: 'none',
+              duration: 2500
+            });
+            return false;
+        }
+    }
+    return true;
+}
 
 Page({
     /**
@@ -87,7 +119,8 @@ Page({
         filedata:{},
         operand_type:"select",
         successSaveFile:false,
-        cancelSaveFile:false
+        cancelSaveFile:false,
+        hasModule:false
     },
 
     /**
@@ -514,8 +547,10 @@ Page({
      * 页面加载时加载文件
      * 在没有文件时初始化组件列表
      */
-    createTemporaryFile: function(type) {
+    createTemporaryFile: function(type,tape=1) {
         canvasElements.type=type;       // get type of automata
+        if(type=="multiple")
+            canvasElements.tape=tape;
         canvasElements.state=[];        // empty vector
         canvasElements.func=[];         // empty vector
         canvasElements.state_counter=0; // set state name counter to 0
@@ -530,8 +565,12 @@ Page({
         if(options.type=="exist_file"){
             this.loadExistFile(options.filename);
         }else{
-            this.createTemporaryFile(options.type);
+            this.createTemporaryFile(options.type,options.type=="multiple"?options.tapes:1);
         }
+        if(canvasElements.type=="subprogram")
+            this.setData({
+                hasModule:true
+            });
         /* if options include filename, set it */
         if("filename" in options)
             this.setData({
@@ -703,9 +742,24 @@ Page({
             name:"q"+String(canvasElements.state_counter),
             fillcolor:"#ffe985",
             isStart:0,
-            isEnd:0
+            isEnd:0,
+            isModule:0
         });
-        canvasElements.state_counter+=1;
+        canvasElements.state_counter++;
+    },
+
+    /**
+     * 单次点击引入新子程序
+     */
+    tapSubprogram: function(x,y,filename){
+        canvasElements.state.push({
+            x:x,y:y,
+            name:filename,
+            fillcolor:"#ffe985",
+            isStart:0,
+            isEnd:0,
+            isModule:1
+        });
     },
 
     /**
@@ -795,7 +849,6 @@ Page({
                     }
                     return;
                 }
-
                 wx.showModal({
                     title: isstr?title:"修改"+title+"的第几个转移函数?",
                     placeholderText: isstr?transfer.text:"",
@@ -841,6 +894,43 @@ Page({
                     }
                 });
             }
+        }else if(opr=="module"){
+            let fs=this.fs;
+            let f=this.tapSubprogram;
+            let flush=this.canvasDraw;
+            wx.showModal({
+                title:'文件名',
+                editable:true,
+                success(res){
+                    let type="";
+                    if(res.confirm){
+                        try{
+                            const r=fs.readFileSync(
+                                `${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+res.content,
+                                'utf8',0);
+                            type=JSON.parse(r).type;
+                        }catch(e){ // empty file
+                            wx.showToast({
+                                title: '文件不存在',
+                                icon: "none",
+                                duration: 800
+                            });
+                            return;
+                        }
+                        if(type!="normal"){
+                            wx.showToast({
+                                title: "子程序必须是单带图灵机",
+                                icon: "none",
+                                duration: 1500
+                            });
+                        }else{
+                            operations.push();
+                            f(x,y,res.content);
+                            flush();
+                        }
+                    }
+                }
+            })
         }
         this.canvasDraw();
     },
@@ -976,10 +1066,15 @@ Page({
                     editable:true,
                     placeholderText:vec[index].text,
                     success(res){
+                        let default_text="ε;ε;S";
+                        if(canvasElements.type=="multiple")
+                            for(let i=1;i<canvasElements.tape;i++)
+                                default_text+="|ε;ε;S";
                         if(res.cancel){
-                            vec[index].text="ε;ε;S";
+                            vec[index].text=default_text;
                         }else{
-                            vec[index].text=propertyParse(res.content)?res.content:"ε;ε;S";
+                            let parse_res=canvasElements.type=="multiple"?multiplePropertyParse(res.content):propertyParse(res.content);
+                            vec[index].text=parse_res?res.content:default_text;
                         }
                         // check different transfers have same begin/end state
                         for(let i=0;i<vec.length-1;i++){

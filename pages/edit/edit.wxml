@@ -42,6 +42,16 @@
                 <image src="/image/delete.png" mode="aspectFit"></image>
             </button>
         </view>
+        <view wx:if="{{hasModule && operand_type=='module'}}">
+            <button bindtap="tapButton" data-param="module" style="background-color: #409eff;">
+                <image src="/image/module.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view wx:if="{{hasModule && operand_type!='module'}}">
+            <button bindtap="tapButton" data-param="module" style="background-color: rgb(217,236,255);">
+                <image src="/image/module.png" mode="aspectFit"></image>
+            </button>
+        </view>
         <view>
             <button bindtap="undo">
                 <image src="/image/undo.png" mode="aspectFit"></image>
