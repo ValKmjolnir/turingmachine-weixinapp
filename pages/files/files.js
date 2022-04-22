@@ -12,6 +12,20 @@ Page({
     },
 
     /**
+     * 读取并刷新files
+    */
+    readMiniProgDir: function() {
+        let fs=this.fs;
+        this.setData({
+            files:fs.readdirSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator`)
+        });
+        if(this.data.files.length>0)
+            this.setData({
+                empty_file_list:false
+            });
+    },
+
+    /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
@@ -30,14 +44,7 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow: function () {
-        let fs=this.fs;
-        this.setData({
-            files:fs.readdirSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator`)
-        });
-        if(this.data.files.length>0)
-            this.setData({
-                empty_file_list:false
-            });
+        this.readMiniProgDir();
     },
 
     /**
@@ -121,26 +128,17 @@ Page({
     clearfile: function(param) {
         let fs=this.fs;
         let name=param.currentTarget.dataset.param;
+        let flush_list=this.readMiniProgDir;
         wx.showModal({
-            title:"清空文件",
-            content:"是否清空并初始化文件内容？",
+            title:"删除文件",
+            content:"是否删除该文件？",
             success (res) {
                 if(res.confirm){
-                    let init=null;
                     try{
-                        const res=fs.readFileSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+name,'utf8',0);
-                        init=JSON.parse(res);
-                    }catch(e){ // empty file
-                        console.error(e);
-                    }
-                    init.state_counter=0;
-                    init.state=[];
-                    init.func=[];
-                    try{
-                        fs.writeFileSync(
-                            `${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+name,
-                            JSON.stringify(init),
-                            'utf8');
+                        fs.unlinkSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+name);
+                        wx.showToast({title: "删除成功",icon: "success",duration: 800});
+                        flush_list();
+                        return;
                     }catch(e){
                         console.error(e);
                     }
