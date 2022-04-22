@@ -282,6 +282,24 @@ Page({
     },
 
     /**
+     * 绘制子程序节点的特别部分
+    */
+    drawSubProgram: function(x,y) {
+        ctx.save();
+        ctx.strokeStyle="#606266";
+        ctx.fillStyle="#e1f3d8";
+        ctx.beginPath();
+        ctx.moveTo(x-6,y-9);
+        ctx.lineTo(x+6,y-9);
+        ctx.lineTo(x+6,y-7);
+        ctx.lineTo(x-6,y-7);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+        ctx.restore();
+    },
+
+    /**
      * 绘制选择圆环
      */
     drawCircleSelectPanel: function(x,y,r,isStart=0,isEnd=0) {
@@ -520,11 +538,15 @@ Page({
         });
         // states
         canvasElements.state.forEach(elem=>{
-            this.drawState(elem.name,elem.x,elem.y,15,elem.fillcolor);
+            const x=elem.x;
+            const y=elem.y;
+            this.drawState(elem.name,x,y,15,elem.fillcolor);
             if(elem.isEnd)
-                this.drawStateEnd(elem.x,elem.y,11);
+                this.drawStateEnd(x,y,11);
             if(elem.isStart)
-                this.drawStateStart(elem.x,elem.y,15);
+                this.drawStateStart(x,y,15);
+            if(elem.isModule)
+                this.drawSubProgram(x,y);
         });
     },
 
@@ -736,30 +758,17 @@ Page({
     /**
      * 单次点击创建新状态
      */
-    tapState: function(x,y){
+    tapState: function(x,y,filename=""){
         canvasElements.state.push({
             x:x,y:y,
             name:"q"+String(canvasElements.state_counter),
             fillcolor:"#ffe985",
             isStart:0,
             isEnd:0,
-            isModule:0
+            isModule:filename.length?1:0,
+            moduleName:filename.length?filename:0
         });
         canvasElements.state_counter++;
-    },
-
-    /**
-     * 单次点击引入新子程序
-     */
-    tapSubprogram: function(x,y,filename){
-        canvasElements.state.push({
-            x:x,y:y,
-            name:filename,
-            fillcolor:"#ffe985",
-            isStart:0,
-            isEnd:0,
-            isModule:1
-        });
     },
 
     /**
@@ -824,48 +833,54 @@ Page({
         if(opr=="select"){
             let state=this.findColorNearestState(x,y);
             let transfer=this.findNearestFunc(x,y);
-            if(state==null && transfer!=null){
-                const isstr=(typeof(transfer.text)=="string");
-                const title="从"+transfer.begin_state+"到"+transfer.end_state;
-                let multiple_transfer_set=function(index){
-                    if(isNaN(index) || index<=0 || index>transfer.text.length){
-                        wx.showToast({
-                            title:"必须填写在数组长度范围内的正确数字",
-                            icon:"none"
-                        });
-                    }else{
-                        wx.showModal({
-                            title:"修改"+title+"的第"+index+"个转移函数",
-                            placeholderText: transfer.text[index-1],
-                            editable:true,
-                            success(r){
-                                if(r.confirm && propertyParse(r.content)){
-                                    operations.push();
-                                    transfer.text[index-1]=r.content;
-                                    flush();
-                                }
-                            }
-                        });
-                    }
-                    return;
-                }
-                wx.showModal({
-                    title: isstr?title:"修改"+title+"的第几个转移函数?",
-                    placeholderText: isstr?transfer.text:"",
-                    editable:true,
-                    success(res){
-                        if(res.confirm){
-                            if(isstr && propertyParse(res.content)){
+            if(state!=null && state.isModule)
+                wx.showToast({
+                    title: "子程序"+state.moduleName,
+                    icon: "none",
+                    duration: 800
+                });
+            if(state!=null || transfer==null)
+                return;
+            const isstr=(typeof(transfer.text)=="string");
+            const title="从"+transfer.begin_state+"到"+transfer.end_state;
+            let multiple_transfer_set=function(index){
+                if(isNaN(index) || index<=0 || index>transfer.text.length){
+                    wx.showToast({
+                        title:"必须填写在数组长度范围内的正确数字",
+                        icon:"none"
+                    });
+                }else{
+                    wx.showModal({
+                        title:"修改"+title+"的第"+index+"个转移函数",
+                        placeholderText: transfer.text[index-1],
+                        editable:true,
+                        success(r){
+                            if(r.confirm && propertyParse(r.content)){
                                 operations.push();
-                                transfer.text=res.content;
+                                transfer.text[index-1]=r.content;
                                 flush();
-                            }else if(!isstr){
-                                multiple_transfer_set(Number(res.content));
                             }
                         }
-                    }
-                });
+                    });
+                }
+                return;
             }
+            wx.showModal({
+                title: isstr?title:"修改"+title+"的第几个转移函数?",
+                placeholderText: isstr?transfer.text:"",
+                editable:true,
+                success(res){
+                    if(res.confirm){
+                        if(isstr && propertyParse(res.content)){
+                            operations.push();
+                            transfer.text=res.content;
+                            flush();
+                        }else if(!isstr){
+                            multiple_transfer_set(Number(res.content));
+                        }
+                    }
+                }
+            });
         }else if(opr=="delete"){
             let state=this.findColorNearestState(x,y);
             let transfer=this.findNearestFunc(x,y);
@@ -895,42 +910,18 @@ Page({
                 });
             }
         }else if(opr=="module"){
-            let fs=this.fs;
-            let f=this.tapSubprogram;
-            let flush=this.canvasDraw;
-            wx.showModal({
-                title:'文件名',
-                editable:true,
-                success(res){
-                    let type="";
-                    if(res.confirm){
-                        try{
-                            const r=fs.readFileSync(
-                                `${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+res.content,
-                                'utf8',0);
-                            type=JSON.parse(r).type;
-                        }catch(e){ // empty file
-                            wx.showToast({
-                                title: '文件不存在',
-                                icon: "none",
-                                duration: 800
-                            });
-                            return;
-                        }
-                        if(type!="normal"){
-                            wx.showToast({
-                                title: "子程序必须是单带图灵机",
-                                icon: "none",
-                                duration: 1500
-                            });
-                        }else{
-                            operations.push();
-                            f(x,y,res.content);
-                            flush();
-                        }
+            const subprog=this.tapState;
+            const flush=this.canvasDraw;
+            wx.navigateTo({
+                url: '/pages/files/files?nav=module',
+                events:{
+                    getFile: function(data) {
+                        operations.push();
+                        subprog(x,y,data);
+                        flush();
                     }
                 }
-            })
+            });
         }
         this.canvasDraw();
     },
@@ -1073,7 +1064,9 @@ Page({
                         if(res.cancel){
                             vec[index].text=default_text;
                         }else{
-                            let parse_res=canvasElements.type=="multiple"?multiplePropertyParse(res.content):propertyParse(res.content);
+                            let parse_res=canvasElements.type=="multiple"?
+                                multiplePropertyParse(res.content):
+                                propertyParse(res.content);
                             vec[index].text=parse_res?res.content:default_text;
                         }
                         // check different transfers have same begin/end state

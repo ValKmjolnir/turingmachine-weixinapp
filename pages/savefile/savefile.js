@@ -113,7 +113,7 @@ Page({
                 filename:fname+".json",
             });
             wx.navigateBack({
-              delta: 0,
+                delta: 0,
             })
         }catch(ex){
             wx.showToast({

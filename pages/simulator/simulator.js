@@ -260,6 +260,24 @@ Page({
     },
 
     /**
+     * 绘制子程序节点的特别部分
+    */
+    drawSubProgram: function(x,y) {
+        ctx.save();
+        ctx.strokeStyle="#606266";
+        ctx.fillStyle="#e1f3d8";
+        ctx.beginPath();
+        ctx.moveTo(x-6,y-9);
+        ctx.lineTo(x+6,y-9);
+        ctx.lineTo(x+6,y-7);
+        ctx.lineTo(x-6,y-7);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+        ctx.restore();
+    },
+
+    /**
      * 绘制直线箭头
      */
     drawArrow: function(bx,by,ex,ey,transfer) {
@@ -592,11 +610,15 @@ Page({
         });
         // states
         canvasElements.state.forEach(elem=>{
-            this.drawState(elem.name,elem.x,elem.y,15,elem.fillcolor);
+            const x=elem.x;
+            const y=elem.y;
+            this.drawState(elem.name,x,y,15,elem.fillcolor);
             if(elem.isEnd)
-                this.drawStateEnd(elem.x,elem.y,11);
+                this.drawStateEnd(x,y,11);
             if(elem.isStart)
-                this.drawStateStart(elem.x,elem.y,15);
+                this.drawStateStart(x,y,15);
+            if(elem.isModule)
+                this.drawSubProgram(x,y);
         });
         // simulator paper
         this.drawPaper();

@@ -70,7 +70,7 @@ Page({
 
     settingNavigateBack: function() {
         wx.navigateBack({
-          delta: 0,
+            delta: 0,
         });
     }
 })

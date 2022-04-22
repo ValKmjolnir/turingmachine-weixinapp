@@ -106,7 +106,7 @@ Page({
 
     gotofiles: function (param) {
         wx.navigateTo({
-          url: '/pages/files/files',
+          url: '/pages/files/files?nav=select',
         });
     }
 });
