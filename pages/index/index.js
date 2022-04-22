@@ -88,9 +88,15 @@ Page({
                     if(res.confirm){
                         if(res.content.length)
                             tape=Number(res.content);
-                        if(isNaN(tape) || (2<=tape && tape<=5)){
+                        if(!isNaN(tape) || (2<=tape && tape<=5)){
                             wx.navigateTo({
                                 url: "/pages/edit/edit?type=multiple&tapes="+tape,
+                            });
+                        }else{
+                            wx.showToast({
+                                title:"请输入正确的数字",
+                                icon:"none",
+                                duration:800
                             });
                         }
                     }

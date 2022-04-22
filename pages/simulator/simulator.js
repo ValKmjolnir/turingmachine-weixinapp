@@ -274,6 +274,12 @@ Page({
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
+        for(let i=-3;i<=3;i+=3){
+            ctx.beginPath();
+            ctx.moveTo(x+i,y-9);
+            ctx.lineTo(x+i,y-7);
+            ctx.stroke();
+        }
         ctx.restore();
     },
 

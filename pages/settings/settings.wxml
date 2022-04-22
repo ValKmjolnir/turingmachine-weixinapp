@@ -8,6 +8,9 @@
         <text style="color: #606266;">· 小程序权限设置</text>
     </view>
     <button open-type="openSetting">权限设置</button>
+    <view style="text-align: left;margin-top: 30rpx;margin-left: 30rpx;margin-right: 20rpx;font-size: small;">
+        <text style="color: #606266;">请注意，如果是在编辑界面点击截图生成时跳转的权限设置中进行的设置，在回到编辑界面时，记得再点一次生成截图，才能正常保存截图。</text>
+    </view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;">
         <text style="color: #606266;">· 编辑功能提示(点击显示)</text>
     </view>

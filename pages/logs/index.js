@@ -31,9 +31,18 @@ Page({
      */
     onShow: function () {
         let fs=this.fs;
-        this.setData({
-            files:fs.readdirSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator`)
-        });
+        let list=fs.readdirSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator`);
+        for(let i=0;i<list.length;i++){
+            // sometimes a file is deleted but still readable by readdir
+            // but it is not accessable
+            try{
+                fs.accessSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+list[i]);
+            }catch(e){
+                list.splice(i,1);
+                i--;
+            }
+        }
+        this.setData({files:list});
         if(this.data.files.length>0)
             this.setData({
                 empty_file_list:false
