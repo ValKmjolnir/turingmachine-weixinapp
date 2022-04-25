@@ -20,7 +20,341 @@ function queue(){
     }
 }
 
-function machine(data) {
+function turing_machine(data) {
+    let state=[];
+    let initial_state=null;
+    let final_state=[];
+    let paper="";
+    let simulation_start=false;
+    let hashmap=null;
+    let accepted=false;
+    this.isfinal=function(name){
+        if((name in hashmap) && hashmap[name].isEnd==1)
+            return true;
+        return false;
+    }
+
+    let que=[]; 
+    this.generate=function(){
+        hashmap={};
+        state=data.state;
+        let findByName=function(name){
+            for(let i=0;i<state.length;i++)
+                if(state[i].name==name)
+                    return state[i];
+            return null;
+        }
+        for(let i=0;i<state.length;i++){
+            hashmap[state[i].name]=state[i];
+            if(state[i].isStart)
+                initial_state=i;
+            if(state[i].isEnd)
+                final_state.push(i);
+            state[i].transfer=[];
+            data.func.forEach(elem=>{
+                if(elem.begin_state==state[i].name){
+                    let vec=null;
+                    if(typeof(elem.text)=="string"){
+                        vec=[elem.text];
+                    }else{
+                        vec=elem.text;
+                    }
+                    vec.forEach(txt=>{
+                        let s=txt.split("");
+                            state[i].transfer.push({
+                            to: findByName(elem.end_state),
+                            read: s[0],
+                            write: s[2],
+                            move: s[4]
+                        });
+                    });
+                }
+            });
+        }
+    }
+    this.check=function() {
+        let init_cnt=0;
+        let final_cnt=0;
+        if(data==null)
+            return false;
+        data.state.forEach(elem=>{
+            if(elem.isStart)
+                init_cnt++;
+            if(elem.isEnd)
+                final_cnt++;
+        });
+        if(init_cnt>1){
+            wx.showToast({title:'只能有一个初态',icon:'error',duration:800});
+            return false;
+        }else if(init_cnt==0){
+            wx.showToast({title:'至少有一个初态',icon:'error',duration:800});
+            return false;
+        }
+        if(final_cnt==0){
+            wx.showToast({title:'至少有一个终态',icon:'error',duration:800});
+            return false;
+        }
+        return true;
+    }
+    this.setpaper=function(str){
+        paper=str.split("");
+    }
+    this.isrunning=function(){
+        return simulation_start;
+    }
+    this.start=function(){
+        simulation_start=true;
+        accepted=false;
+        // state paper pointer
+        let init=state[initial_state];
+        // initial state,deep copy of paper,pointer,execute path
+        que=[[init,[...paper],0,""+init.name]];
+        init.fillcolor="#88c3ff";
+    }
+    this.stop=function(){
+        simulation_start=false;
+    }
+    this.next=function(){
+        accepted=false;
+        let vec=[];
+        // remove highlight
+        que.forEach(elem=>{
+            elem[0].fillcolor="#ffe985";
+        });
+        que.forEach(elem=>{
+            let state=elem[0];
+            let p=elem[1];
+            state.transfer.forEach(e=>{
+                // avoid result length overflow
+                // this may cause fatal memory
+                if(vec.length>=1024)
+                    return;
+                let ptr=elem[2];
+                if(ptr>p.length){
+                    return;
+                }
+                if(e.read==p[ptr] || e.read=="ε"){
+                    let tmp=[...p];
+                    tmp[ptr]=e.write;
+                    if(e.move=="L"){
+                        ptr--;
+                    }else if(e.move=="R"){
+                        ptr++;
+                    }
+                    if(ptr<0){
+                        tmp.unshift(null);
+                        ptr=0;
+                    }else if(ptr>tmp.length){
+                        tmp.push(null);
+                    }
+                    vec.push([e.to,tmp,ptr,elem[3]+":"+e.to.name]);
+                }else{
+                    return;
+                }
+            });
+        });
+        if(vec.length==0){
+            wx.showToast({
+                title: '运行结束',
+                icon: 'none',
+                duration: 800
+            });
+            this.stop();
+            return;
+        }
+        // highlight nodes
+        que=vec;
+        que.forEach(elem=>{
+            elem[0].fillcolor="#88c3ff";
+            if(elem[0].isEnd)
+                accepted=true;
+        });
+        if(que.length>=1024){
+            wx.showToast({
+                title: '结果数量溢出',
+                icon: 'error',
+                duration: 1000
+            });
+            accepted=false;
+            this.stop();
+        }
+    }
+    this.result=function(){
+        return que;
+    }
+    this.accept=function(){
+        return accepted;
+    }
+}
+
+function multi_tape_machine(data) {
+    let state=[];
+    let initial_state=null;
+    let final_state=[];
+    let paper="";
+    let simulation_start=false;
+    let hashmap=null;
+    let accepted=false;
+    this.isfinal=function(name){
+        if((name in hashmap) && hashmap[name].isEnd==1)
+            return true;
+        return false;
+    }
+
+    let que=[]; 
+    this.generate=function(){
+        hashmap={};
+        state=data.state;
+        let findByName=function(name){
+            for(let i=0;i<state.length;i++)
+                if(state[i].name==name)
+                    return state[i];
+            return null;
+        }
+        for(let i=0;i<state.length;i++){
+            hashmap[state[i].name]=state[i];
+            if(state[i].isStart)
+                initial_state=i;
+            if(state[i].isEnd)
+                final_state.push(i);
+            state[i].transfer=[];
+            data.func.forEach(elem=>{
+                if(elem.begin_state==state[i].name){
+                    let vec=null;
+                    if(typeof(elem.text)=="string"){
+                        vec=[elem.text];
+                    }else{
+                        vec=elem.text;
+                    }
+                    vec.forEach(txt=>{
+                        let s=txt.split("");
+                            state[i].transfer.push({
+                            to: findByName(elem.end_state),
+                            read: s[0],
+                            write: s[2],
+                            move: s[4]
+                        });
+                    });
+                }
+            });
+        }
+    }
+    this.check=function() {
+        let init_cnt=0;
+        let final_cnt=0;
+        if(data==null)
+            return false;
+        data.state.forEach(elem=>{
+            if(elem.isStart)
+                init_cnt++;
+            if(elem.isEnd)
+                final_cnt++;
+        });
+        if(init_cnt>1){
+            wx.showToast({title:'只能有一个初态',icon:'error',duration:800});
+            return false;
+        }else if(init_cnt==0){
+            wx.showToast({title:'至少有一个初态',icon:'error',duration:800});
+            return false;
+        }
+        if(final_cnt==0){
+            wx.showToast({title:'至少有一个终态',icon:'error',duration:800});
+            return false;
+        }
+        return true;
+    }
+    this.setpaper=function(str){
+        paper=str.split("");
+    }
+    this.isrunning=function(){
+        return simulation_start;
+    }
+    this.start=function(){
+        simulation_start=true;
+        accepted=false;
+        // state paper pointer
+        let init=state[initial_state];
+        // initial state,deep copy of paper,pointer,execute path
+        que=[[init,[...paper],0,""+init.name]];
+        init.fillcolor="#88c3ff";
+    }
+    this.stop=function(){
+        simulation_start=false;
+    }
+    this.next=function(){
+        accepted=false;
+        let vec=[];
+        // remove highlight
+        que.forEach(elem=>{
+            elem[0].fillcolor="#ffe985";
+        });
+        que.forEach(elem=>{
+            let state=elem[0];
+            let p=elem[1];
+            state.transfer.forEach(e=>{
+                // avoid result length overflow
+                // this may cause fatal memory
+                if(vec.length>=1024)
+                    return;
+                let ptr=elem[2];
+                if(ptr>p.length){
+                    return;
+                }
+                if(e.read==p[ptr] || e.read=="ε"){
+                    let tmp=[...p];
+                    tmp[ptr]=e.write;
+                    if(e.move=="L"){
+                        ptr--;
+                    }else if(e.move=="R"){
+                        ptr++;
+                    }
+                    if(ptr<0){
+                        tmp.unshift(null);
+                        ptr=0;
+                    }else if(ptr>tmp.length){
+                        tmp.push(null);
+                    }
+                    vec.push([e.to,tmp,ptr,elem[3]+":"+e.to.name]);
+                }else{
+                    return;
+                }
+            });
+        });
+        if(vec.length==0){
+            wx.showToast({
+                title: '运行结束',
+                icon: 'none',
+                duration: 800
+            });
+            this.stop();
+            return;
+        }
+        // highlight nodes
+        que=vec;
+        que.forEach(elem=>{
+            elem[0].fillcolor="#88c3ff";
+            if(elem[0].isEnd)
+                accepted=true;
+        });
+        if(que.length>=1024){
+            wx.showToast({
+                title: '结果数量溢出',
+                icon: 'error',
+                duration: 1000
+            });
+            accepted=false;
+            this.stop();
+        }
+    }
+    this.result=function(){
+        return que;
+    }
+    this.accept=function(){
+        return accepted;
+    }
+}
+
+function sub_prog_turing_machine(data) {
     let state=[];
     let initial_state=null;
     let final_state=[];
@@ -659,7 +993,12 @@ Page({
             title: "模拟器"
         });
         // initialize turing machine
-        instance=new machine(canvasElements);
+        if(canvasElements.type=="normal")
+            instance=new machine(canvasElements);
+        else if(canvasElements.type=="multiple")
+            instance=new multi_tape_machine(canvasElements);
+        else
+            instance=new sub_prog_turing_machine(canvasElements);
         result_index=0;
         // initialize canvas context
         wx.createSelectorQuery()
@@ -792,12 +1131,12 @@ Page({
             success(res){
                 wx.saveImageToPhotosAlbum({
                     filePath: res.tempFilePath,
-                    success(res){wx.showToast({title:'保存成功',icon:'success',duration:1000});},
+                    success(res){wx.showToast({title:'保存成功',icon:'success',duration:800});},
                     fail(err){
                         if(err.errMsg=="saveImageToPhotosAlbum:fail auth deny"){
                             wx.navigateTo({url:'/pages/auth/auth?info=无图片保存权限，请设置',});
                         }else{
-                            wx.showToast({title:'取消保存',icon:'error',duration:1000});
+                            wx.showToast({title:'取消保存',icon:'error',duration:800});
                         }
                     }
                 });

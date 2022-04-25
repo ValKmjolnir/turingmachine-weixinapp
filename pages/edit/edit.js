@@ -47,15 +47,14 @@ function operation_undo_rollback() {
 }
 
 function propertyParse(str){
-    let vec=str.split("");
-    if(vec.length<5 || (vec.length==5 && (vec[1]!=";" || vec[3]!=";"))){
+    if(str.length<5 || (str.length==5 && (str[1]!=";" || str[3]!=";"))){
         wx.showToast({
             title: '格式错误,正确格式: -;-;-',
             icon: 'none',
             duration: 2500
         });
         return false;
-    }else if(vec.length>5){
+    }else if(str.length>5){
         wx.showToast({
             title: '输入输出与移动方向必须都为单个字符',
             icon: 'none',
@@ -63,7 +62,7 @@ function propertyParse(str){
         })
         return false;
     }
-    if(vec[4]!="R" && vec[4]!="L" && vec[4]!="S"){
+    if(str[4]!="R" && str[4]!="L" && str[4]!="S"){
         wx.showToast({
           title: '指针移动方向必须为R,L,S中的一个',
           icon: 'none',
@@ -76,8 +75,7 @@ function propertyParse(str){
 function multiplePropertyParse(str){
     const tapes=canvasElements.tape;
     const len=6*tapes-1;
-    let vec=str.split("");
-    if(vec.length<len || vec.length>len){
+    if(str.length<len || str.length>len){
         wx.showToast({
             title: '格式错误',
             icon: 'none',
@@ -86,15 +84,15 @@ function multiplePropertyParse(str){
         return false;
     }
     for(let i=0;i<len;i+=6){
-        if(vec[i+1]!=";" || vec[i+3]!=";" || (i+5!=len && vec[i+5]!="|")){
+        if(str[i+1]!=";" || str[i+3]!=";" || (i+5!=len && str[i+5]!="|")){
             wx.showToast({
-                title: '格式错误: '+vec[i]+vec[i+1]+vec[i+2]+vec[i+3]+vec[i+4],
+                title: '格式错误: '+str[i]+str[i+1]+str[i+2]+str[i+3]+str[i+4],
                 icon: 'none',
                 duration: 800
             });
             return false;
         }
-        if(vec[i+4]!="R" && vec[i+4]!="L" && vec[i+4]!="S"){
+        if(str[i+4]!="R" && str[i+4]!="L" && str[i+4]!="S"){
             wx.showToast({
               title: '指针移动方向必须为R,L,S中的一个',
               icon: 'none',
@@ -784,8 +782,8 @@ Page({
         let state=this.data.selectedState;
         if(state==null)
             return;
-        let start_x=state.x;
-        let start_y=state.y;
+        const start_x=state.x;
+        const start_y=state.y;
         if(Math.pow((x-start_x),2)+Math.pow((y-start_y),2)>15*15){
             if(x<start_x){
                 state.isStart=1-state.isStart;
@@ -803,16 +801,17 @@ Page({
      * delete删除状态
      */
     deleteState: function(selectState){
-        for(var i=0;i<canvasElements.func.length;i++){
+        for(let i=0;i<canvasElements.func.length;i++){
             if(canvasElements.func[i].begin_state==selectState.name|| 
                 canvasElements.func[i].end_state==selectState.name){
                 canvasElements.func.splice(i,1);
                 i--;
             }
         }
-        for(var i=0;i<canvasElements.state.length;i++){
+        for(let i=0;i<canvasElements.state.length;i++){
             if(canvasElements.state[i]==selectState){
                 canvasElements.state.splice(i,1);
+                break;
             }
         }
     },
@@ -824,6 +823,7 @@ Page({
         for(var i=0;i<canvasElements.func.length;i++){
             if(canvasElements.func[i]==selectFunc){
                 canvasElements.func.splice(i,1);
+                break;
             }
         }
     },
@@ -832,9 +832,9 @@ Page({
      * canvas单次点击事件
      */
     tap: function (e) {
-        let x=e.detail.x-e.target.offsetLeft;
-        let y=e.detail.y-e.target.offsetTop;
-        let opr=this.data.operand_type;
+        const x=e.detail.x-e.target.offsetLeft;
+        const y=e.detail.y-e.target.offsetTop;
+        const opr=this.data.operand_type;
         let flush=this.canvasDraw;
         if(opr=="select"){
             let state=this.findColorNearestState(x,y);
@@ -861,7 +861,12 @@ Page({
                         placeholderText: transfer.text[index-1],
                         editable:true,
                         success(r){
-                            if(r.confirm && propertyParse(r.content)){
+                            if(r.cancel)
+                                return;
+                            const result=canvasElements.type=="multiple"?
+                                multiplePropertyParse(r.content):
+                                propertyParse(r.content);
+                            if(result){
                                 operations.push();
                                 transfer.text[index-1]=r.content;
                                 flush();
@@ -877,7 +882,9 @@ Page({
                 editable:true,
                 success(res){
                     if(res.confirm){
-                        if(isstr && propertyParse(res.content)){
+                        if(isstr && (canvasElements.type=="multiple"?
+                            multiplePropertyParse(res.content):
+                            propertyParse(res.content))){
                             operations.push();
                             transfer.text=res.content;
                             flush();
