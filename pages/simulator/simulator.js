@@ -60,12 +60,11 @@ function turing_machine(data) {
                         vec=elem.text;
                     }
                     vec.forEach(txt=>{
-                        let s=txt.split("");
-                            state[i].transfer.push({
+                        state[i].transfer.push({
                             to: findByName(elem.end_state),
-                            read: s[0],
-                            write: s[2],
-                            move: s[4]
+                            read: txt[0],
+                            write: txt[2],
+                            move: txt[4]
                         });
                     });
                 }
@@ -191,6 +190,7 @@ function multi_tape_machine(data) {
     let state=[];
     let initial_state=null;
     let final_state=[];
+    let paper_num=data.tape;
     let paper="";
     let simulation_start=false;
     let hashmap=null;
@@ -227,13 +227,18 @@ function multi_tape_machine(data) {
                         vec=elem.text;
                     }
                     vec.forEach(txt=>{
-                        let s=txt.split("");
-                            state[i].transfer.push({
+                        let tmp={
                             to: findByName(elem.end_state),
-                            read: s[0],
-                            write: s[2],
-                            move: s[4]
-                        });
+                                read: [],
+                                write: [],
+                                move: []
+                        }
+                        for(let i=0;i<paper_num;i++){
+                            tmp.read.push(txt[i*6]);
+                            tmp.write.push(txt[i*6+2]);
+                            tmp.move.push(txt[i*6+4]);
+                        }
+                        state[i].transfer.push(tmp);
                     });
                 }
             });
@@ -264,7 +269,10 @@ function multi_tape_machine(data) {
         return true;
     }
     this.setpaper=function(str){
-        paper=str.split("");
+        paper=[];
+        // unfinished
+        for(let i=0;i<paper_num;i++)
+            paper.push(str.split(""));
     }
     this.isrunning=function(){
         return simulation_start;
@@ -274,8 +282,11 @@ function multi_tape_machine(data) {
         accepted=false;
         // state paper pointer
         let init=state[initial_state];
+        let ptrs=[];
+        for(let i=0;i<paper_num;i++)
+            ptrs.push(0);
         // initial state,deep copy of paper,pointer,execute path
-        que=[[init,[...paper],0,""+init.name]];
+        que=[[init,[...paper],ptrs,""+init.name]];
         init.fillcolor="#88c3ff";
     }
     this.stop=function(){
@@ -291,21 +302,28 @@ function multi_tape_machine(data) {
         que.forEach(elem=>{
             let state=elem[0];
             let p=elem[1];
+            let ptrs=elem[2];
             state.transfer.forEach(e=>{
                 // avoid result length overflow
                 // this may cause fatal memory
                 if(vec.length>=1024)
                     return;
-                let ptr=elem[2];
-                if(ptr>p.length){
-                    return;
+                for(let i=0;i<paper_num;i++){
+                    let ptr=ptrs[i];
+                    if(ptr>p[i].length)
+                        return;
+                    if(e.read[i]!=p[i][ptr] && e.read[i]!="ε")
+                        return;
                 }
-                if(e.read==p[ptr] || e.read=="ε"){
-                    let tmp=[...p];
-                    tmp[ptr]=e.write;
-                    if(e.move=="L"){
+                let new_papers=[];
+                let new_ptrs=[];
+                for(let i=0;i<paper_num;i++){
+                    let tmp=[...p[i]];
+                    let ptr=ptrs[i];
+                    tmp[ptr]=e.write[i];
+                    if(e.move[i]=="L"){
                         ptr--;
-                    }else if(e.move=="R"){
+                    }else if(e.move[i]=="R"){
                         ptr++;
                     }
                     if(ptr<0){
@@ -314,10 +332,10 @@ function multi_tape_machine(data) {
                     }else if(ptr>tmp.length){
                         tmp.push(null);
                     }
-                    vec.push([e.to,tmp,ptr,elem[3]+":"+e.to.name]);
-                }else{
-                    return;
+                    new_papers.push(tmp);
+                    new_ptrs.push(ptr);
                 }
+                vec.push([e.to,new_papers,new_ptrs,elem[3]+":"+e.to.name]);
             });
         });
         if(vec.length==0){
@@ -394,12 +412,11 @@ function sub_prog_turing_machine(data) {
                         vec=elem.text;
                     }
                     vec.forEach(txt=>{
-                        let s=txt.split("");
-                            state[i].transfer.push({
+                        state[i].transfer.push({
                             to: findByName(elem.end_state),
-                            read: s[0],
-                            write: s[2],
-                            move: s[4]
+                            read: txt[0],
+                            write: txt[2],
+                            move: txt[4]
                         });
                     });
                 }
@@ -529,6 +546,8 @@ Page({
     data: {
         height:null,
         width:null,
+        acc:null,
+        panel_height:80,
         panel_selected:false
     },
 
@@ -773,27 +792,26 @@ Page({
      */
     drawPaper: function() {
         ctx.strokeStyle="#606266";
-        let width=this.data.width;
-        let acc=width/20;
-        if(acc>25)
-            acc=25;
+        const width=this.data.width;
+        const acc=this.data.acc;
+        const panel_height=this.data.panel_height;
         let x=acc;
         let y=simu_panel_pos;
 
         // draw panel base
         // width: this.data.width-2
-        // height: 80
+        // height: this.data.panel_height
         ctx.beginPath();
         ctx.moveTo(acc,y);
         ctx.lineTo(width-acc,y);
         ctx.quadraticCurveTo(width-1,y,width-1,y+10);
         ctx.lineTo(width-1,y+10);
-        ctx.lineTo(width-1,y+70);
-        ctx.quadraticCurveTo(width-1,y+80,width-acc,y+80);
-        ctx.lineTo(width-acc,y+80);
-        ctx.lineTo(acc,y+80);
-        ctx.quadraticCurveTo(1,y+80,1,y+70);
-        ctx.lineTo(1,y+70);
+        ctx.lineTo(width-1,y+panel_height-10);
+        ctx.quadraticCurveTo(width-1,y+panel_height,width-acc,y+panel_height);
+        ctx.lineTo(width-acc,y+panel_height);
+        ctx.lineTo(acc,y+panel_height);
+        ctx.quadraticCurveTo(1,y+panel_height,1,y+panel_height-10);
+        ctx.lineTo(1,y+panel_height-10);
         ctx.lineTo(1,y+10);
         ctx.quadraticCurveTo(1,y,acc,y);
         ctx.closePath();
@@ -812,66 +830,81 @@ Page({
         ctx.fillText(text,acc,y);
         ctx.restore();
 
+        // draw result string
         y+=8;
-        ctx.beginPath();
-        ctx.moveTo(acc+2,y);
-        ctx.lineTo(acc+2,y-2);
-        ctx.lineTo(acc-1,y-2);
-        ctx.lineTo(acc-1,y+acc+2);
-        ctx.lineTo(acc+2,y+acc+2);
-        ctx.closePath();
-        ctx.fillStyle="#606266";
-        ctx.fill();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(acc*19-2,y);
-        ctx.lineTo(acc*19-2,y-2);
-        ctx.lineTo(acc*19+1,y-2);
-        ctx.lineTo(acc*19+1,y+acc+2);
-        ctx.lineTo(acc*19-2,y+acc+2);
-        ctx.closePath();
-        ctx.fillStyle="#606266";
-        ctx.fill();
-        ctx.stroke();
-
+        const null_res=[null,[],0,""];
         let result=instance.result();
+        const tape_num=(canvasElements.type=="multiple")?canvasElements.tape:1;
         if(result.length==0){
-            result=[null,[],0,""];
+            result=null_res;
+            if(canvasElements.type=="multiple"){
+                result=[null,[],[],""];
+                for(let i=0;i<tape_num;i++){
+                    result[1].push([]);
+                    result[2].push(0);
+                }
+            }
         }else{
             result=result[result_index];
         }
-        let paper=result[1];
-        let ptr=result[2];
-        let begin=Math.floor(ptr/18)*18;
-        for(let i=begin;i<begin+18;i+=1){
+        for(let p=0;p<tape_num;p++){
+            x=acc;
+            let paper=(canvasElements.type=="multiple")?result[1][p]:result[1];
+            let ptr=(canvasElements.type=="multiple")?result[2][p]:result[2];
+            let begin=Math.floor(ptr/18)*18;
+
             ctx.beginPath();
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+acc,y);
-            ctx.lineTo(x+acc,y+acc);
-            ctx.lineTo(x,y+acc);
+            ctx.moveTo(acc+2,y);
+            ctx.lineTo(acc+2,y-2);
+            ctx.lineTo(acc-1,y-2);
+            ctx.lineTo(acc-1,y+acc+2);
+            ctx.lineTo(acc+2,y+acc+2);
             ctx.closePath();
-            ctx.fillStyle="rgb(217,236,255)";
+            ctx.fillStyle="#606266";
             ctx.fill();
             ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(acc*19-2,y);
+            ctx.lineTo(acc*19-2,y-2);
+            ctx.lineTo(acc*19+1,y-2);
+            ctx.lineTo(acc*19+1,y+acc+2);
+            ctx.lineTo(acc*19-2,y+acc+2);
+            ctx.closePath();
             ctx.fillStyle="#606266";
-            if(i<paper.length)
-                ctx.fillText(paper[i]!=null?paper[i]:' ',x+acc/2,y+acc/2);
-            else
-                ctx.fillText(' ',x+acc/2,y+acc/2);
-            x+=acc;
+            ctx.fill();
+            ctx.stroke();
+            for(let i=begin;i<begin+18;i+=1){
+                ctx.beginPath();
+                ctx.moveTo(x,y);
+                ctx.lineTo(x+acc,y);
+                ctx.lineTo(x+acc,y+acc);
+                ctx.lineTo(x,y+acc);
+                ctx.closePath();
+                ctx.fillStyle="rgb(217,236,255)";
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle="#606266";
+                if(i<paper.length)
+                    ctx.fillText(paper[i]!=null?paper[i]:' ',x+acc/2,y+acc/2);
+                else
+                    ctx.fillText(' ',x+acc/2,y+acc/2);
+                x+=acc;
+            }
+            
+            // draw arrow which pointing to the place
+            // that turing machine is r/w now
+            ptr%=18;
+            ctx.beginPath();
+            ctx.moveTo((1.5+ptr)*acc,y+acc);
+            ctx.lineTo((1.7+ptr)*acc,y+1.4*acc);
+            ctx.lineTo((1.3+ptr)*acc,y+1.4*acc);
+            ctx.closePath();
+            ctx.fillStyle="#f56c6c";
+            ctx.fill();
+            ctx.stroke();
+            y+=acc*1.4;
         }
-        
-        // draw arrow which pointing to the place
-        // that turing machine is r/w now
-        ptr%=18;
-        ctx.beginPath();
-        ctx.moveTo((1.5+ptr)*acc,y+acc);
-        ctx.lineTo((1.7+ptr)*acc,y+1.4*acc);
-        ctx.lineTo((1.3+ptr)*acc,y+1.4*acc);
-        ctx.closePath();
-        ctx.fillStyle="#f56c6c";
-        ctx.fill();
-        ctx.stroke();
+        y-=acc*1.4;
 
         // draw execution path
         const max_path_show=Math.floor(18*acc/27);
@@ -994,7 +1027,7 @@ Page({
         });
         // initialize turing machine
         if(canvasElements.type=="normal")
-            instance=new machine(canvasElements);
+            instance=new turing_machine(canvasElements);
         else if(canvasElements.type=="multiple")
             instance=new multi_tape_machine(canvasElements);
         else
@@ -1022,9 +1055,14 @@ Page({
     onReady: function () {
         try{
             const res=wx.getSystemInfoSync();
+            let acc=res.windowWidth/20;
+            acc=acc>25?25:acc;
+            let paper_height=(canvasElements.type=="multiple")?(canvasElements.tape-1)*acc*1.4:0;
             this.setData({
                 height:res.windowHeight,
-                width:res.windowWidth
+                width:res.windowWidth,
+                acc:acc,
+                panel_height:80+paper_height
             });
             this.canvasDraw();
         }catch(e){
@@ -1081,41 +1119,47 @@ Page({
     },
 
     touchStart: function (e) {
-        let y=e.touches[0].y-40;
-        if(simu_panel_pos-40<=y && y<=simu_panel_pos+40){
+        const height=this.data.height;
+        const panel_height=this.data.panel_height;
+        let y=e.touches[0].y-panel_height/2;
+        if(simu_panel_pos-panel_height/2<=y && y<=simu_panel_pos+panel_height/2){
             this.setData({panel_selected:true});
         }else{
             return;
         }
         if(y<=0)
             y=0;
-        if(y>=this.data.height-80-e.target.offsetTop)
-            y=this.data.height-80-e.target.offsetTop;
+        if(y>=height-panel_height-e.target.offsetTop)
+            y=height-panel_height-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
     },
 
     touchMove: function (e) {
+        const height=this.data.height;
+        const panel_height=this.data.panel_height;
         if(!this.data.panel_selected)
             return;
-        let y=e.changedTouches[0].y-40;
+        let y=e.changedTouches[0].y-panel_height/2;
         if(y<=0)
             y=0;
-        if(y>=this.data.height-80-e.target.offsetTop)
-            y=this.data.height-80-e.target.offsetTop;
+        if(y>=height-panel_height-e.target.offsetTop)
+            y=height-panel_height-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
     },
 
     touchEnd: function (e) {
+        const height=this.data.height;
+        const panel_height=this.data.panel_height;
         if(!this.data.panel_selected)
             return;
         let x=e.changedTouches[0].x;
-        let y=e.changedTouches[0].y-40;
+        let y=e.changedTouches[0].y-panel_height/2;
         if(y<=0)
             y=0;
-        if(y>=this.data.height-80-e.target.offsetTop)
-            y=this.data.height-80-e.target.offsetTop;
+        if(y>=height-panel_height-e.target.offsetTop)
+            y=height-panel_height-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
         this.setData({panel_selected:false});
