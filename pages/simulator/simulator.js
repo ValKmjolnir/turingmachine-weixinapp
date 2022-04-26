@@ -7,19 +7,6 @@ var simu_panel_pos=null;
 var instance=null;
 var result_index=0;
 
-// queue data structure
-function queue(){
-    let val=[];
-    this.push=function(data){
-        val.unshift(data);
-    }
-    this.pop=function(){
-        if(val.length==0)
-            return null;
-        return val.pop();
-    }
-}
-
 function turing_machine(data) {
     let state=[];
     let initial_state=null;
@@ -191,7 +178,7 @@ function multi_tape_machine(data) {
     let initial_state=null;
     let final_state=[];
     let paper_num=data.tape;
-    let paper="";
+    let paper=[];
     let simulation_start=false;
     let hashmap=null;
     let accepted=false;
@@ -268,11 +255,14 @@ function multi_tape_machine(data) {
         }
         return true;
     }
-    this.setpaper=function(str){
-        paper=[];
-        // unfinished
-        for(let i=0;i<paper_num;i++)
-            paper.push(str.split(""));
+    this.setpaper=function(str,index=0){
+        // check if paper is a correct vector
+        if(paper.length<paper_num){
+            paper=[];
+            for(let i=0;i<paper_num;i++)
+                paper.push([]);
+        }
+        paper[index]=str.split("");
     }
     this.isrunning=function(){
         return simulation_start;
@@ -464,6 +454,21 @@ function sub_prog_turing_machine(data) {
     }
     this.stop=function(){
         simulation_start=false;
+    }
+    this.subprogram=function(){
+        // let count=0;
+        // while(instance.isrunning()){
+        //     instance.next();
+        //     result_index=0;
+        //     count+=1;
+        //     if(count==200 || instance.accept())
+        //         break;
+        // }
+        // if(count==200){
+        //     wx.showToast({title:'执行次数过多,暂停',icon:'none',duration:1500});
+        // }else if(instance.accept()){
+        //     wx.showToast({title:'有接受状态，暂停',icon:'none',duration:1000});
+        // }
     }
     this.next=function(){
         accepted=false;
@@ -1198,23 +1203,46 @@ Page({
             return;
         }
         let flush=this.canvasDraw;
-        wx.showModal({
-            title: "请输入要验证的字符串",
-            editable: true,
-            success(res){
-                if(res.confirm){
-                    instance.setpaper(res.content);
-                    if(instance.check()){
-                        instance.generate();
-                        instance.start();
+        if(canvasElements.type!="multiple"){
+            wx.showModal({
+                title: "请输入要验证的字符串",
+                editable: true,
+                success(res){
+                    if(res.confirm){
+                        instance.setpaper(res.content);
+                        if(instance.check()){
+                            instance.generate();
+                            instance.start();
+                        }
+                        result_index=0;
+                        flush();
+                    }else if(res.cancel){
+                        instance.stop();
                     }
-                    result_index=0;
-                    flush();
-                }else if(res.cancel){
-                    instance.stop();
                 }
+            });
+        }else{
+            for(let i=canvasElements.tape;i>0;i--){
+                wx.showModal({
+                    title: "请输入要验证的字符串 "+i,
+                    editable: true,
+                    success(res){
+                        if(res.confirm){
+                            instance.setpaper(res.content,i-1);
+                        }else if(res.cancel){
+                            instance.setpaper("",i-1);
+                        }
+                        // input all the strings to start the machine
+                        if(i==canvasElements.tape && instance.check()){
+                            instance.generate();
+                            instance.start();
+                        }
+                        result_index=0;
+                        flush();
+                    }
+                });
             }
-        });
+        }
     },
 
     nextStep: function() {
