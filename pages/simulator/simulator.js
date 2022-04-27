@@ -89,18 +89,21 @@ function turing_machine(data) {
     this.isrunning=function(){
         return simulation_start;
     }
-    this.start=function(sub_paper=null,sub_ptr=null){
+    this.start=function(){
         simulation_start=true;
         accepted=false;
         // state paper pointer
         let init=state[initial_state];
         // initial state,deep copy of paper,pointer,execute path
-        if(sub_paper!=null && sub_ptr!=null){
-            que.push([init,[...sub_paper],sub_ptr,""+init.name]);
-        }else{
-            que.push([init,[...paper],0,""+init.name]);
-        }
+        que=[[init,[...paper],0,""+init.name]];
         init.fillcolor="#88c3ff";
+    }
+    this.modulestart=function(paper,ptr){
+        simulation_start=true;
+        accepted=false;
+        // state paper pointer
+        let init=state[initial_state];
+        que=[[init,[...paper],ptr,""+init.name]];
     }
     this.stop=function(){
         simulation_start=false;
@@ -431,6 +434,7 @@ function sub_prog_turing_machine(data) {
     this.check=function() {
         let init_cnt=0;
         let final_cnt=0;
+        let module_error=0;
         if(data==null)
             return false;
         data.state.forEach(elem=>{
@@ -442,18 +446,20 @@ function sub_prog_turing_machine(data) {
                 let mod=load(elem.moduleName);
                 if(mod==null){
                     wx.showToast({title: "子程序"+elem.moduleName+"("+elem.name+")加载失败",icon:'none',duration:1500});
-                    return false;
+                    module_error++;
+                    return;
                 }
                 elem.instance=new turing_machine(mod);
                 if(!elem.instance.check(false)){
                     wx.showToast({title: "子程序"+elem.moduleName+"("+elem.name+")存在错误",icon:'none',duration:1500});
-                    return false;
+                    module_error++;
+                    return;
                 }else{
                     elem.instance.generate();
-                    elem.instance.start();
                 }
             }
         });
+        
         if(init_cnt>1){
             wx.showToast({title:'只能有一个初态',icon:'error',duration:800});
             return false;
@@ -465,6 +471,8 @@ function sub_prog_turing_machine(data) {
             wx.showToast({title:'至少有一个终态',icon:'error',duration:800});
             return false;
         }
+        if(module_error)
+            return false;
         return true;
     }
     this.setpaper=function(str){
@@ -485,19 +493,22 @@ function sub_prog_turing_machine(data) {
     this.stop=function(){
         simulation_start=false;
     }
-    let subprogram=function(instance){
+    let subprogram=function(instance,this_paper,this_ptr){
         let count=0;
+        instance.modulestart(this_paper,this_ptr);
         while(instance.isrunning()){
             instance.next();
             result_index=0;
             count+=1;
-            if(count==512 || instance.accept())
+            if(count==200){
+                wx.showToast({title:'子程序执行次数过多,停止',icon:'none',duration:1500});
+                break;
+            }
+            if(instance.accept())
                 break;
         }
-        if(count==512){
-            wx.showToast({title:'子程序执行次数过多,停止',icon:'none',duration:1500});
-            this.stop();
-        }
+        instance.stop();
+        return instance.result();
     }
     this.next=function(){
         accepted=false;
@@ -509,13 +520,22 @@ function sub_prog_turing_machine(data) {
         que.forEach(elem=>{
             let state=elem[0];
             if(state.isModule){
-                subprogram(state.instance);
-                if(state.instance.accept() || !state.instance.isrunning()){
-
-                }else{
-                    vec.push(elem);
+                const res=subprogram(state.instance,elem[1],elem[2]);
+                // module stop running and is not accept state
+                // this means errors occurred or string is not accepted
+                if(!state.instance.accept()){
                     return;
                 }
+                let module_result=null;
+                for(let i=0;i<res.length;i++){
+                    if(res[i][0].isEnd){
+                        module_result=res[i];
+                        break;
+                    }
+                }
+                console.log(module_result);
+                elem[1]=module_result[1];
+                elem[2]=module_result[2];
             }
             let p=elem[1];
             state.transfer.forEach(e=>{
