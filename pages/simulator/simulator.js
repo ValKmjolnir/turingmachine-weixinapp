@@ -23,6 +23,7 @@ function turing_machine(data) {
 
     let que=[]; 
     this.generate=function(){
+        que=[];
         hashmap={};
         state=data.state;
         let findByName=function(name){
@@ -58,7 +59,7 @@ function turing_machine(data) {
             });
         }
     }
-    this.check=function() {
+    this.check=function(echo=true) {
         let init_cnt=0;
         let final_cnt=0;
         if(data==null)
@@ -70,14 +71,14 @@ function turing_machine(data) {
                 final_cnt++;
         });
         if(init_cnt>1){
-            wx.showToast({title:'只能有一个初态',icon:'error',duration:800});
+            if(echo)wx.showToast({title:'只能有一个初态',icon:'error',duration:800});
             return false;
         }else if(init_cnt==0){
-            wx.showToast({title:'至少有一个初态',icon:'error',duration:800});
+            if(echo)wx.showToast({title:'至少有一个初态',icon:'error',duration:800});
             return false;
         }
         if(final_cnt==0){
-            wx.showToast({title:'至少有一个终态',icon:'error',duration:800});
+            if(echo)wx.showToast({title:'至少有一个终态',icon:'error',duration:800});
             return false;
         }
         return true;
@@ -88,13 +89,17 @@ function turing_machine(data) {
     this.isrunning=function(){
         return simulation_start;
     }
-    this.start=function(){
+    this.start=function(sub_paper=null,sub_ptr=null){
         simulation_start=true;
         accepted=false;
         // state paper pointer
         let init=state[initial_state];
         // initial state,deep copy of paper,pointer,execute path
-        que=[[init,[...paper],0,""+init.name]];
+        if(sub_paper!=null && sub_ptr!=null){
+            que.push([init,[...sub_paper],sub_ptr,""+init.name]);
+        }else{
+            que.push([init,[...paper],0,""+init.name]);
+        }
         init.fillcolor="#88c3ff";
     }
     this.stop=function(){
@@ -370,6 +375,16 @@ function sub_prog_turing_machine(data) {
     let simulation_start=false;
     let hashmap=null;
     let accepted=false;
+    let load=function(filename){
+        let fs=wx.getFileSystemManager();
+        try{
+            const res=fs.readFileSync(`${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+filename,'utf8',0);
+            return JSON.parse(res);
+        }catch(e){ // empty file
+            console.error(e);
+            return null;
+        }
+    }
     this.isfinal=function(name){
         if((name in hashmap) && hashmap[name].isEnd==1)
             return true;
@@ -423,6 +438,21 @@ function sub_prog_turing_machine(data) {
                 init_cnt++;
             if(elem.isEnd)
                 final_cnt++;
+            if(elem.isModule){
+                let mod=load(elem.moduleName);
+                if(mod==null){
+                    wx.showToast({title: "子程序"+elem.moduleName+"("+elem.name+")加载失败",icon:'none',duration:1500});
+                    return false;
+                }
+                elem.instance=new turing_machine(mod);
+                if(!elem.instance.check(false)){
+                    wx.showToast({title: "子程序"+elem.moduleName+"("+elem.name+")存在错误",icon:'none',duration:1500});
+                    return false;
+                }else{
+                    elem.instance.generate();
+                    elem.instance.start();
+                }
+            }
         });
         if(init_cnt>1){
             wx.showToast({title:'只能有一个初态',icon:'error',duration:800});
@@ -455,20 +485,19 @@ function sub_prog_turing_machine(data) {
     this.stop=function(){
         simulation_start=false;
     }
-    this.subprogram=function(){
-        // let count=0;
-        // while(instance.isrunning()){
-        //     instance.next();
-        //     result_index=0;
-        //     count+=1;
-        //     if(count==200 || instance.accept())
-        //         break;
-        // }
-        // if(count==200){
-        //     wx.showToast({title:'执行次数过多,暂停',icon:'none',duration:1500});
-        // }else if(instance.accept()){
-        //     wx.showToast({title:'有接受状态，暂停',icon:'none',duration:1000});
-        // }
+    let subprogram=function(instance){
+        let count=0;
+        while(instance.isrunning()){
+            instance.next();
+            result_index=0;
+            count+=1;
+            if(count==512 || instance.accept())
+                break;
+        }
+        if(count==512){
+            wx.showToast({title:'子程序执行次数过多,停止',icon:'none',duration:1500});
+            this.stop();
+        }
     }
     this.next=function(){
         accepted=false;
@@ -479,6 +508,15 @@ function sub_prog_turing_machine(data) {
         });
         que.forEach(elem=>{
             let state=elem[0];
+            if(state.isModule){
+                subprogram(state.instance);
+                if(state.instance.accept() || !state.instance.isrunning()){
+
+                }else{
+                    vec.push(elem);
+                    return;
+                }
+            }
             let p=elem[1];
             state.transfer.forEach(e=>{
                 // avoid result length overflow
