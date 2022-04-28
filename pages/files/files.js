@@ -7,7 +7,6 @@ Page({
      */
     data: {
         files:[],
-        empty_file_list:true,
         navigateType:""
     },
 
@@ -28,10 +27,6 @@ Page({
             }
         }
         this.setData({files:list});
-        if(this.data.files.length>0)
-            this.setData({
-                empty_file_list:false
-            });
     },
 
     /**

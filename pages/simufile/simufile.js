@@ -5,8 +5,7 @@ Page({
      * 页面的初始数据
      */
     data: {
-        files:[],
-        empty_file_list:true
+        files:[]
     },
 
     /**
@@ -43,10 +42,6 @@ Page({
             }
         }
         this.setData({files:list});
-        if(this.data.files.length>0)
-            this.setData({
-                empty_file_list:false
-            });
     },
 
     /**

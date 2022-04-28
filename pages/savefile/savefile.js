@@ -78,7 +78,6 @@ Page({
     },
 
     confirmSave: function() {
-        let type=this.data.type;
         let fname=this.data.filename;
         let fs=this.fs;
         if(fname=="untitled" || fname==""){
@@ -97,21 +96,18 @@ Page({
             return;
         }
         try{
-            let pages=getCurrentPages();
             let fd=fs.openSync({
                 filePath: `${wx.env.USER_DATA_PATH}/turingmachinesimulator/${fname}.json`,
                 flag: "wx"
             });
-
-            fs.writeSync({
-                fd:fd,
-                data:JSON.stringify(pages[pages.length-2].data.filedata)
+            const event=this.getOpenerEventChannel();
+            event.on("saveFileContext",function(data){
+                fs.writeSync({
+                    fd:fd,
+                    data:data
+                });
             });
-            
-            pages[pages.length-2].setData({
-                successSaveFile:true,
-                filename:fname+".json",
-            });
+            event.emit("successSaveFile",{res:true,name:fname+".json"});
             wx.navigateBack({
                 delta: 0,
             })
@@ -125,12 +121,9 @@ Page({
     },
 
     cancelSave: function() {
-        let pages=getCurrentPages();
-        pages[pages.length-2].setData({
-            cancelSaveFile:true
-        });
+        this.getOpenerEventChannel().emit("cancelSaveFile",true);
         wx.navigateBack({
-          delta: 0,
-        })
+            delta: 0,
+        });
     }
 })

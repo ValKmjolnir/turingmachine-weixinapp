@@ -6,6 +6,10 @@ var canvasElements=null;
 var simu_panel_pos=null;
 var instance=null;
 var result_index=0;
+var height=0;
+var width=0;
+var panel_height=80;
+var panel_selected=false;
 
 function turing_machine(data) {
     let state=[];
@@ -606,11 +610,6 @@ Page({
      * 页面的初始数据
      */
     data: {
-        height:null,
-        width:null,
-        acc:null,
-        panel_height:80,
-        panel_selected:false
     },
 
     /**
@@ -854,15 +853,13 @@ Page({
      */
     drawPaper: function() {
         ctx.strokeStyle="#606266";
-        const width=this.data.width;
-        const acc=this.data.acc;
-        const panel_height=this.data.panel_height;
+        const acc=(width/20)>25?25:width/20;
         let x=acc;
         let y=simu_panel_pos;
 
         // draw panel base
-        // width: this.data.width-2
-        // height: this.data.panel_height
+        // width: width-2
+        // height: panel_height
         ctx.beginPath();
         ctx.moveTo(acc,y);
         ctx.lineTo(width-acc,y);
@@ -1075,12 +1072,14 @@ Page({
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
+        panel_selected=false;
         this.fs=wx.getFileSystemManager();
         if("type" in options && options.type=="fromedit"){
-            let pages=getCurrentPages();
-            // do deep copy
-            let tmp=JSON.stringify(pages[pages.length-2].data.filedata);
-            canvasElements=JSON.parse(tmp);
+            const event=this.getOpenerEventChannel();
+            event.on("temporaryMachine",function(data){
+                // do deep copy
+                canvasElements=JSON.parse(data);
+            });
         }else{
             this.loadExistFile(options.filename);
         }
@@ -1117,21 +1116,17 @@ Page({
     onReady: function () {
         try{
             const res=wx.getSystemInfoSync();
-            let acc=res.windowWidth/20;
-            acc=acc>25?25:acc;
+            let acc=(res.windowWidth/20)>25?25:(res.windowWidth/20);
             let paper_height=(canvasElements.type=="multiple")?(canvasElements.tape-1)*acc*1.4:0;
-            this.setData({
-                height:res.windowHeight,
-                width:res.windowWidth,
-                acc:acc,
-                panel_height:80+paper_height
-            });
+            height=res.windowHeight;
+            width=res.windowWidth;
+            panel_height=80+paper_height;
             this.canvasDraw();
         }catch(e){
             console.error(e);
         }
         // load default simulator panel's y position
-        simu_panel_pos=this.data.height*0.62;
+        simu_panel_pos=height*0.62;
         this.canvasDraw();
     },
 
@@ -1181,11 +1176,9 @@ Page({
     },
 
     touchStart: function (e) {
-        const height=this.data.height;
-        const panel_height=this.data.panel_height;
         let y=e.touches[0].y-panel_height/2;
         if(simu_panel_pos-panel_height/2<=y && y<=simu_panel_pos+panel_height/2){
-            this.setData({panel_selected:true});
+            panel_selected=true;
         }else{
             return;
         }
@@ -1198,9 +1191,7 @@ Page({
     },
 
     touchMove: function (e) {
-        const height=this.data.height;
-        const panel_height=this.data.panel_height;
-        if(!this.data.panel_selected)
+        if(!panel_selected)
             return;
         let y=e.changedTouches[0].y-panel_height/2;
         if(y<=0)
@@ -1212,11 +1203,8 @@ Page({
     },
 
     touchEnd: function (e) {
-        const height=this.data.height;
-        const panel_height=this.data.panel_height;
-        if(!this.data.panel_selected)
+        if(!panel_selected)
             return;
-        let x=e.changedTouches[0].x;
         let y=e.changedTouches[0].y-panel_height/2;
         if(y<=0)
             y=0;
@@ -1224,7 +1212,7 @@ Page({
             y=height-panel_height-e.target.offsetTop;
         simu_panel_pos=y;
         this.canvasDraw();
-        this.setData({panel_selected:false});
+        panel_selected=false;
     },
 
     /**

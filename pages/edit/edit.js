@@ -2,6 +2,9 @@
 var canvas=null;
 var ctx=null;
 const dpr=wx.getSystemInfoSync().pixelRatio;
+var page_filename="untitled.json";
+var success_save=false;
+var cancel_save=false;
 
 var canvasElements={
     type:null,
@@ -72,6 +75,7 @@ function propertyParse(str){
     }
     return true;
 }
+
 function multiplePropertyParse(str){
     const tapes=canvasElements.tape;
     const len=6*tapes-1;
@@ -109,15 +113,9 @@ Page({
      * 页面的初始数据
      */
     data: {
-        width:null,
-        height:null,
         isLongTap:false,
         selectedState:null,
-        filename:"untitled.json",
-        filedata:{},
         operand_type:"select",
-        successSaveFile:false,
-        cancelSaveFile:false,
         hasModule:false
     },
 
@@ -598,12 +596,13 @@ Page({
                 hasModule:true
             });
         /* if options include filename, set it */
-        if("filename" in options)
-            this.setData({
-                filename:options.filename
-            });
+        if("filename" in options){
+            page_filename=options.filename;
+        }else{
+            page_filename="untitled.json";
+        }
         wx.setNavigationBarTitle({
-            title: this.data.filename,
+            title: page_filename,
         });
         operations=new operation_undo_rollback();
         wx.createSelectorQuery()
@@ -625,16 +624,7 @@ Page({
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function() {
-        try{
-            const res=wx.getSystemInfoSync();
-            this.setData({
-                height:res.windowHeight,
-                width:res.windowWidth
-            });
-            this.canvasDraw();
-        }catch(e){
-            console.error(e);
-        }
+        this.canvasDraw();
     },
 
     /**
@@ -642,27 +632,24 @@ Page({
      */
     onShow: function () {
         wx.setNavigationBarTitle({
-            title: this.data.filename,
+            title: page_filename,
         });
-        // successfully save file in savefile page
-        if(this.data.successSaveFile)
+        if(success_save){
             wx.showToast({
                 title: '创建成功',
                 icon: 'success',
                 duration: 1000
             });
-        // cancel saving file in savefile page
-        else if(this.data.cancelSaveFile)
+        }
+        if(cancel_save){
             wx.showToast({
                 title: '取消创建',
                 icon: 'error',
                 duration: 1000
             });
-        // reset
-        this.setData({
-            successSaveFile:false,
-            cancelSaveFile:false
-        });
+        }
+        success_save=false;
+        cancel_save=false;
         this.canvasDraw();
     },
 
@@ -724,13 +711,26 @@ Page({
      * 保存模型到文件
      */
     saveFile: function(e) {
-        let name=this.data.filename;
+        let name=page_filename;
         canvasElements.state.forEach(elem=>{
             elem.fillcolor="#ffe985";
         });
-        this.setData({filedata:canvasElements});
         if(name=="untitled.json"){
-            wx.navigateTo({url: '/pages/savefile/savefile?type='+canvasElements.type});
+            wx.navigateTo({
+                url: '/pages/savefile/savefile?type='+canvasElements.type,
+                events:{
+                    successSaveFile(data){
+                        success_save=data.res;
+                        page_filename=data.name;
+                    },
+                    cancelSaveFile(data){
+                        cancel_save=data;
+                    }
+                },
+                success(res){
+                    res.eventChannel.emit("saveFileContext",JSON.stringify(canvasElements));
+                }
+            });
         }else{
             try{
                 this.fs.writeFileSync(
@@ -751,11 +751,11 @@ Page({
         canvasElements.state.forEach(elem =>{
             elem.fillcolor="#ffe985";
         });
-        this.setData({
-            filedata:canvasElements
-        });
         wx.navigateTo({
             url: "/pages/simulator/simulator?type=fromedit",
+            success(res){
+                res.eventChannel.emit("temporaryMachine",JSON.stringify(canvasElements));
+            }
         });
     },
 
@@ -1142,12 +1142,12 @@ Page({
             success(res){
                 wx.saveImageToPhotosAlbum({
                     filePath: res.tempFilePath,
-                    success(res){wx.showToast({title:'保存成功',icon:'success',duration:1000});},
+                    success(res){wx.showToast({title:'保存成功',icon:'success',duration:800});},
                     fail(err){
                         if(err.errMsg=="saveImageToPhotosAlbum:fail auth deny"){
                             wx.navigateTo({url:'/pages/auth/auth?info=无图片保存权限，请设置',});
                         }else{
-                            wx.showToast({title:'取消保存',icon:'error',duration:1000});
+                            wx.showToast({title:'保存失败',icon:'error',duration:800});
                         }
                     }
                 });
