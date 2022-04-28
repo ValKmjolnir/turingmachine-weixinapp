@@ -1,4 +1,4 @@
-<!--pages/logs/index.wxml-->
+<!--pages/simufile/simufile.wxml-->
 <view>
     <view style="text-align: center;margin-top: 20rpx;font-weight: 700;">
         <text style="color: #303133;">选择图灵机</text>

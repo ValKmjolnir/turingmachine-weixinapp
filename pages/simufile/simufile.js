@@ -1,4 +1,4 @@
-// pages/logs/index.js
+// pages/simufile/simufile.js
 Page({
 
     /**
@@ -83,7 +83,7 @@ Page({
     onShareAppMessage: function () {
         return {
             title:"模拟器",
-            path:"/pages/logs/index"
+            path:"/pages/simufile/simufile"
         }
     },
 

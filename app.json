@@ -1,13 +1,14 @@
 {
     "pages": [
         "pages/index/index",
-        "pages/logs/index",
         "pages/edit/edit",
         "pages/files/files",
         "pages/savefile/savefile",
         "pages/simulator/simulator",
         "pages/settings/settings",
-        "pages/auth/auth"
+        "pages/auth/auth",
+        "pages/simufile/simufile",
+        "pages/logs/logs"
     ],
     "window": {
         "navigationBarTitleText": "图灵机模拟",
@@ -27,7 +28,7 @@
                 "text": "首页"
             },
             {
-                "pagePath": "pages/logs/index",
+                "pagePath": "pages/simufile/simufile",
                 "iconPath": "image/icon_CPU.png",
                 "selectedIconPath": "image/icon_CPU_HL.png",
                 "text": "模拟"

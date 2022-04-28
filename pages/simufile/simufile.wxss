@@ -1,4 +1,4 @@
-/* pages/logs/index.wxss */
+/* pages/simufile/simufile.wxss */
 button {
     font-size: 30rpx;
     margin-top: 10rpx;
