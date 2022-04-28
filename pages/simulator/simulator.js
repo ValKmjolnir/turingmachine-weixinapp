@@ -533,7 +533,6 @@ function sub_prog_turing_machine(data) {
                         break;
                     }
                 }
-                console.log(module_result);
                 elem[1]=module_result[1];
                 elem[2]=module_result[2];
             }
