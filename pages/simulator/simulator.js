@@ -1076,23 +1076,29 @@ Page({
         this.fs=wx.getFileSystemManager();
         if("type" in options && options.type=="fromedit"){
             const event=this.getOpenerEventChannel();
+            // this is async function
             event.on("temporaryMachine",function(data){
                 // do deep copy
                 canvasElements=JSON.parse(data);
+                if(canvasElements.type=="normal")
+                    instance=new turing_machine(canvasElements);
+                else if(canvasElements.type=="multiple")
+                    instance=new multi_tape_machine(canvasElements);
+                else
+                    instance=new sub_prog_turing_machine(canvasElements);
             });
         }else{
             this.loadExistFile(options.filename);
+            if(canvasElements.type=="normal")
+                instance=new turing_machine(canvasElements);
+            else if(canvasElements.type=="multiple")
+                instance=new multi_tape_machine(canvasElements);
+            else
+                instance=new sub_prog_turing_machine(canvasElements);
         }
         wx.setNavigationBarTitle({
             title: "模拟器"
         });
-        // initialize turing machine
-        if(canvasElements.type=="normal")
-            instance=new turing_machine(canvasElements);
-        else if(canvasElements.type=="multiple")
-            instance=new multi_tape_machine(canvasElements);
-        else
-            instance=new sub_prog_turing_machine(canvasElements);
         result_index=0;
         // initialize canvas context
         wx.createSelectorQuery()
