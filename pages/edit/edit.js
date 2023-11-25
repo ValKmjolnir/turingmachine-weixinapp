@@ -1,12 +1,12 @@
 // pages/edit.js
-var canvas=null;
-var ctx=null;
-const dpr=wx.getSystemInfoSync().pixelRatio;
-var page_filename="untitled.json";
-var success_save=false;
-var cancel_save=false;
+var canvas = null;
+var ctx = null;
+const dpr = wx.getSystemInfoSync().pixelRatio;
+var page_filename = "untitled.json";
+var success_save = false;
+var cancel_save = false;
 
-var canvasElements={
+var canvasElements = {
     type:null,
     state_counter:0,
     state:[],
@@ -17,34 +17,42 @@ var operations=null;
 var last_x,last_y;
 
 function operation_undo_rollback() {
-    let ud=[];
-    let rb=[];
-    this.push=function(){
+    let ud = [];
+    let rb = [];
+
+    this.push = function() {
         ud.push(JSON.stringify(canvasElements));
-        if(ud.length>16){
-            ud=ud.slice(1);
+        if (ud.length>16) {
+            ud = ud.slice(1);
         }
-        rb=[];
+        rb = [];
     }
-    this.pop=function(){
+
+    this.pop = function() {
         ud.pop();
     }
-    this.undo=function(){
-        if(ud.length==0)
+
+    this.undo = function() {
+        if (ud.length==0) {
             return;
+        }
         rb.push(JSON.stringify(canvasElements));
-        canvasElements=JSON.parse(ud.pop());
+        canvasElements = JSON.parse(ud.pop());
     }
-    this.rollback=function(){
-        if(rb.length==0)
+
+    this.rollback = function() {
+        if (rb.length==0) {
             return;
+        }
         ud.push(JSON.stringify(canvasElements));
-        canvasElements=JSON.parse(rb.pop());
+        canvasElements = JSON.parse(rb.pop());
     }
-    this.undo_size=function(){
+
+    this.undo_size = function() {
         return ud.length;
     }
-    this.rollback_size=function(){
+
+    this.rollback_size = function() {
         return rb.length;
     }
 }
@@ -127,17 +135,18 @@ Page({
      * 根据名称查找状态
      */
     findState: function(name) {
-        let vec=canvasElements.state;
-        for(let i=0;i<vec.length;i++)
-            if(vec[i].name==name)
-                return vec[i];
+        for(const state of canvasElements.state) {
+            if (state.name === name) {
+                return state;
+            }
+        }
         return null;
     },
 
     /**
      * 寻找距离点击处最近的状态，并且更新颜色
      */
-    findColorNearestState: function(x,y) {
+    findColorNearestState: function(x, y) {
         let dis=1e6;
         let tmp={};
         canvasElements.state.forEach(elem => {
@@ -159,15 +168,15 @@ Page({
      * 寻找距离点击处最近的状态，并且更新颜色
      * 只返回名称
      */
-    findColorNearestStateName: function(x,y){
-        let state=this.findColorNearestState(x,y);
-        return (state==null)?null:state.name;
+    findColorNearestStateName: function(x, y) {
+        const state = this.findColorNearestState(x, y);
+        return (state==null)? null:state.name;
     },
 
     /**
      * 寻找被点击的线段
      */
-    findNearestFunc: function(x,y){
+    findNearestFunc: function(x, y) {
         //求点到线的距离
         let dis=1e6;
         let tmp={};
@@ -235,38 +244,46 @@ Page({
      * 初始化文字格式 
      */
     textStyle: function() {
-        ctx.font="10rpx sans-serif"
-        ctx.textAlign="center";
-        ctx.textBaseline="middle";
+        ctx.font = "10rpx sans-serif"
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
     },
 
     /**
      * 绘制状态
      */
-    drawState: function(name,x,y,r,color) {
-        ctx.strokeStyle="#606266";
+    drawState: function(state) {
+        const name = state.name;
+        const x = state.x;
+        const y = state.y;
+        const r = 15;
+        const color = state.fillcolor;
+        ctx.strokeStyle = "#606266";
         // draw circle
         ctx.beginPath();
-        ctx.arc(x,y,r,0,2*Math.PI);
-        ctx.fillStyle=color;
+        ctx.arc(x, y, r, 0, 2*Math.PI);
+        ctx.fillStyle = color;
         ctx.fill();
         ctx.stroke();
         // set text
-        ctx.fillStyle="#606266";
-        ctx.fillText(name,x,y);
+        ctx.fillStyle = "#606266";
+        ctx.fillText(name, x, y);
     },
 
     /**
      * 绘制初态侧面三角形
      */
-    drawStateStart: function(x,y,r) {
-        ctx.strokeStyle="#606266";
-        ctx.fillStyle="#e1f3d8";
+    drawStateStart: function(state) {
+        const x = state.x;
+        const y = state.y;
+        const r = 15; // radius
+        ctx.strokeStyle = "#606266";
+        ctx.fillStyle = "#e1f3d8";
         ctx.beginPath();
-        ctx.moveTo(x-r,y);
-        ctx.lineTo(x-r-0.5*r,y-0.7*r);
-        ctx.lineTo(x-r-0.5*r,y+0.7*r);
-        ctx.lineTo(x-r,y);
+        ctx.moveTo(x-r, y);
+        ctx.lineTo(x-r-0.5*r, y-0.7*r);
+        ctx.lineTo(x-r-0.5*r, y+0.7*r);
+        ctx.lineTo(x-r, y);
         ctx.fill();
         ctx.stroke();
     },
@@ -274,32 +291,34 @@ Page({
     /**
      * 绘制终态的小圆环
      */
-    drawStateEnd: function(x,y,r) {
-        ctx.strokeStyle="#606266";
+    drawStateEnd: function(state) {
+        ctx.strokeStyle = "#606266";
         ctx.beginPath();
-        ctx.arc(x,y,r,0,2*Math.PI);
+        ctx.arc(state.x, state.y, 12, 0, 2*Math.PI);
         ctx.stroke();
     },
 
     /**
      * 绘制子程序节点的特别部分
     */
-    drawSubProgram: function(x,y) {
+    drawSubProgram: function(state) {
+        const x = state.x;
+        const y = state.y;
         ctx.save();
-        ctx.strokeStyle="#606266";
-        ctx.fillStyle="#e1f3d8";
+        ctx.strokeStyle = "#606266";
+        ctx.fillStyle = "#e1f3d8";
         ctx.beginPath();
-        ctx.moveTo(x-6,y-9);
-        ctx.lineTo(x+6,y-9);
-        ctx.lineTo(x+6,y-7);
-        ctx.lineTo(x-6,y-7);
+        ctx.moveTo(x-6, y-9);
+        ctx.lineTo(x+6, y-9);
+        ctx.lineTo(x+6, y-7);
+        ctx.lineTo(x-6, y-7);
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
-        for(let i=-3;i<=3;i+=3){
+        for(let i = -3; i<=3; i+=3){
             ctx.beginPath();
-            ctx.moveTo(x+i,y-9);
-            ctx.lineTo(x+i,y-7);
+            ctx.moveTo(x+i, y-9);
+            ctx.lineTo(x+i, y-7);
             ctx.stroke();
         }
         ctx.restore();
@@ -530,18 +549,18 @@ Page({
                 }
             });
         });
-        canvasElements.func.forEach(elem =>{
-            if(elem.begin_state==null){ // no need to render invalid connection
+        canvasElements.func.forEach(elem => {
+            if (elem.begin_state==null) { // no need to render invalid connection
                 return;
-            }else{
-                let state=this.findState(elem.begin_state);
-                elem.begin_x=state.x;
-                elem.begin_y=state.y;
+            } else {
+                const state = this.findState(elem.begin_state);
+                elem.begin_x = state.x;
+                elem.begin_y = state.y;
             }
-            if(elem.end_state!=null){ // end state maybe null, then use end_x end_y
-                let state=this.findState(elem.end_state);
-                elem.end_x=state.x;
-                elem.end_y=state.y;
+            if (elem.end_state!=null) { // end state maybe null, then use end_x end_y
+                const state = this.findState(elem.end_state);
+                elem.end_x = state.x;
+                elem.end_y = state.y;
             }
             if(elem.begin_x==elem.end_x && elem.begin_y==elem.end_y){
                 this.drawSelfArrow(elem.begin_x,elem.begin_y,elem.text);
@@ -552,16 +571,16 @@ Page({
             }
         });
         // states
-        canvasElements.state.forEach(elem=>{
-            const x=elem.x;
-            const y=elem.y;
-            this.drawState(elem.name,x,y,15,elem.fillcolor);
-            if(elem.isEnd)
-                this.drawStateEnd(x,y,11);
-            if(elem.isStart)
-                this.drawStateStart(x,y,15);
-            if(elem.isModule)
-                this.drawSubProgram(x,y);
+        canvasElements.state.forEach(state => {
+            const x = state.x;
+            const y = state.y;
+            this.drawState(state);
+            if(state.isEnd)
+                this.drawStateEnd(state);
+            if(state.isStart)
+                this.drawStateStart(state);
+            if(state.isModule)
+                this.drawSubProgram(state);
         });
     },
 
@@ -571,11 +590,13 @@ Page({
      */
     loadExistFile: function(filename) {
         try{
-            const res=this.fs.readFileSync(
+            const res = this.fs.readFileSync(
                 `${wx.env.USER_DATA_PATH}/turingmachinesimulator/`+filename,
-                'utf8',0);
-            canvasElements=JSON.parse(res);
-        }catch(e){ // empty file
+                'utf8',
+                0
+            );
+            canvasElements = JSON.parse(res);
+        } catch(e) { // empty file
             console.error(e);
         }
     },
@@ -791,7 +812,7 @@ Page({
     /**
      * select下长按状态的选择
      */
-    longTapSelect: function(x,y){
+    longTapSelect: function(x, y) {
         let state=this.data.selectedState;
         if(state==null)
             return;
@@ -854,8 +875,8 @@ Page({
         const opr=this.data.operand_type;
         const flush=this.canvasDraw;
         if (opr=="select") {
-            const state = this.findColorNearestState(x,y);
-            const transfer = this.findNearestFunc(x,y);
+            const state = this.findColorNearestState(x, y);
+            const transfer = this.findNearestFunc(x, y);
             if(state !== null && state.isModule)
                 wx.showToast({
                     title: "子程序" + state.moduleName,
@@ -863,6 +884,7 @@ Page({
                     duration: 800
                 });
             if(state !== null && state !== undefined) {
+                this.drawCircleSelectPanel(state);
                 const state_is_start = state.isStart;
                 const state_is_end = state.isEnd;
                 const choices = [
@@ -872,6 +894,7 @@ Page({
                 wx.showActionSheet({
                     itemList: choices,
                     success: (res) => {
+                        operations.push();
                         switch(res.tapIndex) {
                             case 0: state.isStart = !state_is_start; break;
                             case 1: state.isEnd = !state_is_end; break;
@@ -881,7 +904,7 @@ Page({
                 })
                 return;
             }
-            if(transfer === null) {
+            if (transfer === null) {
                 return;
             }
             const isstr=(typeof(transfer.text)=="string");
@@ -932,8 +955,8 @@ Page({
                 }
             });
         }else if(opr=="delete"){
-            let state=this.findColorNearestState(x,y);
-            let transfer=this.findNearestFunc(x,y);
+            let state=this.findColorNearestState(x, y);
+            let transfer=this.findNearestFunc(x, y);
             if(state!=null){
                 let f=this.deleteState;
                 wx.showModal({
@@ -960,14 +983,14 @@ Page({
                 });
             }
         }else if(opr=="module"){
-            const subprog=this.tapState;
-            const flush=this.canvasDraw;
+            const subprog = this.tapState;
+            const flush = this.canvasDraw;
             wx.navigateTo({
                 url: '/pages/files/files?nav=module',
-                events:{
+                events: {
                     getFile: function(data) {
                         operations.push();
-                        subprog(x,y,data);
+                        subprog(x, y, data);
                         flush();
                     }
                 }
@@ -1027,13 +1050,13 @@ Page({
         this.setData({touch_start_stamp:e.timeStamp, touch_start_cordx:x, touch_start_cordy:y});
         let opr=this.data.operand_type;
         if(opr=="select"){
-            let state=this.findColorNearestState(x,y);
+            let state=this.findColorNearestState(x, y);
             if(state!=null){
                 operations.push();
                 // last_x/y is used to make sure the state
                 // is really moved for a bit of range
-                last_x=state.x;
-                last_y=state.y;
+                last_x = state.x;
+                last_y = state.y;
             }
             // this operation binds 'select move', 'select set init/final'
             this.setData({
@@ -1043,10 +1066,10 @@ Page({
             this.canvasDraw();
         }else if(opr=="state"){
             operations.push();
-            this.tapState(x,y);
+            this.tapState(x, y);
             this.canvasDraw();
         }else if(opr=="func"){
-            let name=this.findColorNearestStateName(x,y);
+            let name=this.findColorNearestStateName(x, y);
             operations.push();
             canvasElements.func.push({
                 begin_x:x,begin_y:y,
@@ -1080,7 +1103,7 @@ Page({
         
         if(this.data.isLongTap){
             // this is select set init/final state operation
-            this.longTapSelect(x,y);
+            this.longTapSelect(x, y);
             this.setData({selectedState:null});
         }else if(opr=="select" && this.data.selectedState!=null){
             let state=this.data.selectedState;
@@ -1098,7 +1121,7 @@ Page({
         }else if(opr=="func"){
             let vec=canvasElements.func;
             let index=vec.length-1;
-            vec[index].end_state=this.findColorNearestStateName(x,y);
+            vec[index].end_state=this.findColorNearestStateName(x, y);
             if(vec[index].begin_state==null || vec[index].end_state==null){
                 // cancel creating new transfer, pop
                 vec.pop();
@@ -1164,7 +1187,7 @@ Page({
 
         if(opr=="select"){
             // draw select panel
-            let state=this.findColorNearestState(x,y);
+            let state=this.findColorNearestState(x, y);
             if(state!=null){
                 this.setData({isLongTap:true});
                 this.drawCircleSelectPanel(state);
@@ -1187,7 +1210,7 @@ Page({
                     },
                     fail(err){
                         if(err.errMsg=="saveImageToPhotosAlbum:fail auth deny"){
-                            wx.navigateTo({url:'/pages/auth/auth?info=无图片保存权限，请设置',});
+                            wx.navigateTo({url:'/pages/auth/auth?info=请设置图片保存权限',});
                         }else{
                             wx.showToast({title:'保存失败',icon:'error',duration:800});
                         }
@@ -1198,15 +1221,17 @@ Page({
     },
 
     undo: function() {
-        if(operations.undo_size()==0)
+        if (operations.undo_size()==0) {
             return;
+        }
         operations.undo();
         this.canvasDraw();
     },
 
     rollback: function() {
-        if(operations.rollback_size()==0)
+        if (operations.rollback_size()==0) {
             return;
+        }
         operations.rollback();
         this.canvasDraw();
     }

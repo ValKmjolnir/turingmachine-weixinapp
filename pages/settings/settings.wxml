@@ -12,7 +12,7 @@
         <text style="color: #303133;">设置</text>
     </view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
-        <text style="color: #606266;">· 小程序权限设置</text>
+        <text style="color: #606266;">· 图片保存权限设置</text>
     </view>
     <button open-type="openSetting">图片保存权限设置</button>
     <view style="text-align: left;margin-top: 30rpx;margin-left: 30rpx;margin-right: 20rpx;font-size: small;">
@@ -120,25 +120,21 @@
         <text style="color: #303133;">版本信息</text>
     </view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
-        <text style="color: #606266;">Version 1.0.2(2023/11/25)</text>
+        <text style="color: #606266;">· Version 1.0.2(2023/11/25)</text>
     </view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
-        <text style="color: #606266;">Copy Right @ValKmjolnir 2021~2023</text>
+        <text style="color: #606266;">· Copy Right @ValKmjolnir 2021~2023</text>
     </view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 800;">
         <text style="color: #303133;">反馈与联系方式</text>
     </view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
-        <text style="color: #606266;">E-mail: lhk101lhk101@qq.com</text>
+        <text style="color: #606266;">· E-mail: lhk101lhk101@qq.com</text>
     </view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
-        <text style="color: #606266;">QQ: 896693328</text>
+        <text style="color: #606266;">· QQ: 896693328</text>
     </view>
     <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
-        <text style="color: #606266;">Github: ValKmjolnir</text>
-    </view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
-        <text style="color: #606266;">Gitee: ValKmjolnir</text>
+        <text style="color: #606266;">· Github/Gitee: ValKmjolnir</text>
     </view>
 </view>
-
