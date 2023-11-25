@@ -14,7 +14,7 @@ Page({
     onLoad: function (options) {
         this.fs=wx.getFileSystemManager();
         wx.setNavigationBarTitle({
-            title: '选择图灵机',
+            title: 'Choose Turing Machine File',
         })
     },
 

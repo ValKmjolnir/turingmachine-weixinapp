@@ -1097,7 +1097,7 @@ Page({
                 instance=new sub_prog_turing_machine(canvasElements);
         }
         wx.setNavigationBarTitle({
-            title: "模拟器"
+            title: "Simulator"
         });
         result_index=0;
         // initialize canvas context

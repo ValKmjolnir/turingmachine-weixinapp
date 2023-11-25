@@ -11,7 +11,7 @@
         "pages/logs/logs"
     ],
     "window": {
-        "navigationBarTitleText": "图灵机模拟",
+        "navigationBarTitleText": "Turing Machine Simulator",
         "navigationBarBackgroundColor": "#409eff"
     },
     "tabBar": {

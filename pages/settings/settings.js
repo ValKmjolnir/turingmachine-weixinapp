@@ -13,7 +13,7 @@ Page({
      */
     onLoad: function (options) {
         wx.setNavigationBarTitle({
-            title: '设置',
+            title: 'Settings',
         });
     },
 
@@ -73,39 +73,39 @@ Page({
      * 编辑功能教程提示
      */
     tapTips: function(param) {
-        const tips={
-            select: "选择组件",
+        const tips = {
+            select: "选择组件, 单击状态时可以设置状态类型",
             state: "创建状态",
             transfer: "创建状态转移函数",
-            delete: "删除",
-            module: "添加模块(子程序)",
-            undo: "撤回",
-            rollback: "取消撤回",
+            delete: "删除状态或转移函数",
+            module: "添加模块 (子程序)",
+            undo: "撤回操作",
+            rollback: "取消撤回操作",
             savefile: "保存文件",
-            savepic: "保存为图片",
+            savepic: "保存当前页面为图片",
             simulation: "跳转到模拟器",
             input: "输入待验证字符串",
             next: "单步执行",
             terminate: "中止模拟",
-            fastrun: "快速执行(直接得到结果)",
+            fastrun: "快速执行 (直接得到结果)",
             prevresult: "展示上个结果",
             nextresult: "展示下个结果"
         };
         wx.showToast({
-          title: tips[param.currentTarget.dataset.param],
-          icon: "none",
-          duration: 1000
+            title: tips[param.currentTarget.dataset.param],
+            icon: "none",
+            duration: 1000
         })
     },
 
     setClipboard: function() {
         wx.setClipboardData({
             data: "ε",
-            success(res){
+            success: (res) => {
                 wx.showToast({
                     title: "复制成功",
                     icon: "none",
-                    duration: 800
+                    duration: 600
                 });
             }
         });

@@ -1,18 +1,25 @@
 <!--pages/settings/settings.wxml-->
 
+<view style="text-align: center;margin-top: 20rpx;font-weight: 1000;">
+    <text style="color: #303133;">ValKmjolnir's Turing Machine Simulator</text>
+</view>
+<view style="text-align: center;margin-top: 20rpx;font-weight: 200;font-size: small;">
+    <text style="color: rgb(103, 104, 105);">@NUAA-CCST 2022</text>
+</view>
+
 <view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 700;">
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 800;">
         <text style="color: #303133;">设置</text>
     </view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;">
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
         <text style="color: #606266;">· 小程序权限设置</text>
     </view>
-    <button open-type="openSetting">权限设置</button>
+    <button open-type="openSetting">图片保存权限设置</button>
     <view style="text-align: left;margin-top: 30rpx;margin-left: 30rpx;margin-right: 20rpx;font-size: small;">
-        <text style="color: #606266;">请注意，如果是在编辑界面点击截图生成时跳转的权限设置中进行的设置，在回到编辑界面时，记得再点一次生成截图，才能正常保存截图。</text>
+        <text style="color: #606266;">如果是在编辑界面点击截图生成时跳转的权限设置中进行的设置，在回到编辑界面时，请再点一次生成截图，方可正常保存。</text>
     </view>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;">
-        <text style="color: #606266;">· 编辑功能提示(点击显示)</text>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">· 编辑功能提示 (点击显示)</text>
     </view>
     <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
         <view>
@@ -68,9 +75,9 @@
             </button>
         </view>
     </view>
-    <button bindtap="setClipboard">ε通配符(点击复制到剪贴板)</button>
-    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;">
-        <text style="color: #606266;">· 模拟器功能提示(点击显示)</text>
+    <button bindtap="setClipboard">ε 通配符 (点击复制到剪贴板)</button>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">· 模拟器功能提示 (点击显示)</text>
     </view>
     <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
         <view>
@@ -108,6 +115,30 @@
                 <image src="/image/next_result.png" mode="aspectFit"></image>
             </button>
         </view>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 800;">
+        <text style="color: #303133;">版本信息</text>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">Version 1.0.2(2023/11/25)</text>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">Copy Right @ValKmjolnir 2021~2023</text>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 800;">
+        <text style="color: #303133;">反馈与联系方式</text>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">E-mail: lhk101lhk101@qq.com</text>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">QQ: 896693328</text>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">Github: ValKmjolnir</text>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">Gitee: ValKmjolnir</text>
     </view>
 </view>
 

@@ -63,8 +63,8 @@ Page({
      */
     onShareAppMessage: function () {
         return {
-            title:"权限设置",
-            path:"/pages/auth/auth"
+            title: "权限设置",
+            path: "/pages/auth/auth"
         }
     },
 

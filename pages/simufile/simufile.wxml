@@ -1,4 +1,12 @@
 <!--pages/simufile/simufile.wxml-->
+
+<view style="text-align: center;margin-top: 20rpx;font-weight: 1000;">
+    <text style="color: #303133;">ValKmjolnir's Turing Machine Simulator</text>
+</view>
+<view style="text-align: center;margin-top: 20rpx;font-weight: 200;font-size: small;">
+    <text style="color: rgb(103, 104, 105);">@NUAA-CCST 2022</text>
+</view>
+
 <view>
     <view style="text-align: center;margin-top: 20rpx;font-weight: 700;">
         <text style="color: #303133;">选择图灵机</text>

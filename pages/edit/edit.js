@@ -116,7 +116,11 @@ Page({
         isLongTap:false,
         selectedState:null,
         operand_type:"select",
-        hasModule:false
+        hasModule:false,
+        touch_start_cordx:0,
+        touch_start_cordy:0,
+        touch_start_stamp:0,
+        touch_end_stamp:0
     },
 
     /**
@@ -304,7 +308,16 @@ Page({
     /**
      * 绘制选择圆环
      */
-    drawCircleSelectPanel: function(x,y,r,isStart=0,isEnd=0) {
+    drawCircleSelectPanel: function(state) {
+        if (state === null || state === undefined) {
+            return;
+        }
+        const x = state.x;
+        const y = state.y;
+        const isStart = state.isStart;
+        const isEnd = state.isEnd;
+        const r = 15;
+
         ctx.strokeStyle="#606266";
         // end state choice panel
         ctx.beginPath();
@@ -832,21 +845,45 @@ Page({
      * canvas单次点击事件
      */
     tap: function (e) {
+        if (this.data.touch_end_stamp-this.data.touch_start_stamp>350) {
+            this.longTap(e);
+            return;
+        }
         const x=e.detail.x-e.target.offsetLeft;
         const y=e.detail.y-e.target.offsetTop;
         const opr=this.data.operand_type;
-        let flush=this.canvasDraw;
-        if(opr=="select"){
-            let state=this.findColorNearestState(x,y);
-            let transfer=this.findNearestFunc(x,y);
-            if(state!=null && state.isModule)
+        const flush=this.canvasDraw;
+        if (opr=="select") {
+            const state = this.findColorNearestState(x,y);
+            const transfer = this.findNearestFunc(x,y);
+            if(state !== null && state.isModule)
                 wx.showToast({
-                    title: "子程序"+state.moduleName,
+                    title: "子程序" + state.moduleName,
                     icon: "none",
                     duration: 800
                 });
-            if(state!=null || transfer==null)
+            if(state !== null && state !== undefined) {
+                const state_is_start = state.isStart;
+                const state_is_end = state.isEnd;
+                const choices = [
+                    state_is_start? "取消初态 | Cancel Start State":"设置初态 | Set Start State",
+                    state_is_end?   "取消终态 | Cancel End State  ":"设置终态 | Set End State  "
+                ]
+                wx.showActionSheet({
+                    itemList: choices,
+                    success: (res) => {
+                        switch(res.tapIndex) {
+                            case 0: state.isStart = !state_is_start; break;
+                            case 1: state.isEnd = !state_is_end; break;
+                        }
+                        flush();
+                    }
+                })
                 return;
+            }
+            if(transfer === null) {
+                return;
+            }
             const isstr=(typeof(transfer.text)=="string");
             const title="从"+transfer.begin_state+"到"+transfer.end_state;
             let multiple_transfer_set=function(index){
@@ -946,6 +983,7 @@ Page({
         let opr=this.data.operand_type;
         let current_x=e.changedTouches[0].x;
         let current_y=e.changedTouches[0].y;
+        
         // edge detection
         if(current_x<0)
             current_x=0;
@@ -986,6 +1024,7 @@ Page({
     touchStart: function(e) {
         let x=e.touches[0].x;
         let y=e.touches[0].y;
+        this.setData({touch_start_stamp:e.timeStamp, touch_start_cordx:x, touch_start_cordy:y});
         let opr=this.data.operand_type;
         if(opr=="select"){
             let state=this.findColorNearestState(x,y);
@@ -1024,6 +1063,7 @@ Page({
      * canvas点击移动结束
      */
     touchEnd: function(e) {
+        this.setData({touch_end_stamp:e.timeStamp});
         let x=e.changedTouches[0].x;
         let y=e.changedTouches[0].y;
         let opr=this.data.operand_type;
@@ -1127,7 +1167,7 @@ Page({
             let state=this.findColorNearestState(x,y);
             if(state!=null){
                 this.setData({isLongTap:true});
-                this.drawCircleSelectPanel(state.x,state.y,15,state.isStart,state.isEnd);
+                this.drawCircleSelectPanel(state);
             }
         }
     },
@@ -1142,7 +1182,9 @@ Page({
             success(res){
                 wx.saveImageToPhotosAlbum({
                     filePath: res.tempFilePath,
-                    success(res){wx.showToast({title:'保存成功',icon:'success',duration:800});},
+                    success(res){
+                        wx.showToast({title:'保存成功',icon:'success',duration:800});
+                    },
                     fail(err){
                         if(err.errMsg=="saveImageToPhotosAlbum:fail auth deny"){
                             wx.navigateTo({url:'/pages/auth/auth?info=无图片保存权限，请设置',});
