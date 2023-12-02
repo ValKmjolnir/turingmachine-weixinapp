@@ -1,0 +1,39 @@
+/* pages/tutorial.wxss */
+
+button {
+    font-size: 30rpx;
+    margin-top: 10rpx;
+    margin-bottom: 10rpx;
+    margin-left: 30rpx;
+    margin-right: 30rpx;
+    background-color: rgb(217,236,255);
+}
+
+.button-tips {
+    width: 70rpx;
+    height: 70rpx;
+    margin-top: 10rpx;
+    margin-bottom: 10rpx;
+    margin-left: 5rpx;
+    margin-right: 5rpx;
+    background-color: rgb(217,236,255);
+    padding: 15rpx;
+}
+
+.button-hover {
+    background-color: #409eff;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+image {
+    width: 40rpx;
+    height: 40rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

@@ -1,0 +1,108 @@
+<!--pages/tutorial.wxml-->
+
+<view style="text-align: center;margin-top: 20rpx;font-weight: 1000;">
+    <text style="color: #303133;">ValKmjolnir's Turing Machine Simulator</text>
+</view>
+<view style="text-align: center;margin-top: 20rpx;font-weight: 200;font-size: small;">
+    <text style="color: rgb(103, 104, 105);">@NUAA-CCST 2022</text>
+</view>
+
+<view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">· 编辑功能</text>
+    </view>
+    <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
+        <view>
+            <button class="button-tips">
+                <image src="/image/arrow.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/state.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/func.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/delete.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/module.png" mode="aspectFit"></image>
+            </button>
+        </view>
+    </view>
+    <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
+        <view>
+            <button class="button-tips">
+                <image src="/image/undo.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/rollback.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/save.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/savepic.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/icon_CPU.png" mode="aspectFit"></image>
+            </button>
+        </view>
+    </view>
+    <view style="text-align: left;margin-top: 20rpx;margin-left: 20rpx;font-weight: 600;font-size: small;">
+        <text style="color: #606266;">· 模拟器功能</text>
+    </view>
+    <view class="button-container" style="margin-left: 25rpx;margin-right: 30rpx;">
+        <view>
+            <button class="button-tips">
+                <image src="/image/input.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/savepic.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/next.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/stop.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/start.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/prev_result.png" mode="aspectFit"></image>
+            </button>
+        </view>
+        <view>
+            <button class="button-tips">
+                <image src="/image/next_result.png" mode="aspectFit"></image>
+            </button>
+        </view>
+    </view>
+</view>

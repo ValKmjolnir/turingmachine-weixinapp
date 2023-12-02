@@ -112,7 +112,13 @@ Page({
 
     gotofiles: function (param) {
         wx.navigateTo({
-          url: '/pages/files/files?nav=select',
+            url: '/pages/files/files?nav=select',
         });
+    },
+
+    gototutorial: function (param) {
+        wx.navigateTo({
+            url: '/pages/tutorial/tutorial',
+        })
     }
 });

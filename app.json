@@ -8,7 +8,8 @@
         "pages/settings/settings",
         "pages/auth/auth",
         "pages/simufile/simufile",
-        "pages/logs/logs"
+        "pages/logs/logs",
+        "pages/tutorial/tutorial"
     ],
     "window": {
         "navigationBarTitleText": "Turing Machine Simulator",
